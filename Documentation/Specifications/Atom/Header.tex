@@ -1,0 +1,17 @@
+\begin{table}[h]
+    \centering
+    \label{tbl:header}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Offset} & \textbf{Size in Bytes} & \textbf{Description} \\ \hline
+        0               & 4                      & Magic number         \\ \hline
+        4               & 2                      & Version number       \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Magic Number}
+The magic number is \textbf{atom} in utf8 which is \textbf{61 74 6F 6D} in hex.
+
+\subsection{Version Number}
+This number determines which version of the atom format was used. This must be 
+1. This number is an unsigned 16 bit integer.

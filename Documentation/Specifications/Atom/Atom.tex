@@ -1,0 +1,62 @@
+\documentclass[10pt, a4paper]{article}
+
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{tocloft}
+
+\title{Atom Specification}
+\author{Paw W. K. Møller}
+
+\hypersetup
+{
+    pdftitle={Atom Specification},
+    pdfsubject={Specification of the Atom object code file format},
+    pdfkeywords={Atom; Specification}
+    pdfauthor={Paw W. K. Møller},
+    bookmarksnumbered={true},
+    pdfhighlight={/N}
+}
+
+\titlespacing\section{0pt}{12pt plus 4pt minus 2pt}{-8pt plus 2pt minus 2pt}
+\titlespacing\subsection{0pt}{12pt plus 4pt minus 2pt}{-8pt plus 2pt minus 2pt}
+\titlespacing\subsubsection{0pt}{12pt plus 4pt minus 2pt}{-8pt plus 2pt minus 2pt}
+
+\renewcommand\cftsecleader{\cftdotfill{\cftdotsep}}
+
+\setlength\parindent{0pt}
+\linespread{1.2}
+
+\begin{document}
+    \pagenumbering{gobble}
+    \maketitle
+    \clearpage
+    
+    \pagenumbering{roman}
+    \tableofcontents
+    \clearpage
+    
+    \pagenumbering{arabic}
+    \setcounter{page}{1}
+    \setlength{\parskip}{10pt}
+
+    \maketitle
+    
+    \section{Header}
+    \input{Header.tex}
+    
+    \section{Atoms}
+    \input{Atoms.tex}
+    
+    \section{Procedures}
+    \input{Procedures.tex}
+    
+    \section{Null Terminated Strings}
+    \input{NullTerminatedStrings.tex}
+    
+    \section{Data}
+    \input{Data.tex}
+\end{document}

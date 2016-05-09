@@ -1,0 +1,55 @@
+The object file consist of \textbf{atoms}. An atom is an indivisible chunk of
+code or data. There are a few types of atoms, but they all have a set of common
+fields. These fields are:
+
+\begin{table}[h]
+    \centering
+    \label{tbl:atom}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Offset} & \textbf{Size in Bytes} & \textbf{Description}                                            \\ \hline
+        0               & 1                      & The type of atom.                                               \\ \hline
+        1               & 1                      & Boolean telling if the atom is defined.                         \\ \hline
+        2               & 1                      & Boolean telling if the atom is available to other object files. \\ \hline
+        3               & 1                      & Boolean telling if the address of the atom is fixed.            \\ \hline
+        4               & 8                      & The absolute address of the atom in memory.                     \\ \hline
+        12              & x                      & The name of the atom in utf8.                                   \\ \hline
+    \end{tabular}
+\end{table}
+
+All types of atoms appends their data to the data mentioned in the table above.
+
+\subsection{Types}
+This is an unsinged byte telling the which type of atom it is.
+
+\begin{table}[h]
+    \centering
+    \label{tbl:type}
+    \begin{tabular}{|l|l|}
+        \hline
+        \textbf{Number} & \textbf{Type}          \\ \hline
+        0               & Procedure              \\ \hline
+        1               & Null terminated string \\ \hline
+        2               & Data                   \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Is Defined}
+If true this atom is some code or data otherwise; a reference to an atom in 
+another object file.
+
+\subsection{Is Global Atom}
+If true outside atoms is allowed to reference this atom; otherwise only atoms in
+this atom's object file may reference it.
+
+\subsection{Is Address Fixed}
+If true this atom can't be relocated to another address otherwise; the atom may
+be relocated.
+
+\subsection{Address}
+The absolute address which it is assumed the atom begins at when it is loaded
+into memory. This is an 64 bit unsigned integer.
+
+\subsection{Names}
+The atom's name is a null terminated string encoded in utf8. The name is case 
+sensitive and it must be unique.
