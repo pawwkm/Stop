@@ -1,0 +1,19 @@
+Data blocks can be any chunk of data that doesn't fit in as one of the other 
+atom types.
+
+\begin{table}[h]
+    \centering
+    \label{tbl:data}
+        \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Offset} & \textbf{Size in Bytes} & \textbf{Description}  \\ \hline
+        0               & 4                      & The size of the data. \\ \hline
+        4               & x                      & The actual data.      \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Data Size}
+This is the size of the data in bytes. This is an unsigned 32 bit number.
+
+\subsection{Content}
+This is the actual raw binary data.
