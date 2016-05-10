@@ -12,8 +12,9 @@ fields. These fields are:
         1               & 1                      & Boolean telling if the atom is defined.                         \\ \hline
         2               & 1                      & Boolean telling if the atom is available to other object files. \\ \hline
         3               & 1                      & Boolean telling if the address of the atom is fixed.            \\ \hline
-        4               & 8                      & The absolute address of the atom in memory.                     \\ \hline
-        12              & x                      & The name of the atom in utf8.                                   \\ \hline
+        4               & 1                      & Address size in bytes.                                          \\ \hline
+        5               & 8                      & The absolute address of the atom in memory.                     \\ \hline
+        13              & x                      & The name of the atom in utf8.                                   \\ \hline
     \end{tabular}
 \end{table}
 
@@ -45,6 +46,9 @@ this atom's object file may reference it.
 \subsection{Is Address Fixed}
 If true this atom can't be relocated to another address otherwise; the atom may
 be relocated.
+
+\subsection{Address Size}
+The size of an address can be 2, 4 or 8 bytes long.
 
 \subsection{Address}
 The absolute address which it is assumed the atom begins at when it is loaded

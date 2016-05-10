@@ -1,18 +1,1 @@
-Strings are textual data.
-
-\begin{table}[h]
-    \centering
-    \label{tbl:strings}
-        \begin{tabular}{|l|l|l|}
-        \hline
-        \textbf{Offset} & \textbf{Size in Bytes} & \textbf{Description}     \\ \hline
-        0               & 4                      & The size of the string.  \\ \hline
-        4               & x                      & The bytes of the string. \\ \hline
-    \end{tabular}
-\end{table}
-
-\subsection{String Size}
-This is the size of the string in bytes. This is an unsigned 32 bit number.
-
-\subsection{Content}
-This is the actual string encoded in utf8.
+Strings are textual data encoded in utf8 and null terminated.
