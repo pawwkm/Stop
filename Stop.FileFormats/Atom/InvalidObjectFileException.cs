@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace Stop.FileFormats
+namespace Stop.FileFormats.Atom
 {
     /// <summary>
     /// The exception that thrown when there is an error in an atom object file.

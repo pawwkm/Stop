@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Stop.FileFormats
+namespace Stop.FileFormats.Atom
 {
     /// <summary>
     /// Defines a named chunk of executable code.

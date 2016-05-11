@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Stop.FileFormats
+namespace Stop.FileFormats.Atom
 {
     /// <summary>
     /// Data blocks can be any chunk of data that doesn't fit in as 

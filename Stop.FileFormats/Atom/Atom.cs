@@ -1,7 +1,7 @@
 ﻿using Pote;
 using System;
 
-namespace Stop.FileFormats
+namespace Stop.FileFormats.Atom
 {
     /// <summary>
     /// Defines an atom in an object file.
@@ -72,6 +72,16 @@ namespace Stop.FileFormats
 
                 sizeOfAddress = value;
             }
+        }
+
+        /// <summary>
+        /// If true the <see cref="Address"/> is in little endian;
+        /// otherwise it is in big endian.
+        /// </summary>
+        public bool IsAddressInLittleEndian
+        {
+            get;
+            set;
         }
 
         /// <summary>

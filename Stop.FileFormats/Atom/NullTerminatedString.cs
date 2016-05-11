@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace Stop.FileFormats
+namespace Stop.FileFormats.Atom
 {
     /// <summary>
     /// Some null terminated textual data.

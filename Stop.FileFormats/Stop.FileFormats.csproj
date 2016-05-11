@@ -16,26 +16,26 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\Build\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <CodeAnalysisRuleSet>ExtendedDesignGuidelineRules.ruleset</CodeAnalysisRuleSet>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DocumentationFile>bin\Debug\Stop.FileFormats.XML</DocumentationFile>
+    <DocumentationFile>..\Build\Debug\Stop.FileFormats.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\Build\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <CodeAnalysisRuleSet>ExtendedDesignGuidelineRules.ruleset</CodeAnalysisRuleSet>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DocumentationFile>bin\Release\Stop.FileFormats.XML</DocumentationFile>
+    <DocumentationFile>..\Build\Release\Stop.FileFormats.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Pote, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -46,14 +46,14 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Atom.cs" />
-    <Compile Include="AtomReader.cs" />
-    <Compile Include="Data.cs" />
-    <Compile Include="InvalidObjectFileException.cs" />
-    <Compile Include="NullTerminatedString.cs" />
-    <Compile Include="Procedure.cs" />
+    <Compile Include="Atom\Atom.cs" />
+    <Compile Include="Atom\AtomReader.cs" />
+    <Compile Include="Atom\Data.cs" />
+    <Compile Include="Atom\InvalidObjectFileException.cs" />
+    <Compile Include="Atom\NullTerminatedString.cs" />
+    <Compile Include="Atom\Procedure.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Reference.cs" />
+    <Compile Include="Atom\Reference.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

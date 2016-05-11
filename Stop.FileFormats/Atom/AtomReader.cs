@@ -4,13 +4,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace Stop.FileFormats
+namespace Stop.FileFormats.Atom
 {
     /// <summary>
     /// Reads Atom object files.
     /// </summary>
     public class AtomReader
     {
+        private List<Tuple<Procedure, uint, bool, byte, uint>> references = new List<Tuple<Procedure, uint, bool, byte, uint>>();
+
         private BinaryReader reader;
 
         /// <summary>
@@ -31,7 +33,7 @@ namespace Stop.FileFormats
         {
             get
             {
-                return reader.BaseStream.Position.ToString("X");
+                return ToHex(reader.BaseStream.Position);
             }
         }
 
@@ -51,6 +53,15 @@ namespace Stop.FileFormats
         /// </summary>
         /// <param name="source">The source to read atoms from.</param>
         /// <returns>The atoms read from the <paramref name="source"/>.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="source"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// There is no header on the current position in the <paramref name="source"/>.
+        /// </exception>
+        /// <exception cref="InvalidObjectFileException">
+        /// <paramref name="source"/> is an invalid object file.
+        /// </exception>
         public IList<Atom> Read(Stream source)
         {
             if (source == null)
@@ -62,14 +73,14 @@ namespace Stop.FileFormats
             using (reader = new BinaryReader(source))
             {
                 // This number is ascii for "atom" backwards.
-                if (reader.ReadInt32() != 1836020833)
+                if (reader.ReadInt32() != 0x6D6F7461)
                     throw new InvalidObjectFileException("This is not an atom object file.");
                 if (reader.ReadUInt16() != 1)
                     throw new InvalidObjectFileException("This object file is not using version one.");
 
                 while (!EndOfFile)
                 {
-                    switch (reader.PeekChar())
+                    switch (reader.ReadByte())
                     {
                         case 0:
                             atoms.Add(Procedure());
@@ -81,12 +92,28 @@ namespace Stop.FileFormats
                             atoms.Add(Data());
                             break;
                         default:
-                            throw new InvalidObjectFileException("Invalid atom type at " + HexPosition);
+                            throw new InvalidObjectFileException("Invalid atom type at " + ToHex(reader.BaseStream.Position - 1));
                     }
                 }
             }
 
+            ResolveReferences(atoms);
+
             return atoms;
+        }
+
+        private static string ToHex(long number)
+        {
+            if (number <= byte.MaxValue)
+                return "0x" + number.ToString("X2");
+
+            if (number <= ushort.MaxValue)
+                return "0x" + number.ToString("X4");
+
+            if (number <= uint.MaxValue)
+                return "0x" + number.ToString("X8");
+
+            return "0x" + number.ToString("X16");
         }
 
         /// <summary>
@@ -95,8 +122,6 @@ namespace Stop.FileFormats
         /// <returns>The read procedure.</returns>
         private Procedure Procedure()
         {
-            reader.ReadByte(); // Skip the atom type.
-
             var procedure = new Procedure();
             Atom(procedure);
 
@@ -104,8 +129,7 @@ namespace Stop.FileFormats
             foreach (var b in Code())
                 procedure.Code.Add(b);
 
-            foreach (var r in References())
-                procedure.References.Add(r);
+            References(procedure);
 
             return procedure;
         }
@@ -122,6 +146,7 @@ namespace Stop.FileFormats
             atom.IsDefined = IsDefined();
             atom.IsGlobal = IsGlobal();
             atom.IsAddressFixed = IsAddressFixed();
+            atom.IsAddressInLittleEndian = IsAddressInLittleEndian();
             atom.SizeOfAddress = SizeOfAddress();
             atom.Address = Address(atom.SizeOfAddress);
             atom.Name = Name();
@@ -168,6 +193,21 @@ namespace Stop.FileFormats
         {
             if (EndOfFile)
                 throw new InvalidObjectFileException("Unexpected end of object file. Expected 'is address fixed' bool.");
+
+            return reader.ReadBoolean();
+        }
+
+        /// <summary>
+        /// Checks if the address of the current atom is in little endian.
+        /// </summary>
+        /// <returns>True if the address of the current atom is in little endian; otherwise false.</returns>
+        /// <exception cref="InvalidObjectFileException">
+        /// Unexpected end of object file.
+        /// </exception>
+        private bool IsAddressInLittleEndian()
+        {
+            if (EndOfFile)
+                throw new InvalidObjectFileException("Unexpected end of object file. Expected 'is little endian' bool.");
 
             return reader.ReadBoolean();
         }
@@ -235,10 +275,21 @@ namespace Stop.FileFormats
                 throw new InvalidObjectFileException("Unexpected end of object file. Expected the name of an atom.");
 
             var bytes = new List<byte>();
-            while (!reader.PeekChar().IsOneOf(-1, 0))
-                bytes.Add(reader.ReadByte());
+            while (!EndOfFile)
+            {
+                var b = reader.ReadByte();
+                switch (b)
+                {
+                    case 0:
+                        break;
+                    default:
+                        bytes.Add(b);
+                        break;
+                }
 
-            reader.ReadByte(); // Skip null terminater.
+                if (b == 0)
+                    break;
+            }
 
             return Encoding.UTF8.GetString(bytes.ToArray());
         }
@@ -276,7 +327,7 @@ namespace Stop.FileFormats
             var amount = reader.Read(bytes, 0, bytes.Length);
 
             if (amount != bytes.Length)
-                throw new InvalidObjectFileException("Unexpected end of object file. Expected a code block of " + bytes.Length + " but " + amount + " was read.");
+                throw new InvalidObjectFileException("Unexpected end of object file. Expected a code block of " + ToHex(bytes.Length) + " bytes but " + ToHex(amount) + " was read.");
 
             return bytes;
         }
@@ -290,8 +341,6 @@ namespace Stop.FileFormats
         /// </exception>
         private NullTerminatedString NullTerminatedString()
         {
-            reader.ReadByte(); // Skip the atom type.
-
             var s = new NullTerminatedString();
             Atom(s);
 
@@ -299,10 +348,22 @@ namespace Stop.FileFormats
                 throw new InvalidObjectFileException("Unexpected end of object file. Expected null terminated string.");
 
             var bytes = new List<byte>();
-            while (!reader.PeekChar().IsOneOf(-1, 0))
-                bytes.Add(reader.ReadByte());
+            while (!EndOfFile)
+            {
+                var b = reader.ReadByte();
+                switch (b)
+                {
+                    case 0:
+                        break;
+                    default:
+                        bytes.Add(b);
+                        break;
+                }
 
-            reader.ReadByte(); // Skip null terminater.
+                if (b == 0)
+                    break;
+            }
+
             s.Content = Encoding.UTF8.GetString(bytes.ToArray());
 
             return s;
@@ -317,8 +378,6 @@ namespace Stop.FileFormats
         /// </exception>
         private Data Data()
         {
-            reader.ReadByte(); // Skip the atom type.
-
             var data = new Data();
             Atom(data);
 
@@ -342,15 +401,44 @@ namespace Stop.FileFormats
         /// <summary>
         /// Reads the references of a procedure.
         /// </summary>
-        /// <returns>The references of a procedure.</returns>
         /// <exception cref="InvalidObjectFileException">
         /// Unexpected end of object file.
         /// </exception>
-        private IList<Reference> References()
+        private void References(Procedure owner)
         {
-            var amount = reader.ReadUInt16();
+            if (BytesLeft < 2)
+                throw new InvalidObjectFileException("Unexpected end of object file. Expected the 16 bit number for amount of references.");
 
-            return new Reference[0];
+            var amount = reader.ReadUInt16();
+            for (int i = 0; i < amount; i++)
+            {
+                var number = reader.ReadUInt32();
+                var isLittleEndian = reader.ReadBoolean();
+                var addressSize = reader.ReadByte();
+                var address = reader.ReadUInt32();
+
+                references.Add(new Tuple<Procedure, uint, bool, byte, uint>(owner, number, isLittleEndian, addressSize, address));
+            }
+        }
+
+        private void ResolveReferences(List<Atom> atoms)
+        {
+            foreach (var tuple in references)
+            {
+                if (atoms.Count < tuple.Item2)
+                {
+                    var message = string.Format("The atom called '{0}' has a reference to atom number {1} which doesn't exist.", tuple.Item1.Name, tuple.Item2);
+
+                    throw new InvalidObjectFileException(message);
+                }
+
+                var reference = new Reference(atoms[(int)tuple.Item2]);
+                reference.IsAddressInLittleEndian = tuple.Item3;
+                reference.SizeOfAddress = tuple.Item4;
+                reference.Address = tuple.Item5;
+
+                tuple.Item1.References.Add(reference);
+            }
         }
     }
 }

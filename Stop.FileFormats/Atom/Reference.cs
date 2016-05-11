@@ -1,7 +1,7 @@
 ﻿using Pote;
 using System;
 
-namespace Stop.FileFormats
+namespace Stop.FileFormats.Atom
 {
     /// <summary>
     /// Defines a reference from a <see cref="Procedure"/> to an <see cref="Atom"/>.
@@ -31,7 +31,7 @@ namespace Stop.FileFormats
         /// If true the <see cref="Address"/> is in little endian;
         /// otherwise it is in big endian.
         /// </summary>
-        public bool IsLittleEndian
+        public bool IsAddressInLittleEndian
         {
             get;
             set;
