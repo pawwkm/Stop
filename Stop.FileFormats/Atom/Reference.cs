@@ -62,7 +62,7 @@ namespace Stop.FileFormats.Atom
         /// This is the address within the code block of the procedure to
         /// relocate to match the address of the referenced atom.
         /// </summary>
-        public ulong Address
+        public uint Address
         {
             get;
             set;
@@ -87,6 +87,23 @@ namespace Stop.FileFormats.Atom
 
                 atom = value;
             }
+        }
+
+        /// <summary>
+        /// Checks if the <paramref name="reference"/>'s address overlaps with 
+        /// the address with this reference.
+        /// </summary>
+        /// <param name="reference">The reference the check.</param>
+        /// <returns>True if the two references have overlapping addresses; otherwise false.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="reference"/> is null.
+        /// </exception>
+        public bool IsOverlapping(Reference reference)
+        {
+            if (reference == null)
+                throw new ArgumentNullException(nameof(reference));
+
+            return Address < reference.Address + reference.SizeOfAddress && reference.Address < Address + SizeOfAddress;
         }
     }
 }

@@ -52,6 +52,7 @@
     <Compile Include="Atom\InvalidObjectFileException.cs" />
     <Compile Include="Atom\NullTerminatedString.cs" />
     <Compile Include="Atom\Procedure.cs" />
+    <Compile Include="BinaryReaderExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Atom\Reference.cs" />
   </ItemGroup>

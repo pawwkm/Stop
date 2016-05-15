@@ -27,13 +27,13 @@ namespace Stop.FileFormats.Atom
         }
 
         /// <summary>
-        /// The current position in the object file as hexidecimal.
+        /// The current position in the object file.
         /// </summary>
-        private string HexPosition
+        private long Position
         {
             get
             {
-                return ToHex(reader.BaseStream.Position);
+                return reader.BaseStream.Position;
             }
         }
 
@@ -102,6 +102,11 @@ namespace Stop.FileFormats.Atom
             return atoms;
         }
 
+        /// <summary>
+        /// Returns the hex representation of the given <paramref name="number"/>.
+        /// </summary>
+        /// <param name="number">The number to represent in hex.</param>
+        /// <returns>The hex representation of the given <paramref name="number"/>.</returns>
         private static string ToHex(long number)
         {
             if (number <= byte.MaxValue)
@@ -148,7 +153,7 @@ namespace Stop.FileFormats.Atom
             atom.IsAddressFixed = IsAddressFixed();
             atom.IsAddressInLittleEndian = IsAddressInLittleEndian();
             atom.SizeOfAddress = SizeOfAddress();
-            atom.Address = Address(atom.SizeOfAddress);
+            atom.Address = Address(atom.SizeOfAddress, atom.IsAddressInLittleEndian);
             atom.Name = Name();
         }
 
@@ -226,7 +231,7 @@ namespace Stop.FileFormats.Atom
 
             var size = reader.ReadByte();
             if (!size.IsOneOf(2, 4, 8))
-                throw new InvalidObjectFileException("The address size at " + HexPosition + " is invalid. It must be 2, 4 or 8.");
+                throw new InvalidObjectFileException("The address size at " + ToHex(Position - 1) + " is invalid. It must be 2, 4 or 8.");
 
             return size;
         }
@@ -235,31 +240,41 @@ namespace Stop.FileFormats.Atom
         /// Reads an address of a given size. 
         /// </summary>
         /// <param name="size">The size of the address to read.</param>
+        /// <param name="isLittleEndian">True if the address is expected to be encoded in little endian.</param>
         /// <returns>The read address.</returns>
         /// <exception cref="InvalidOperationException">
         /// Unexpected end of object file. 
         /// </exception>
-        private ulong Address(byte size)
+        private ulong Address(byte size, bool isLittleEndian)
         {
             if (size == 2)
             {
                 if (BytesLeft < 2)
                     throw new InvalidObjectFileException("Unexpected end of object file. Expected a 16 bit address.");
 
-                return reader.ReadUInt16();
+                if (isLittleEndian)
+                    return reader.ReadUInt16();
+
+                return reader.ReadBigEndianUInt16();
             }
             if (size == 4)
             {
                 if (BytesLeft < 4)
                     throw new InvalidObjectFileException("Unexpected end of object file. Expected a 32 bit address.");
 
-                return reader.ReadUInt32();
+                if (isLittleEndian)
+                    return reader.ReadUInt32();
+
+                return reader.ReadBigEndianUInt32();
             }
 
             if (BytesLeft < 8)
                 throw new InvalidObjectFileException("Unexpected end of object file. Expected a 64 bit address.");
 
-            return reader.ReadUInt64();
+            if (isLittleEndian)
+                return reader.ReadUInt64();
+
+            return reader.ReadBigEndianUInt64();
         }
 
         /// <summary>
@@ -390,7 +405,7 @@ namespace Stop.FileFormats.Atom
             var amount = reader.Read(bytes, 0, bytes.Length);
 
             if (amount != bytes.Length)
-                throw new InvalidObjectFileException("Unexpected end of object file. Expected a data block of " + bytes.Length + " but " + amount + " was read.");
+                throw new InvalidObjectFileException("Unexpected end of object file. Expected a data block of " + ToHex(bytes.Length) + " bytes but " + ToHex(amount) + " was read.");
 
             foreach (var b in bytes)
                 data.Content.Add(b);
@@ -401,6 +416,7 @@ namespace Stop.FileFormats.Atom
         /// <summary>
         /// Reads the references of a procedure.
         /// </summary>
+        /// <param name="owner">The owner of references ahead.</param>
         /// <exception cref="InvalidObjectFileException">
         /// Unexpected end of object file.
         /// </exception>
@@ -412,15 +428,32 @@ namespace Stop.FileFormats.Atom
             var amount = reader.ReadUInt16();
             for (int i = 0; i < amount; i++)
             {
-                var number = reader.ReadUInt32();
-                var isLittleEndian = reader.ReadBoolean();
-                var addressSize = reader.ReadByte();
-                var address = reader.ReadUInt32();
+                if (BytesLeft < 4)
+                    throw new InvalidObjectFileException("Unexpected end of object file. Expected the number of an atom.");
 
-                references.Add(new Tuple<Procedure, uint, bool, byte, uint>(owner, number, isLittleEndian, addressSize, address));
+                var number = reader.ReadUInt32();
+                var isLittleEndian = IsAddressInLittleEndian();
+
+                if (EndOfFile)
+                    throw new InvalidObjectFileException("Unexpected end of object file. Expected 'address size' byte.");
+
+                var size = reader.ReadByte();
+                if (!size.IsOneOf(2, 4))
+                    throw new InvalidObjectFileException("The address size at " + ToHex(Position - 1) + " is invalid. It must be 2 or 4.");
+
+                var address = (uint)Address(size, isLittleEndian);
+
+                references.Add(new Tuple<Procedure, uint, bool, byte, uint>(owner, number, isLittleEndian, size, address));
             }
         }
 
+        /// <summary>
+        /// Resolves the references the given <paramref name="atoms"/> have.
+        /// </summary>
+        /// <param name="atoms">The atoms with references.</param>
+        /// <exception cref="InvalidObjectFileException">
+        /// There are references with overlapping addresses.
+        /// </exception>
         private void ResolveReferences(List<Atom> atoms)
         {
             foreach (var tuple in references)
@@ -436,6 +469,16 @@ namespace Stop.FileFormats.Atom
                 reference.IsAddressInLittleEndian = tuple.Item3;
                 reference.SizeOfAddress = tuple.Item4;
                 reference.Address = tuple.Item5;
+
+                foreach (var r in tuple.Item1.References)
+                {
+                    if (r.IsOverlapping(reference))
+                    {
+                        var message = string.Format("{0}'s reference to '{1}' has an overlapping address with the reference to '{2}' at {3}.", tuple.Item1.Name, r.Atom.Name, reference.Atom.Name, ToHex(r.Address));
+
+                        throw new InvalidObjectFileException(message);
+                    }
+                }
 
                 tuple.Item1.References.Add(reference);
             }
