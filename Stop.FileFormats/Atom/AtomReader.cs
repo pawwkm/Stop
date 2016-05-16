@@ -22,7 +22,7 @@ namespace Stop.FileFormats.Atom
         {
             get
             {
-                return reader.BaseStream.Position == reader.BaseStream.Length;
+                return reader.BaseStream.IsEndOfStream();
             }
         }
 
@@ -44,7 +44,7 @@ namespace Stop.FileFormats.Atom
         {
             get
             {
-                return reader.BaseStream.Length - reader.BaseStream.Position;
+                return reader.BaseStream.BytesLeft();
             }
         }
 
