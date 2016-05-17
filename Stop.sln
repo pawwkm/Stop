@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stop.FileFormats", "Stop.Fi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stop.FileFormats.Tests", "Stop.FileFormats.Tests\Stop.FileFormats.Tests.csproj", "{6C3C1275-7EEA-478F-8535-225B404AEEDA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stop.FileSystems", "Stop.FileSystems\Stop.FileSystems.csproj", "{E08E9DB2-CF5E-441D-AAA3-9EF2A67093EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stop.FileSystems.Tests", "Stop.FileSystems.Tests\Stop.FileSystems.Tests.csproj", "{7DCFAF79-0DF8-4F33-BA53-9457D7A61420}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{6C3C1275-7EEA-478F-8535-225B404AEEDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C3C1275-7EEA-478F-8535-225B404AEEDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C3C1275-7EEA-478F-8535-225B404AEEDA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E08E9DB2-CF5E-441D-AAA3-9EF2A67093EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E08E9DB2-CF5E-441D-AAA3-9EF2A67093EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E08E9DB2-CF5E-441D-AAA3-9EF2A67093EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E08E9DB2-CF5E-441D-AAA3-9EF2A67093EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DCFAF79-0DF8-4F33-BA53-9457D7A61420}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DCFAF79-0DF8-4F33-BA53-9457D7A61420}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DCFAF79-0DF8-4F33-BA53-9457D7A61420}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DCFAF79-0DF8-4F33-BA53-9457D7A61420}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
