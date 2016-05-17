@@ -48,11 +48,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Atom\Atom.cs" />
+    <Compile Include="Atom\AtomLinker.cs" />
     <Compile Include="Atom\AtomReader.cs" />
     <Compile Include="Atom\AtomWriter.cs" />
     <Compile Include="Atom\Data.cs" />
     <Compile Include="Atom\InvalidObjectFileException.cs" />
     <Compile Include="Atom\NullTerminatedString.cs" />
+    <Compile Include="Atom\ObjectFile.cs" />
     <Compile Include="Atom\Procedure.cs" />
     <Compile Include="BinaryReaderExtensions.cs" />
     <Compile Include="BinaryWriterExtensions.cs" />

@@ -13,23 +13,23 @@ namespace Stop.FileFormats.Atom
     {
         private BinaryWriter writer;
 
-        private IList<Atom> list;
+        private ObjectFile of;
 
         /// <summary>
         /// Writes an object file to a stream.
         /// </summary>
-        /// <param name="atoms">The atoms of the object file.</param>
+        /// <param name="file">The object file to write.</param>
         /// <param name="destination">The stream the object file is written to.</param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="atoms"/> or <paramref name="destination"/> is null.
+        /// <paramref name="file"/> or <paramref name="destination"/> is null.
         /// </exception>
         /// <exception cref="ArgumentException">
         /// <paramref name="destination"/> is read only.
         /// </exception>
-        public void Write(IList<Atom> atoms, Stream destination)
+        public void Write(ObjectFile file, Stream destination)
         {
-            if (atoms == null)
-                throw new ArgumentNullException(nameof(atoms));
+            if (file == null)
+                throw new ArgumentNullException(nameof(file));
             if (destination == null)
                 throw new ArgumentNullException(nameof(destination));
             if (!destination.CanWrite)
@@ -40,9 +40,11 @@ namespace Stop.FileFormats.Atom
                 // Write header.
                 writer.Write(0x6D6F7461);   // Ascii for "atom" backwards.
                 writer.Write((ushort)1);
+                writer.Write(file.IsOriginSet);
+                writer.Write(file.Origin);
 
-                list = atoms;
-                foreach (dynamic atom in atoms)
+                of = file;
+                foreach (dynamic atom in file)
                     Write(atom);
             }
         }
@@ -62,11 +64,31 @@ namespace Stop.FileFormats.Atom
 
             foreach (var reference in procedure.References)
             {
-                writer.Write((uint)list.IndexOf(reference.Atom));
+                writer.Write((uint)of.Atoms.IndexOf(reference.Atom));
                 writer.Write(reference.IsAddressInLittleEndian);
                 writer.Write(reference.SizeOfAddress);
 
-                Write(reference.Address, reference.SizeOfAddress, reference.IsAddressInLittleEndian);
+                if (reference.SizeOfAddress == 2)
+                {
+                    if (reference.IsAddressInLittleEndian)
+                        writer.Write((ushort)reference.Address);
+                    else
+                        writer.WriteBigEndian((ushort)reference.Address);
+                }
+                else if (reference.SizeOfAddress == 4)
+                {
+                    if (reference.IsAddressInLittleEndian)
+                        writer.Write(reference.Address);
+                    else
+                        writer.WriteBigEndian(reference.Address);
+                }
+                else
+                {
+                    if (reference.IsAddressInLittleEndian)
+                        writer.Write((ulong)reference.Address);
+                    else
+                        writer.WriteBigEndian((ulong)reference.Address);
+                }
             }
         }
 
@@ -105,46 +127,10 @@ namespace Stop.FileFormats.Atom
             writer.Write(type);
             writer.Write(atom.IsDefined);
             writer.Write(atom.IsGlobal);
-            writer.Write(atom.IsAddressFixed);
-            writer.Write(atom.IsAddressInLittleEndian);
-
-            writer.Write(atom.SizeOfAddress);
-            Write(atom.Address, atom.SizeOfAddress, atom.IsAddressInLittleEndian);
 
             var name = Encoding.UTF8.GetBytes(atom.Name);
             writer.Write(name, 0, name.Length);
             writer.Write((byte)0x00);
-        }
-
-        /// <summary>
-        /// Writes an address.
-        /// </summary>
-        /// <param name="address">The address to write.</param>
-        /// <param name="sizeOfAddress">The actual size of <paramref name="address"/> in bytes.</param>
-        /// <param name="isAddressInLittleEndian">True if the address should be encoded in little endian.</param>
-        private void Write(ulong address, byte sizeOfAddress, bool isAddressInLittleEndian)
-        {
-            if (sizeOfAddress == 2)
-            {
-                if (isAddressInLittleEndian)
-                    writer.Write((ushort)address);
-                else
-                    writer.WriteBigEndian((ushort)address);
-            }
-            else if (sizeOfAddress == 4)
-            {
-                if (isAddressInLittleEndian)
-                    writer.Write((uint)address);
-                else
-                    writer.WriteBigEndian((uint)address);
-            }
-            else
-            {
-                if (isAddressInLittleEndian)
-                    writer.Write(address);
-                else
-                    writer.WriteBigEndian(address);
-            }
         }
     }
 }

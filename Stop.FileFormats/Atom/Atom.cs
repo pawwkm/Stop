@@ -10,8 +10,6 @@ namespace Stop.FileFormats.Atom
     {
         private string name = "";
 
-        private byte sizeOfAddress = 4;
-
         /// <summary>
         /// The name of the atomic unit.
         /// </summary>
@@ -38,57 +36,6 @@ namespace Stop.FileFormats.Atom
         /// a reference to an outside atom.
         /// </summary>
         public bool IsDefined
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// If true this atom can't be relocated to another address
-        /// otherwise; the atom may be relocated.
-        /// </summary>
-        public bool IsAddressFixed
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// The size of an address in bytes.
-        /// </summary>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="value"/> is not 2, 4 or 8.
-        /// </exception>
-        public byte SizeOfAddress
-        {
-            get
-            {
-                return sizeOfAddress;
-            }
-            set
-            {
-                if (!sizeOfAddress.IsOneOf(2, 4, 8))
-                    throw new ArgumentException("The address size can only be 2, 4 or 8 bytes long", nameof(value));
-
-                sizeOfAddress = value;
-            }
-        }
-
-        /// <summary>
-        /// If true the <see cref="Address"/> is in little endian;
-        /// otherwise it is in big endian.
-        /// </summary>
-        public bool IsAddressInLittleEndian
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// The absolute address which it is assumed the atom begins at 
-        /// when it is loaded into memory.
-        /// </summary>
-        public ulong Address
         {
             get;
             set;
