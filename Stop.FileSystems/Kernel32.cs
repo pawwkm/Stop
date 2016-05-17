@@ -9,7 +9,7 @@ namespace Stop.FileSystems
     /// </summary>
     internal static class Kernel32
     {
-        private const string DllName = "kernel32.dll";
+        private const string DllName = "Kernel32.dll";
 
         /// <summary>
         /// Creates or opens a file or I/O device. The most commonly used I/O devices are as follows: 
@@ -78,22 +78,25 @@ namespace Stop.FileSystems
         /// If the function succeeds, the return value is an open handle to the specified file, device, named pipe, or mail slot.
         /// </returns>
         [DllImport(DllName, SetLastError = true, CharSet = CharSet.Auto)]
-        public static extern SafeFileHandle CreateFile(string lpFileName, EFileAccess dwDesiredAccess, EFileShare dwShareMode, IntPtr lpSecurityAttributes, ECreationDisposition dwCreationDisposition, EFileAttributes dwFlagsAndAttributes, IntPtr hTemplateFile);
+        public static extern IntPtr CreateFile(string lpFileName, EFileAccess dwDesiredAccess, EFileShare dwShareMode, IntPtr lpSecurityAttributes, ECreationDisposition dwCreationDisposition, EFileAttributes dwFlagsAndAttributes, IntPtr hTemplateFile);
 
         [DllImport(DllName, SetLastError = true, CharSet = CharSet.Auto)]
-        public static extern bool CloseHandle(SafeFileHandle handle);
-
+        public static extern bool CloseHandle(IntPtr handle);
 
         [DllImport(DllName, SetLastError = true, CharSet = CharSet.Auto)]
-        public static extern bool DeviceIoControl(SafeFileHandle hDevice,
-    EIOControlCode IoControlCode,
-    [MarshalAs(UnmanagedType.AsAny)]
-    [In] object InBuffer,
-    uint nInBufferSize,
-    [MarshalAs(UnmanagedType.AsAny)]
-    [Out] object OutBuffer,
-    uint nOutBufferSize,
-    ref uint pBytesReturned,
-    [In] IntPtr Overlapped);
+        public static extern bool DeviceIoControl(IntPtr hDevice, EIOControlCode IoControlCode, [MarshalAs(UnmanagedType.AsAny)][In] object InBuffer, uint nInBufferSize, [MarshalAs(UnmanagedType.AsAny)] [Out] object OutBuffer, uint nOutBufferSize, ref uint pBytesReturned, [In] IntPtr Overlapped);
+
+        [DllImport(DllName, SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern unsafe bool ReadFile(IntPtr hFile, byte* pBuffer, uint NumberOfBytesToRead, uint* pNumberOfBytesRead, IntPtr Overlapped);
+
+        [DllImport(DllName, SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern bool SetFilePointerEx(IntPtr hFile, ulong liDistanceToMove, out ulong lpNewFilePointer, uint dwMoveMethod);
+
+        [DllImport(DllName, SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern unsafe bool WriteFile(IntPtr hFile, byte* pBuffer, uint NumberOfBytesToWrite, uint* pNumberOfBytesWritten, IntPtr Overlapped);
+
+        [DllImport(DllName, SetLastError = true, CharSet = CharSet.Auto)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern unsafe bool FlushFileBuffers(IntPtr hFile);
     }
 }

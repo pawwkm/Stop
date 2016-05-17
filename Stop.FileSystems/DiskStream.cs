@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32.SafeHandles;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using System.Management;
 using System.Runtime.InteropServices;
@@ -12,12 +13,10 @@ namespace Stop.FileSystems
     /// </summary>
     public class DiskStream : Stream
     {
-        private SafeFileHandle handle;
+        private IntPtr handle;
 
         private long length;
-
-        private long position;
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="DiskStream"/> class.
         /// </summary>
@@ -32,12 +31,13 @@ namespace Stop.FileSystems
                 throw new ArgumentException("There is no physical drive with the given number.", nameof(physicalDrive));
 
             length = 0;
-            position = 0;
 
             UnmountVolumes(physicalDrive);
 
             handle = Kernel32.CreateFile(name, EFileAccess.GenericAll, EFileShare.None, IntPtr.Zero, ECreationDisposition.OpenExisting, EFileAttributes.Normal, IntPtr.Zero);
             Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
+
+            Position = 0;
         }
 
         private static string GetDriveId(int number)
@@ -67,18 +67,10 @@ namespace Stop.FileSystems
         /// <param name="number">The number of the physical disk.</param>
         private static void UnmountVolumes(int number)
         {
-            var diskSearcher = new ManagementObjectSearcher("root\\CIMV2", "ASSOCIATORS OF {Win32_DiskDrive.DeviceID='" + @"\\.\PHYSICALDRIVE" + number + "'} WHERE AssocClass = Win32_DiskDriveToDiskPartition");
-
-            List<string> drives = new List<string>();
-            foreach (ManagementObject mo in diskSearcher.Get())
+            foreach (var letter in GetDriveLettersFrom(number))
             {
-                var driveSearcher = new ManagementObjectSearcher("root\\CIMV2", "ASSOCIATORS OF {Win32_DiskPartition.DeviceID='" + mo["DeviceID"] + "'} WHERE AssocClass = Win32_LogicalDiskToPartition");
-                foreach (ManagementObject driveMo in driveSearcher.Get())
-                    drives.Add("\\\\.\\" + driveMo["DeviceID"].ToString());
-            }
+                var drive = "\\\\.\\" + letter + ':';
 
-            foreach (var drive in drives)
-            {
                 var handle = Kernel32.CreateFile(drive, EFileAccess.GenericAll, EFileShare.None, IntPtr.Zero, ECreationDisposition.OpenExisting, EFileAttributes.Normal, IntPtr.Zero);
                 Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
 
@@ -89,8 +81,17 @@ namespace Stop.FileSystems
                 Kernel32.CloseHandle(handle);
                 Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
             }
+        }
 
-            //Kernel32.DeviceIoControl(handle, 0x7c054, )
+        private static IEnumerable<char> GetDriveLettersFrom(int physical)
+        {
+            var diskSearcher = new ManagementObjectSearcher("root\\CIMV2", "ASSOCIATORS OF {Win32_DiskDrive.DeviceID='" + @"\\.\PHYSICALDRIVE" + physical + "'} WHERE AssocClass = Win32_DiskDriveToDiskPartition");
+            foreach (ManagementObject mo in diskSearcher.Get())
+            {
+                var driveSearcher = new ManagementObjectSearcher("root\\CIMV2", "ASSOCIATORS OF {Win32_DiskPartition.DeviceID='" + mo["DeviceID"] + "'} WHERE AssocClass = Win32_LogicalDiskToPartition");
+                foreach (ManagementObject driveMo in driveSearcher.Get())
+                    yield return driveMo["DeviceID"].ToString()[0];
+            }
         }
 
         /// <summary>
@@ -150,7 +151,7 @@ namespace Stop.FileSystems
         {
             get
             {
-                return position;
+                return Seek(0, SeekOrigin.Current);
             }
             set
             {
@@ -170,7 +171,8 @@ namespace Stop.FileSystems
         /// </exception>
         public override void Flush()
         {
-            throw new NotImplementedException();
+            if (!Kernel32.FlushFileBuffers(handle))
+                Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
         }
 
         /// <summary>
@@ -202,7 +204,21 @@ namespace Stop.FileSystems
         /// </exception>
         public override int Read(byte[] buffer, int offset, int count)
         {
-            throw new NotImplementedException();
+
+            //var bytesRead = 0;
+
+            //Kernel32.ReadFile(handle, buffer, count, out bytesRead, IntPtr.Zero);
+
+            unsafe
+            {
+                uint n = 0;
+                fixed (byte* p = buffer)
+                {
+                    if (!Kernel32.ReadFile(handle, p + (uint)offset, (uint)count, &n, IntPtr.Zero))
+                        Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+                }
+                return (int)n;
+            }
         }
 
         /// <summary>
@@ -219,7 +235,11 @@ namespace Stop.FileSystems
         /// </exception>
         public override long Seek(long offset, SeekOrigin origin)
         {
-            throw new NotImplementedException();
+            ulong n = 0;
+            if (!Kernel32.SetFilePointerEx(handle, (ulong)offset, out n, (uint)origin))
+                Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+
+            return (long)n;
         }
 
         /// <summary>
@@ -256,7 +276,15 @@ namespace Stop.FileSystems
         /// </exception>
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new NotImplementedException();
+            unsafe
+            {
+                uint n = 0;
+                fixed (byte* p = buffer)
+                {
+                    if (!Kernel32.WriteFile(handle, p + offset, (uint)count, &n, IntPtr.Zero))
+                        Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+                }
+            }
         }
 
         /// <summary>
