@@ -24,6 +24,7 @@
     <DocumentationFile>bin\Debug\Stop.FileSystems.XML</DocumentationFile>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <CodeAnalysisRuleSet>ExtendedDesignGuidelineRules.ruleset</CodeAnalysisRuleSet>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -36,13 +37,23 @@
     <DocumentationFile>bin\Release\Stop.FileSystems.XML</DocumentationFile>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <CodeAnalysisRuleSet>ExtendedDesignGuidelineRules.ruleset</CodeAnalysisRuleSet>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EFileDevice.cs" />
+    <Compile Include="EIOControlCode .cs" />
     <Compile Include="DiskStream.cs" />
+    <Compile Include="ECreationDisposition.cs" />
+    <Compile Include="EFileAccess.cs" />
+    <Compile Include="EFileAttributes.cs" />
+    <Compile Include="EFileShare.cs" />
+    <Compile Include="EMethod.cs" />
+    <Compile Include="Kernel32.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

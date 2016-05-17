@@ -1,5 +1,11 @@
 ﻿using NUnit.Framework;
+using System;
+using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using System.Linq;
+using System.Collections.Generic;
+using System.Management;
 
 namespace Stop.FileSystems
 {
@@ -15,7 +21,7 @@ namespace Stop.FileSystems
         [TestFixtureSetUp]
         public void FixtureSetup()
         {
-            MessageBox.Show("Only once");
+            //MessageBox.Show("Only once");
         }
 
         /// <summary>
@@ -24,16 +30,10 @@ namespace Stop.FileSystems
         [Test]
         public void Test1()
         {
-            
-        }
+            using (var disk = new DiskStream(1))
+            {
 
-        /// <summary>
-        /// 
-        /// </summary>
-        [Test]
-        public void Test2()
-        {
-
+            }
         }
     }
 }

@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Microsoft.Win32.SafeHandles;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Management;
+using System.Runtime.InteropServices;
 
 namespace Stop.FileSystems
 {
@@ -12,6 +12,87 @@ namespace Stop.FileSystems
     /// </summary>
     public class DiskStream : Stream
     {
+        private SafeFileHandle handle;
+
+        private long length;
+
+        private long position;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DiskStream"/> class.
+        /// </summary>
+        /// <param name="physicalDrive">The number of the physical drive to read from.</param>
+        /// <exception cref="ArgumentException">
+        /// There is no physical drive with the given number.
+        /// </exception>
+        public DiskStream(int physicalDrive)
+        {
+            var name = GetDriveId(physicalDrive);
+            if (name == null)
+                throw new ArgumentException("There is no physical drive with the given number.", nameof(physicalDrive));
+
+            length = 0;
+            position = 0;
+
+            UnmountVolumes(physicalDrive);
+
+            handle = Kernel32.CreateFile(name, EFileAccess.GenericAll, EFileShare.None, IntPtr.Zero, ECreationDisposition.OpenExisting, EFileAttributes.Normal, IntPtr.Zero);
+            Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
+        }
+
+        private static string GetDriveId(int number)
+        {
+            var exist = false;
+            var deviceId = string.Format(@"DeviceID=""\\\\.\\PHYSICALDRIVE{0}""", number);
+
+            var ms = new ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive");
+            foreach (ManagementObject mo in ms.Get())
+            {
+                if (mo.Path.Path.EndsWith(deviceId))
+                {
+                    exist = true;
+                    break;
+                }
+            }
+
+            if (!exist)
+                return null;
+
+            return @"\\.\PHYSICALDRIVE" + number; 
+        }
+
+        /// <summary>
+        /// Unmounts all the drives on a physical disk.
+        /// </summary>
+        /// <param name="number">The number of the physical disk.</param>
+        private static void UnmountVolumes(int number)
+        {
+            var diskSearcher = new ManagementObjectSearcher("root\\CIMV2", "ASSOCIATORS OF {Win32_DiskDrive.DeviceID='" + @"\\.\PHYSICALDRIVE" + number + "'} WHERE AssocClass = Win32_DiskDriveToDiskPartition");
+
+            List<string> drives = new List<string>();
+            foreach (ManagementObject mo in diskSearcher.Get())
+            {
+                var driveSearcher = new ManagementObjectSearcher("root\\CIMV2", "ASSOCIATORS OF {Win32_DiskPartition.DeviceID='" + mo["DeviceID"] + "'} WHERE AssocClass = Win32_LogicalDiskToPartition");
+                foreach (ManagementObject driveMo in driveSearcher.Get())
+                    drives.Add("\\\\.\\" + driveMo["DeviceID"].ToString());
+            }
+
+            foreach (var drive in drives)
+            {
+                var handle = Kernel32.CreateFile(drive, EFileAccess.GenericAll, EFileShare.None, IntPtr.Zero, ECreationDisposition.OpenExisting, EFileAttributes.Normal, IntPtr.Zero);
+                Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
+
+                uint bytesReturned = 0;
+                Kernel32.DeviceIoControl(handle, EIOControlCode.FsctlDismountVolume, null, 0, null, 0, ref bytesReturned, IntPtr.Zero);
+                Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
+
+                Kernel32.CloseHandle(handle);
+                Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
+            }
+
+            //Kernel32.DeviceIoControl(handle, 0x7c054, )
+        }
+
         /// <summary>
         /// The stream supports reading.
         /// </summary>
@@ -52,7 +133,7 @@ namespace Stop.FileSystems
         {
             get
             {
-                throw new NotImplementedException();
+                return length;
             }
         }
 
@@ -69,12 +150,11 @@ namespace Stop.FileSystems
         {
             get
             {
-                throw new NotImplementedException();
+                return position;
             }
-
             set
             {
-                throw new NotImplementedException();
+                Seek(value, SeekOrigin.Begin);
             }
         }
 
@@ -177,6 +257,25 @@ namespace Stop.FileSystems
         public override void Write(byte[] buffer, int offset, int count)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Releases the unmanaged resources used by the stream and optionally
+        /// releases the managed resources.
+        /// </summary>
+        /// <param name="disposing">
+        /// true to release both managed and unmanaged resources; false to 
+        /// release only unmanaged resources.
+        /// </param>
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            Kernel32.CloseHandle(handle);
+            Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
+
+            // This should mount the unmounted drives.
+            DriveInfo.GetDrives();
         }
     }
 }
