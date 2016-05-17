@@ -1,7 +1,6 @@
 ﻿using Microsoft.Win32.SafeHandles;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
 using System.Management;
 using System.Runtime.InteropServices;
@@ -13,16 +12,19 @@ namespace Stop.FileSystems
     /// </summary>
     public class DiskStream : Stream
     {
-        private IntPtr handle;
+        private SafeFileHandle handle;
 
         private long length;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DiskStream"/> class.
         /// </summary>
         /// <param name="physicalDrive">The number of the physical drive to read from.</param>
         /// <exception cref="ArgumentException">
         /// There is no physical drive with the given number.
+        /// </exception>
+        /// <exception cref="COMException">
+        /// An error happend in the WinApi.
         /// </exception>
         public DiskStream(int physicalDrive)
         {
@@ -36,62 +38,6 @@ namespace Stop.FileSystems
 
             handle = Kernel32.CreateFile(name, EFileAccess.GenericAll, EFileShare.None, IntPtr.Zero, ECreationDisposition.OpenExisting, EFileAttributes.Normal, IntPtr.Zero);
             Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
-
-            Position = 0;
-        }
-
-        private static string GetDriveId(int number)
-        {
-            var exist = false;
-            var deviceId = string.Format(@"DeviceID=""\\\\.\\PHYSICALDRIVE{0}""", number);
-
-            var ms = new ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive");
-            foreach (ManagementObject mo in ms.Get())
-            {
-                if (mo.Path.Path.EndsWith(deviceId))
-                {
-                    exist = true;
-                    break;
-                }
-            }
-
-            if (!exist)
-                return null;
-
-            return @"\\.\PHYSICALDRIVE" + number; 
-        }
-
-        /// <summary>
-        /// Unmounts all the drives on a physical disk.
-        /// </summary>
-        /// <param name="number">The number of the physical disk.</param>
-        private static void UnmountVolumes(int number)
-        {
-            foreach (var letter in GetDriveLettersFrom(number))
-            {
-                var drive = "\\\\.\\" + letter + ':';
-
-                var handle = Kernel32.CreateFile(drive, EFileAccess.GenericAll, EFileShare.None, IntPtr.Zero, ECreationDisposition.OpenExisting, EFileAttributes.Normal, IntPtr.Zero);
-                Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
-
-                uint bytesReturned = 0;
-                Kernel32.DeviceIoControl(handle, EIOControlCode.FsctlDismountVolume, null, 0, null, 0, ref bytesReturned, IntPtr.Zero);
-                Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
-
-                Kernel32.CloseHandle(handle);
-                Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
-            }
-        }
-
-        private static IEnumerable<char> GetDriveLettersFrom(int physical)
-        {
-            var diskSearcher = new ManagementObjectSearcher("root\\CIMV2", "ASSOCIATORS OF {Win32_DiskDrive.DeviceID='" + @"\\.\PHYSICALDRIVE" + physical + "'} WHERE AssocClass = Win32_DiskDriveToDiskPartition");
-            foreach (ManagementObject mo in diskSearcher.Get())
-            {
-                var driveSearcher = new ManagementObjectSearcher("root\\CIMV2", "ASSOCIATORS OF {Win32_DiskPartition.DeviceID='" + mo["DeviceID"] + "'} WHERE AssocClass = Win32_LogicalDiskToPartition");
-                foreach (ManagementObject driveMo in driveSearcher.Get())
-                    yield return driveMo["DeviceID"].ToString()[0];
-            }
         }
 
         /// <summary>
@@ -160,19 +106,10 @@ namespace Stop.FileSystems
         }
 
         /// <summary>
-        /// Clears all buffers for this stream and causes any 
-        /// buffered data to be written to the underlying device.
+        /// This doesn't do anything. Data is automatically flushed.
         /// </summary>
-        /// <exception cref="IOException">
-        /// An I/O error occurs.
-        /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        /// Methods were called after the stream was closed.
-        /// </exception>
         public override void Flush()
         {
-            if (!Kernel32.FlushFileBuffers(handle))
-                Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
         }
 
         /// <summary>
@@ -204,11 +141,6 @@ namespace Stop.FileSystems
         /// </exception>
         public override int Read(byte[] buffer, int offset, int count)
         {
-
-            //var bytesRead = 0;
-
-            //Kernel32.ReadFile(handle, buffer, count, out bytesRead, IntPtr.Zero);
-
             unsafe
             {
                 uint n = 0;
@@ -304,6 +236,70 @@ namespace Stop.FileSystems
 
             // This should mount the unmounted drives.
             DriveInfo.GetDrives();
+        }
+
+        /// <summary>
+        /// Gets the id for a physical disk.
+        /// </summary>
+        /// <param name="number">The number of the disk.</param>
+        /// <returns>The id for the disk if it exists; otherwise null.</returns>
+        private static string GetDriveId(int number)
+        {
+            var exist = false;
+            var deviceId = string.Format(@"DeviceID=""\\\\.\\PHYSICALDRIVE{0}""", number);
+
+            var ms = new ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive");
+            foreach (ManagementObject mo in ms.Get())
+            {
+                if (mo.Path.Path.EndsWith(deviceId))
+                {
+                    exist = true;
+                    break;
+                }
+            }
+
+            if (!exist)
+                return null;
+
+            return @"\\.\PHYSICALDRIVE" + number;
+        }
+
+        /// <summary>
+        /// Unmounts all the drives on a physical disk.
+        /// </summary>
+        /// <param name="number">The number of the physical disk.</param>
+        private static void UnmountVolumes(int number)
+        {
+            foreach (var letter in GetDriveLettersFrom(number))
+            {
+                var drive = "\\\\.\\" + letter + ':';
+
+                var handle = Kernel32.CreateFile(drive, EFileAccess.GenericAll, EFileShare.None, IntPtr.Zero, ECreationDisposition.OpenExisting, EFileAttributes.Normal, IntPtr.Zero);
+                Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
+
+                uint bytesReturned = 0;
+                Kernel32.DeviceIoControl(handle, EIOControlCode.FsctlDismountVolume, null, 0, null, 0, ref bytesReturned, IntPtr.Zero);
+                Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
+
+                Kernel32.CloseHandle(handle);
+                Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
+            }
+        }
+
+        /// <summary>
+        /// Gets the drive letters from a physical drive.
+        /// </summary>
+        /// <param name="physical">The number of the physical drive.</param>
+        /// <returns>A list of the drive letters of the physical drive.</returns>
+        private static IEnumerable<char> GetDriveLettersFrom(int physical)
+        {
+            var diskSearcher = new ManagementObjectSearcher("root\\CIMV2", "ASSOCIATORS OF {Win32_DiskDrive.DeviceID='" + @"\\.\PHYSICALDRIVE" + physical + "'} WHERE AssocClass = Win32_DiskDriveToDiskPartition");
+            foreach (ManagementObject mo in diskSearcher.Get())
+            {
+                var driveSearcher = new ManagementObjectSearcher("root\\CIMV2", "ASSOCIATORS OF {Win32_DiskPartition.DeviceID='" + mo["DeviceID"] + "'} WHERE AssocClass = Win32_LogicalDiskToPartition");
+                foreach (ManagementObject driveMo in driveSearcher.Get())
+                    yield return driveMo["DeviceID"].ToString()[0];
+            }
         }
     }
 }

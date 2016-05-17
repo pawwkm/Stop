@@ -33,20 +33,13 @@ namespace Stop.FileSystems
         {
             using (var disk = new DiskStream(1))
             {
-                //var block = new byte[512];
-                //disk.Read(block, 0, 512);
-
-                //File.WriteAllBytes("D:\\Dump.bin", block);
-
-                var bytes = Encoding.UTF8.GetBytes("Cock");
+                var bytes = Encoding.UTF8.GetBytes("Svans");
                 var buffer = new byte[512];
 
                 for (int i = 0; i < bytes.Length; i++)
                     buffer[i] = bytes[i];
 
                 disk.Write(buffer, 0, buffer.Length);
-
-                disk.Flush();
             }
         }
     }
