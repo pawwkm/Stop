@@ -62,14 +62,14 @@ namespace Stop.FileFormats.Atom
         /// <exception cref="InvalidObjectFileException">
         /// <paramref name="source"/> is an invalid object file.
         /// </exception>
-        public IList<Atom> Read(Stream source)
+        public ObjectFile Read(Stream source)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
-            if (source.Length - source.Position < 6)
+            if (source.Length - source.Position <= 13)
                 throw new ArgumentException("There is no header on the current position.", nameof(source));
 
-            var atoms = new List<Atom>();
+            var file = new ObjectFile();
             using (reader = new BinaryReader(source))
             {
                 // This number is ascii for "atom" backwards.
@@ -78,18 +78,21 @@ namespace Stop.FileFormats.Atom
                 if (reader.ReadUInt16() != 1)
                     throw new InvalidObjectFileException("This object file is not using version one.");
 
+                file.IsOriginSet = reader.ReadBoolean();
+                file.Origin = reader.ReadUInt64();
+
                 while (!EndOfFile)
                 {
                     switch (reader.ReadByte())
                     {
                         case 0:
-                            atoms.Add(Procedure());
+                            file.Atoms.Add(Procedure());
                             break;
                         case 1:
-                            atoms.Add(NullTerminatedString());
+                            file.Atoms.Add(NullTerminatedString());
                             break;
                         case 2:
-                            atoms.Add(Data());
+                            file.Atoms.Add(Data());
                             break;
                         default:
                             throw new InvalidObjectFileException("Invalid atom type at " + ToHex(reader.BaseStream.Position - 1));
@@ -97,9 +100,9 @@ namespace Stop.FileFormats.Atom
                 }
             }
 
-            ResolveReferences(atoms);
+            ResolveReferences(file);
 
-            return atoms;
+            return file;
         }
 
         /// <summary>
@@ -150,10 +153,6 @@ namespace Stop.FileFormats.Atom
         {
             atom.IsDefined = IsDefined();
             atom.IsGlobal = IsGlobal();
-            atom.IsAddressFixed = IsAddressFixed();
-            atom.IsAddressInLittleEndian = IsAddressInLittleEndian();
-            atom.SizeOfAddress = SizeOfAddress();
-            atom.Address = Address(atom.SizeOfAddress, atom.IsAddressInLittleEndian);
             atom.Name = Name();
         }
 
@@ -188,21 +187,6 @@ namespace Stop.FileFormats.Atom
         }
 
         /// <summary>
-        /// Checks if the address of the current atom is fixed.
-        /// </summary>
-        /// <returns>True if the address of the current atom is fixed; otherwise false.</returns>
-        /// <exception cref="InvalidObjectFileException">
-        /// Unexpected end of object file.
-        /// </exception>
-        private bool IsAddressFixed()
-        {
-            if (EndOfFile)
-                throw new InvalidObjectFileException("Unexpected end of object file. Expected 'is address fixed' bool.");
-
-            return reader.ReadBoolean();
-        }
-
-        /// <summary>
         /// Checks if the address of the current atom is in little endian.
         /// </summary>
         /// <returns>True if the address of the current atom is in little endian; otherwise false.</returns>
@@ -215,25 +199,6 @@ namespace Stop.FileFormats.Atom
                 throw new InvalidObjectFileException("Unexpected end of object file. Expected 'is little endian' bool.");
 
             return reader.ReadBoolean();
-        }
-
-        /// <summary>
-        /// Checks if the address of the current atom is fixed.
-        /// </summary>
-        /// <returns>True if the address of the current atom is fixed; otherwise false.</returns>
-        /// <exception cref="InvalidObjectFileException">
-        /// Unexpected end of object file. The given size is not 2, 4, or 8.
-        /// </exception>
-        private byte SizeOfAddress()
-        {
-            if (EndOfFile)
-                throw new InvalidObjectFileException("Unexpected end of object file. Expected 'address size' byte.");
-
-            var size = reader.ReadByte();
-            if (!size.IsOneOf(2, 4, 8))
-                throw new InvalidObjectFileException("The address size at " + ToHex(Position - 1) + " is invalid. It must be 2, 4 or 8.");
-
-            return size;
         }
 
         /// <summary>
@@ -448,24 +413,24 @@ namespace Stop.FileFormats.Atom
         }
 
         /// <summary>
-        /// Resolves the references the given <paramref name="atoms"/> have.
+        /// Resolves the references the given <paramref name="file"/> have.
         /// </summary>
-        /// <param name="atoms">The atoms with references.</param>
+        /// <param name="file">The atoms with references.</param>
         /// <exception cref="InvalidObjectFileException">
         /// There are references with overlapping addresses.
         /// </exception>
-        private void ResolveReferences(List<Atom> atoms)
+        private void ResolveReferences(ObjectFile file)
         {
             foreach (var tuple in references)
             {
-                if (atoms.Count < tuple.Item2)
+                if (file.Atoms.Count < tuple.Item2)
                 {
                     var message = string.Format("The atom called '{0}' has a reference to atom number {1} which doesn't exist.", tuple.Item1.Name, tuple.Item2);
 
                     throw new InvalidObjectFileException(message);
                 }
 
-                var reference = new Reference(atoms[(int)tuple.Item2]);
+                var reference = new Reference(file.Atoms[(int)tuple.Item2]);
                 reference.IsAddressInLittleEndian = tuple.Item3;
                 reference.SizeOfAddress = tuple.Item4;
                 reference.Address = tuple.Item5;
