@@ -32,12 +32,12 @@ namespace Stop.FileSystems
             if (name == null)
                 throw new ArgumentException("There is no physical drive with the given number.", nameof(physicalDrive));
 
-            length = 0;
-
             UnmountVolumes(physicalDrive);
 
             handle = Kernel32.CreateFile(name, EFileAccess.GenericAll, EFileShare.None, IntPtr.Zero, ECreationDisposition.OpenExisting, EFileAttributes.Normal, IntPtr.Zero);
             Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
+
+            length = GetLength(physicalDrive);
         }
 
         /// <summary>
@@ -262,6 +262,25 @@ namespace Stop.FileSystems
                 return null;
 
             return @"\\.\PHYSICALDRIVE" + number;
+        }
+
+        /// <summary>
+        /// Gets the length of a physical disk.
+        /// </summary>
+        /// <param name="number">The number of the disk.</param>
+        /// <returns>The length of the disk.</returns>
+        private static long GetLength(int number)
+        {
+            var deviceId = string.Format(@"DeviceID=""\\\\.\\PHYSICALDRIVE{0}""", number);
+
+            var ms = new ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive");
+            foreach (ManagementObject mo in ms.Get())
+            {
+                if (mo.Path.Path.EndsWith(deviceId))
+                    return Convert.ToInt64(mo["Size"]);
+            }
+
+            return 0;
         }
 
         /// <summary>
