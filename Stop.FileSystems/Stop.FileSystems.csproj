@@ -45,15 +45,10 @@
     <Reference Include="System.Management" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EFileDevice.cs" />
-    <Compile Include="EIOControlCode .cs" />
     <Compile Include="DiskStream.cs" />
-    <Compile Include="ECreationDisposition.cs" />
-    <Compile Include="EFileAccess.cs" />
-    <Compile Include="EFileAttributes.cs" />
-    <Compile Include="EFileShare.cs" />
-    <Compile Include="EMethod.cs" />
-    <Compile Include="Kernel32.cs" />
+    <Compile Include="NativeMethods.cs">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

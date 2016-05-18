@@ -39,7 +39,7 @@ namespace Stop.FileSystems
 
             HandleVolumes(physicalDrive);
 
-            handle = Kernel32.CreateFile(name, EFileAccess.GenericAll, EFileShare.None, IntPtr.Zero, ECreationDisposition.OpenExisting, EFileAttributes.Normal, IntPtr.Zero);
+            handle = NativeMethods.CreateFile(name, NativeMethods.GenericAll, NativeMethods.NoSharing, IntPtr.Zero, NativeMethods.OpenExisting, NativeMethods.Normal, IntPtr.Zero);
             Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
 
             length = GetLength(physicalDrive);
@@ -158,7 +158,7 @@ namespace Stop.FileSystems
             {   
                 fixed (byte* p = bytes)
                 {
-                    if (!Kernel32.ReadFile(handle, p, (uint)bytes.Length, &n, IntPtr.Zero))
+                    if (!NativeMethods.ReadFile(handle, p, (uint)bytes.Length, &n, IntPtr.Zero))
                         Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
                 }
             }
@@ -185,7 +185,7 @@ namespace Stop.FileSystems
         public override long Seek(long offset, SeekOrigin origin)
         {
             ulong n = 0;
-            if (!Kernel32.SetFilePointerEx(handle, (ulong)offset, out n, (uint)origin))
+            if (!NativeMethods.SetFilePointerEx(handle, (ulong)offset, out n, (uint)origin))
                 Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
 
             return (long)n;
@@ -244,11 +244,8 @@ namespace Stop.FileSystems
             {
                 fixed (byte* p = bytes)
                 {
-                    for (int i = 0; i < bytes.Length / 512; i++)
-                    {
-                        if (!Kernel32.WriteFile(handle, p + i * 512, 512, &n, IntPtr.Zero))
-                            Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
-                    }
+                    if (!NativeMethods.WriteFile(handle, p, (uint)bytes.Length, &n, IntPtr.Zero))
+                        Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
                 }
             }
 
@@ -272,11 +269,11 @@ namespace Stop.FileSystems
                 if (eject)
                 {
                     uint bytesReturned = 0;
-                    Kernel32.DeviceIoControl(handle, EIOControlCode.StorageEjectMedia, null, 0, null, 0, ref bytesReturned, IntPtr.Zero);
+                    NativeMethods.DeviceIoControl(handle, NativeMethods.StorageEjectMedia, null, 0, null, 0, ref bytesReturned, IntPtr.Zero);
                     Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
                 }
 
-                Kernel32.CloseHandle(handle);
+                NativeMethods.CloseHandle(handle);
                 Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
 
                 handle.SetHandleAsInvalid();
@@ -343,20 +340,20 @@ namespace Stop.FileSystems
             {
                 var drive = "\\\\.\\" + letter + ':';
 
-                var handle = Kernel32.CreateFile(drive, EFileAccess.GenericAll, EFileShare.None, IntPtr.Zero, ECreationDisposition.OpenExisting, EFileAttributes.Normal, IntPtr.Zero);
+                var handle = NativeMethods.CreateFile(drive, NativeMethods.GenericAll, NativeMethods.NoSharing, IntPtr.Zero, NativeMethods.OpenExisting, NativeMethods.Normal, IntPtr.Zero);
                 Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
 
                 uint bytesReturned = 0;
-                Kernel32.DeviceIoControl(handle, EIOControlCode.FsctlLockVolume, null, 0, null, 0, ref bytesReturned, IntPtr.Zero);
+                NativeMethods.DeviceIoControl(handle, NativeMethods.FsctlLockVolume, null, 0, null, 0, ref bytesReturned, IntPtr.Zero);
                 Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
 
-                Kernel32.DeviceIoControl(handle, EIOControlCode.FsctlAllowExtendedDasdIo, null, 0, null, 0, ref bytesReturned, IntPtr.Zero);
+                NativeMethods.DeviceIoControl(handle, NativeMethods.FsctlAllowExtendedDasdIo, null, 0, null, 0, ref bytesReturned, IntPtr.Zero);
                 Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
 
-                Kernel32.DeviceIoControl(handle, EIOControlCode.FsctlDismountVolume, null, 0, null, 0, ref bytesReturned, IntPtr.Zero);
+                NativeMethods.DeviceIoControl(handle, NativeMethods.FsctlDismountVolume, null, 0, null, 0, ref bytesReturned, IntPtr.Zero);
                 Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
 
-                Kernel32.CloseHandle(handle);
+                NativeMethods.CloseHandle(handle);
                 Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
             }
         }

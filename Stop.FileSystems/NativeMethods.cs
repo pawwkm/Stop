@@ -7,9 +7,38 @@ namespace Stop.FileSystems
     /// <summary>
     /// Provides access to methods in Kernel32 dll.
     /// </summary>
-    internal static class Kernel32
+    internal static class NativeMethods
     {
-        private const string DllName = "Kernel32.dll";
+        private const string Dll = "Kernel32.dll";
+
+        /// <summary>
+        /// All possible access rights.
+        /// </summary>
+        public const uint GenericAll = 0x10000000;
+
+        /// <summary>
+        /// The file cannot be shared.
+        /// </summary>
+        public const uint NoSharing = 0x00000000;
+
+        /// <summary>
+        /// Opens a file. The function fails if the file does not exist. 
+        /// </summary>
+        public const uint OpenExisting = 3;
+
+        /// <summary>
+        /// The file does not have other attributes set. 
+        /// This attribute is valid only if used alone.
+        /// </summary>
+        public const uint Normal = 0x00000080;
+
+        public const uint StorageEjectMedia = 2967560;
+
+        public const uint FsctlLockVolume = 589848;
+
+        public const uint FsctlAllowExtendedDasdIo = 589955;
+
+        public const uint FsctlDismountVolume = 589856;
 
         /// <summary>
         /// Creates or opens a file or I/O device. The most commonly used I/O devices are as follows: 
@@ -77,22 +106,22 @@ namespace Stop.FileSystems
         /// <returns>
         /// If the function succeeds, the return value is an open handle to the specified file, device, named pipe, or mail slot.
         /// </returns>
-        [DllImport(DllName, SetLastError = true, CharSet = CharSet.Auto)]
-        public static extern SafeFileHandle CreateFile(string lpFileName, EFileAccess dwDesiredAccess, EFileShare dwShareMode, IntPtr lpSecurityAttributes, ECreationDisposition dwCreationDisposition, EFileAttributes dwFlagsAndAttributes, IntPtr hTemplateFile);
+        [DllImport(Dll, SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern SafeFileHandle CreateFile(string lpFileName, uint dwDesiredAccess, uint dwShareMode, IntPtr lpSecurityAttributes, uint dwCreationDisposition, uint dwFlagsAndAttributes, IntPtr hTemplateFile);
 
-        [DllImport(DllName, SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport(Dll, SetLastError = true, CharSet = CharSet.Auto)]
         public static extern bool CloseHandle(SafeFileHandle handle);
 
-        [DllImport(DllName, SetLastError = true, CharSet = CharSet.Auto)]
-        public static extern bool DeviceIoControl(SafeFileHandle hDevice, EIOControlCode IoControlCode, [MarshalAs(UnmanagedType.AsAny)][In] object InBuffer, uint nInBufferSize, [MarshalAs(UnmanagedType.AsAny)] [Out] object OutBuffer, uint nOutBufferSize, ref uint pBytesReturned, [In] IntPtr Overlapped);
+        [DllImport(Dll, SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern bool DeviceIoControl(SafeFileHandle hDevice, uint IoControlCode, [MarshalAs(UnmanagedType.AsAny)][In] object InBuffer, uint nInBufferSize, [MarshalAs(UnmanagedType.AsAny)] [Out] object OutBuffer, uint nOutBufferSize, ref uint pBytesReturned, [In] IntPtr Overlapped);
 
-        [DllImport(DllName, SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport(Dll, SetLastError = true, CharSet = CharSet.Auto)]
         public static extern unsafe bool ReadFile(SafeFileHandle hFile, byte* pBuffer, uint NumberOfBytesToRead, uint* pNumberOfBytesRead, IntPtr Overlapped);
 
-        [DllImport(DllName, SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport(Dll, SetLastError = true, CharSet = CharSet.Auto)]
         public static extern bool SetFilePointerEx(SafeFileHandle hFile, ulong liDistanceToMove, out ulong lpNewFilePointer, uint dwMoveMethod);
 
-        [DllImport(DllName, SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport(Dll, SetLastError = true, CharSet = CharSet.Auto)]
         public static extern unsafe bool WriteFile(SafeFileHandle hFile, byte* pBuffer, uint NumberOfBytesToWrite, uint* pNumberOfBytesWritten, IntPtr Overlapped);
     }
 }
