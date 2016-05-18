@@ -16,17 +16,22 @@ namespace Stop.FileSystems
 
         private long length;
 
+        private bool eject;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DiskStream"/> class.
         /// </summary>
         /// <param name="physicalDrive">The number of the physical drive to read from.</param>
+        /// <param name="ejectWhenDone">
+        /// If true, the physical drive is ejected when the stream is closed or disposed.
+        /// </param>
         /// <exception cref="ArgumentException">
         /// There is no physical drive with the given number.
         /// </exception>
         /// <exception cref="COMException">
         /// An error happend in the WinApi.
         /// </exception>
-        public DiskStream(int physicalDrive)
+        public DiskStream(int physicalDrive, bool ejectWhenDone)
         {
             var name = GetDriveId(physicalDrive);
             if (name == null)
@@ -38,6 +43,7 @@ namespace Stop.FileSystems
             Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
 
             length = GetLength(physicalDrive);
+            eject = ejectWhenDone;
         }
 
         /// <summary>
@@ -263,15 +269,22 @@ namespace Stop.FileSystems
 
             if (handle != null)
             {
+                if (eject)
+                {
+                    uint bytesReturned = 0;
+                    Kernel32.DeviceIoControl(handle, EIOControlCode.StorageEjectMedia, null, 0, null, 0, ref bytesReturned, IntPtr.Zero);
+                    Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
+                }
+
                 Kernel32.CloseHandle(handle);
                 Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
 
                 handle.SetHandleAsInvalid();
                 handle = null;
-            }
 
-            // This should mount the unmounted drives.
-            DriveInfo.GetDrives();
+                // This should mount the unmounted drives.
+                DriveInfo.GetDrives();
+            }
         }
 
         /// <summary>
