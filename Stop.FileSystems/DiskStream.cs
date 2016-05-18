@@ -141,16 +141,27 @@ namespace Stop.FileSystems
         /// </exception>
         public override int Read(byte[] buffer, int offset, int count)
         {
+            long pos = Position;
+            int allignmentOffset = (int)(pos % 512);
+            int sectorsToRead = (int)Math.Ceiling((count + allignmentOffset) / 512f);
+
+            byte[] bytes = new byte[sectorsToRead * 512];
+
+            uint n = 0;
             unsafe
-            {
-                uint n = 0;
-                fixed (byte* p = buffer)
+            {   
+                fixed (byte* p = bytes)
                 {
-                    if (!Kernel32.ReadFile(handle, p + (uint)offset, (uint)count, &n, IntPtr.Zero))
+                    if (!Kernel32.ReadFile(handle, p, (uint)bytes.Length, &n, IntPtr.Zero))
                         Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
                 }
-                return (int)n;
             }
+
+            Buffer.BlockCopy(bytes, allignmentOffset, buffer, offset, count);
+
+            Position = pos + count;
+
+            return (int)n;
         }
 
         /// <summary>
@@ -231,8 +242,14 @@ namespace Stop.FileSystems
         {
             base.Dispose(disposing);
 
-            Kernel32.CloseHandle(handle);
-            Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
+            if (handle != null)
+            {
+                Kernel32.CloseHandle(handle);
+                Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
+
+                handle.SetHandleAsInvalid();
+                handle = null;
+            }
 
             // This should mount the unmounted drives.
             DriveInfo.GetDrives();
