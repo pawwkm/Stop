@@ -159,7 +159,7 @@ namespace Stop.FileSystems
 
             Buffer.BlockCopy(bytes, allignmentOffset, buffer, offset, count);
 
-            Position = pos + count;
+            Position = pos + n;
 
             return (int)n;
         }
@@ -219,15 +219,34 @@ namespace Stop.FileSystems
         /// </exception>
         public override void Write(byte[] buffer, int offset, int count)
         {
+            long pos = Position;
+            int allignmentOffset = (int)(pos % 512);
+            long allignedPosition = pos - allignmentOffset;
+            int sectorsToRead = (int)Math.Ceiling((count + allignmentOffset) / 512f);
+
+            Position = allignedPosition;
+
+            byte[] bytes = new byte[sectorsToRead * 512];
+            Read(bytes, 0, bytes.Length);
+
+            Buffer.BlockCopy(buffer, offset, bytes, allignmentOffset, count);
+
+            Position = allignedPosition;
+
+            uint n = 0;
             unsafe
             {
-                uint n = 0;
-                fixed (byte* p = buffer)
+                fixed (byte* p = bytes)
                 {
-                    if (!Kernel32.WriteFile(handle, p + offset, (uint)count, &n, IntPtr.Zero))
-                        Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+                    for (int i = 0; i < bytes.Length / 512; i++)
+                    {
+                        if (!Kernel32.WriteFile(handle, p + i * 512, 512, &n, IntPtr.Zero))
+                            Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+                    }
                 }
             }
+
+            Position = pos + (int)n;
         }
 
         /// <summary>

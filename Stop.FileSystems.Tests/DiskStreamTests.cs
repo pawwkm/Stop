@@ -33,26 +33,17 @@ namespace Stop.FileSystems
         {
             using (var disk = new DiskStream(1))
             {
-                //var lol = disk.Seek(2048, SeekOrigin.Begin);
-                //var bytes = Encoding.UTF8.GetBytes("Cock");
+                //disk.Seek(2, SeekOrigin.Begin);
 
-                //disk.Write(bytes, 0, bytes.Length);
+                var bytes = Encoding.UTF8.GetBytes("Cock");
+                var buffer = new byte[512];
 
+                for (int i = 0; i < bytes.Length; i++)
+                    buffer[i] = bytes[i];
 
-                disk.Seek(0x210, SeekOrigin.Begin);
+                buffer[511] = 0xDD;
 
-                var block = new byte[512];
-                disk.Read(block, 0, 512);
-
-                File.WriteAllBytes("D:\\Dump.bin", block);
-
-                //var bytes = Encoding.UTF8.GetBytes("Cock");
-                //var buffer = new byte[512];
-
-                //for (int i = 0; i < bytes.Length; i++)
-                //    buffer[i] = bytes[i];
-
-                //disk.Write(buffer, 0, buffer.Length);
+                disk.Write(buffer, 0, buffer.Length);
             }
         }
     }
