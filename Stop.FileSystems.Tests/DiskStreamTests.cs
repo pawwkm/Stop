@@ -33,7 +33,7 @@ namespace Stop.FileSystems
         {
             using (var disk = new DiskStream(1))
             {
-                //disk.Seek(2, SeekOrigin.Begin);
+                disk.Seek(2, SeekOrigin.Begin);
 
                 var bytes = Encoding.UTF8.GetBytes("Cock");
                 var buffer = new byte[512];

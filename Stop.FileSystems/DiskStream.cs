@@ -32,7 +32,7 @@ namespace Stop.FileSystems
             if (name == null)
                 throw new ArgumentException("There is no physical drive with the given number.", nameof(physicalDrive));
 
-            UnmountVolumes(physicalDrive);
+            HandleVolumes(physicalDrive);
 
             handle = Kernel32.CreateFile(name, EFileAccess.GenericAll, EFileShare.None, IntPtr.Zero, ECreationDisposition.OpenExisting, EFileAttributes.Normal, IntPtr.Zero);
             Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
@@ -320,10 +320,11 @@ namespace Stop.FileSystems
         }
 
         /// <summary>
-        /// Unmounts all the drives on a physical disk.
+        /// Circumvents Windows' protection of the disk if there is 
+        /// a known file system on it.
         /// </summary>
         /// <param name="number">The number of the physical disk.</param>
-        private static void UnmountVolumes(int number)
+        private static void HandleVolumes(int number)
         {
             foreach (var letter in GetDriveLettersFrom(number))
             {
@@ -333,6 +334,12 @@ namespace Stop.FileSystems
                 Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
 
                 uint bytesReturned = 0;
+                Kernel32.DeviceIoControl(handle, EIOControlCode.FsctlLockVolume, null, 0, null, 0, ref bytesReturned, IntPtr.Zero);
+                Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
+
+                Kernel32.DeviceIoControl(handle, EIOControlCode.FsctlAllowExtendedDasdIo, null, 0, null, 0, ref bytesReturned, IntPtr.Zero);
+                Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
+
                 Kernel32.DeviceIoControl(handle, EIOControlCode.FsctlDismountVolume, null, 0, null, 0, ref bytesReturned, IntPtr.Zero);
                 Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
 
