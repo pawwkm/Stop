@@ -181,7 +181,7 @@ namespace Stop.FileSystems.Fat32
         }
 
         /// <summary>
-        /// The number of fat structures on the volume.
+        /// The number of fat structures on the disk.
         /// Some operating systems may not recognize the 
         /// disk if this number is not 2.
         /// </summary>
@@ -204,7 +204,7 @@ namespace Stop.FileSystems.Fat32
         }
 
         /// <summary>
-        /// The number of sectors per track. This is only relavent for
+        /// The number of sectors per track. This is only relevant for
         /// media that has geometri.
         /// </summary>
         public ushort SectorsPerTrack
@@ -220,7 +220,7 @@ namespace Stop.FileSystems.Fat32
         }
 
         /// <summary>
-        /// The number of heads. This is only relavent for
+        /// The number of heads on the media. This is only relavent for
         /// media that has geometri.
         /// </summary>
         public ushort Heads
@@ -496,6 +496,17 @@ namespace Stop.FileSystems.Fat32
                         systemType = Encoding.ASCII.GetBytes(Fat32);
                         break;
                 }
+            }
+        }
+
+        /// <summary>
+        /// The number of bytes in a cluster.
+        /// </summary>
+        public uint BytesPerCluster
+        {
+            get
+            {
+                return (uint)(SectorsPerCluster * BytesPerSector);
             }
         }
     }

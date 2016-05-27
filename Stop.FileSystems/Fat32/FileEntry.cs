@@ -42,7 +42,16 @@ namespace Stop.FileSystems.Fat32
         {
             get
             {
-                return Encoding.ASCII.GetString(shortName);
+                if (Attributes.HasFlag(FileAttributes.Directory))
+                    return Encoding.ASCII.GetString(shortName).Trim(' ');
+
+                string name = Encoding.ASCII.GetString(shortName, 0, 8).Trim(' ');
+                string extension = Encoding.ASCII.GetString(shortName, 8, 3).TrimEnd(' ');
+
+                if (extension.Length == 0)
+                    return name;
+
+                return name + '.' + extension;
             }
         }
 
@@ -169,7 +178,7 @@ namespace Stop.FileSystems.Fat32
         {
             get
             {
-                return (uint)(firstClusterHigh << 16 | (firstClusterLow & 0x0000FFFF));
+                return (uint)(firstClusterHigh << 16 | firstClusterLow);
             }
             set
             {

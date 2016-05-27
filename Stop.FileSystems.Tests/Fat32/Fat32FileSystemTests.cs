@@ -22,7 +22,8 @@ namespace Stop.FileSystems.Fat32
             using (var file = File.Open("D:\\Fat32.bin", FileMode.Open))
             {
                 var system = new Fat32FileSystem(file);
-                Assert.True(system.Exist("F:\\ReadMe.txt"));
+                Assert.True(system.Exist("ReadMe.txt"));
+                Assert.True(system.Exist("Psx\\1.13\\unicows_license.txt"));
             }
         }
     }
