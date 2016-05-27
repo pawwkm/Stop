@@ -168,7 +168,7 @@ namespace Stop.FileSystems
         /// <paramref name="path"/> is null.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
-        /// If the given <paramref name="path"/> is to a directory and it doesn't exist
+        /// If the given <paramref name="path"/> contains a directory that doesn't exist
         /// </exception>
         /// <exception cref="FileNotFoundException">
         /// If the given <paramref name="path"/> is to a file and it doesn't exist

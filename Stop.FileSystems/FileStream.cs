@@ -16,6 +16,17 @@ namespace Stop.FileSystems
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="FileStream"/> class.
+        /// </summary>
+        /// <param name="buffer">The content of the file.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="buffer"/> is null.
+        /// </exception>
+        public FileStream(byte[] buffer) : base(buffer)
+        {
+        }
+
+        /// <summary>
         /// Occurs when the file has been flushed.
         /// </summary>
         public event EventHandler AfterFlush;

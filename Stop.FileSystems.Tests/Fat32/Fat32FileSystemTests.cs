@@ -23,7 +23,15 @@ namespace Stop.FileSystems.Fat32
             {
                 var system = new Fat32FileSystem(file);
                 Assert.True(system.Exist("ReadMe.txt"));
-                Assert.True(system.Exist("Psx\\1.13\\unicows_license.txt"));
+                using (var stream = system.Open("ReadMe.txt"))
+                {
+                    using (var dump = File.Create("D:\\Dump.txt"))
+                    {
+                        stream.CopyTo(dump);
+                        dump.Flush(true);
+                    }
+                }
+                
             }
         }
     }

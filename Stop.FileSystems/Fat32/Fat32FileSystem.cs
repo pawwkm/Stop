@@ -30,6 +30,17 @@ namespace Stop.FileSystems.Fat32
         }
 
         /// <summary>
+        /// The first sector that files and directories are stored.
+        /// </summary>
+        private uint FirstDataSector
+        {
+            get
+            {
+                return boot.ReservedSectors + (boot.Fats * boot.FatSize);
+            }
+        }
+
+        /// <summary>
         /// Checks if a directory or file exists in the file system.
         /// </summary>
         /// <param name="path">The path of the directory or file.</param>
@@ -46,29 +57,53 @@ namespace Stop.FileSystems.Fat32
         }
 
         /// <summary>
-        /// Finds all file entries in the root directory.
+        /// Opens the file specified by the given <paramref name="path"/>.
         /// </summary>
-        /// <returns>All file entries in the root directory.</returns>
-        private IEnumerable<FileEntry> GetFileEntriesInRoot()
+        /// <param name="path">The path of the file to open.</param>
+        /// <returns>The opened file stream.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="path"/> is null.
+        /// </exception>
+        /// <exception cref="DirectoryNotFoundException">
+        /// If the given <paramref name="path"/> contains a directory that doesn't exist
+        /// </exception>
+        /// <exception cref="FileNotFoundException">
+        /// If the given <paramref name="path"/> is to a file and it doesn't exist
+        /// </exception>
+        public override Stream Open(string path)
         {
-            uint start = FirstDataSector * boot.BytesPerSector;
-            for (uint i = start; i < start + boot.BytesPerCluster; i += 32)
-            {
-                FileEntry entry = ReadStructure<FileEntry>(i);
-                if (!entry.IsThereMoreEntriesInThisFile)
-                    break;
+            FileEntry entry = FindEntry(path);
+            if (entry == null)
+                throw new FileNotFoundException("The file doesn't exist.", nameof(path));
 
-                yield return entry;
-            }
+            return new FileStream(GetFileData(entry));
         }
 
+        /// <summary>
+        /// Finds the entry with the given <paramref name="path"/>.
+        /// </summary>
+        /// <param name="path">The path to the entry.</param>
+        /// <returns>The entry if it exists; otherwise null.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="path"/> is null.
+        /// </exception>
         private FileEntry FindEntry(string path)
         {
-            string[] parts = path.ToLower().Split('\\');            
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+
+            string[] parts = path.ToLower().Split('\\');
 
             return FindEntry(boot.RootCluster, parts, path.EndsWith("\\"));
         }
 
+        /// <summary>
+        /// Finds the entry of a file or directory.
+        /// </summary>
+        /// <param name="firstCluster">The first cluster to search.</param>
+        /// <param name="parts">The parts of the path.</param>
+        /// <param name="isDirectory">True if the expected entry is a directory.</param>
+        /// <returns>The entry if it exists; otherwise null.</returns>
         private FileEntry FindEntry(uint firstCluster, string[] parts, bool isDirectory)
         {
             foreach (FileEntry entry in GetEntriesInClusterChain(firstCluster))
@@ -107,6 +142,10 @@ namespace Stop.FileSystems.Fat32
             return null;
         }
 
+        /// <summary>
+        /// Reads the long name at the current position.
+        /// </summary>
+        /// <returns>The long name at the current position.</returns>
         private string ReadLongName()
         {
             LongFileEntry first = ReadStructure<LongFileEntry>(Source.Position);
@@ -121,61 +160,6 @@ namespace Stop.FileSystems.Fat32
             return name;
         }
 
-        //private FileEntry FindEntry(string path)
-        //{
-        //    string[] parts = path.Split('/');
-        //    foreach (var entry in GetFileEntriesInRoot())
-        //    {
-        //        FileEntry e = FindEntry(entry, parts);
-        //        if (e != null)
-        //            return e;
-        //    }
-
-        //    return null;
-        //}
-
-        //private FileEntry FindEntry(FileEntry file, string[] parts)
-        //{
-        //    string part = "";
-        //    foreach (var entry in GetEntriesInClusterChain(file.FirstCluster))
-        //    {
-        //        if (entry.Attributes == FileAttributes.LongName)
-        //        {
-        //            LongFileEntry first = ReadStructure<LongFileEntry>(Source.Position - 32);
-        //            part = first.Name;
-
-        //            for (int i = 0; i < first.NumberOfLongEntriesFollowing - 1; i++)
-        //            {
-        //                LongFileEntry next = ReadStructure<LongFileEntry>(Source.Position);
-        //                part += next.Name;
-        //            }
-        //        }
-        //        else if (parts[0] == part)
-        //        {
-        //            FileEntry e = ReadStructure<FileEntry>(Source.Position);
-        //            if (parts.Length == 1)
-        //                return e;
-
-        //            return FindEntry(e, parts.Skip(1).ToArray());
-        //        }
-        //        else
-        //            part = "";
-        //    }
-
-        //    return null;
-        //}
-
-        /// <summary>
-        /// The first sector that files and directories are stored.
-        /// </summary>
-        private uint FirstDataSector
-        {
-            get
-            {
-                return boot.ReservedSectors + (boot.Fats * boot.FatSize); 
-            }
-        }
-
         /// <summary>
         /// Calculates the first sector the given <paramref name="cluster"/>.
         /// </summary>
@@ -186,6 +170,11 @@ namespace Stop.FileSystems.Fat32
             return ((cluster - 2) * boot.SectorsPerCluster) + FirstDataSector;
         }
 
+        /// <summary>
+        /// Gets all entries in a cluster chain.
+        /// </summary>
+        /// <param name="firstCluster">The first cluster in the chain.</param>
+        /// <returns>All entries in a cluster chain.</returns>
         private IEnumerable<FileEntry> GetEntriesInClusterChain(uint firstCluster)
         {
             foreach (uint cluster in GetClusterChain(firstCluster))
@@ -196,6 +185,41 @@ namespace Stop.FileSystems.Fat32
             }
         }
 
+        /// <summary>
+        /// Gets the data of a file.
+        /// </summary>
+        /// <param name="entry">The file entry of the file.</param>
+        /// <returns>The bytes of the file.</returns>
+        private byte[] GetFileData(FileEntry entry)
+        {
+            byte[] bytes = new byte[entry.FileSize];
+            uint amount = entry.FileSize;
+            int count = 0;
+
+            foreach (uint cluster in GetClusterChain(entry.FirstCluster))
+            {
+                uint start = FirstSectorOfCluster(cluster) * boot.BytesPerSector;
+                byte[] chunk = ReadData(start, boot.BytesPerCluster);
+
+                uint size = amount > boot.BytesPerCluster ? boot.BytesPerCluster : amount;
+                Buffer.BlockCopy(chunk, 0, bytes, count * (int)boot.BytesPerCluster, (int)size);
+
+                if (amount - boot.BytesPerCluster <= 0)
+                    break;
+
+                amount -= boot.BytesPerCluster;
+            }
+
+            return bytes;
+        }
+
+        /// <summary>
+        /// Gets a cluster chain.
+        /// </summary>
+        /// <param name="firstCluster">The first cluster in chain.</param>
+        /// <returns>
+        /// <paramref name="firstCluster"/> then the clusters following that one, if any.
+        /// </returns>
         private IEnumerable<uint> GetClusterChain(uint firstCluster)
         {
             yield return firstCluster;

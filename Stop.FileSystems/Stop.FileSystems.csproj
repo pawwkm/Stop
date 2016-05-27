@@ -60,7 +60,6 @@
     <Compile Include="NativeMethods.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="Partition.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Structures.cs" />
     <Compile Include="Fat32\SystemType.cs" />
