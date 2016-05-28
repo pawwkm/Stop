@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Pote;
 
 namespace Stop.FileSystems.Fat32
 {
@@ -13,6 +12,8 @@ namespace Stop.FileSystems.Fat32
     public class Fat32FileSystem : FileSystem
     {
         private BootSector boot;
+
+        private FileSystemInfo info;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Fat32FileSystem"/> class.
@@ -27,6 +28,10 @@ namespace Stop.FileSystems.Fat32
         public Fat32FileSystem(Stream stream) : base(stream)
         {
             boot = ReadStructure<BootSector>(0);
+            info = ReadStructure<FileSystemInfo>(boot.FileSystemInfoSector * boot.BytesPerSector);
+
+            if (!info.IsFileSystemInfo)
+                throw new ArgumentException("File System Info is corrupted.", nameof(stream));
         }
 
         /// <summary>
@@ -80,6 +85,93 @@ namespace Stop.FileSystems.Fat32
         }
 
         /// <summary>
+        /// Creates a file or a directory in the file system.
+        /// </summary>
+        /// <param name="path">The path to the new file or directory.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="path"/> is null.
+        /// </exception>
+        public override void Create(string path)
+        {
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+
+            if (Exist(path))
+                throw new ArgumentException("A file or directory with the same name exists.", nameof(path));
+
+            bool isDirectory = path.EndsWith("\\");
+            string[] parts = path.Split('\\');
+
+            if (parts.Length > 1)
+            {
+                for (int i = 0; i < parts.Length - 1; i++)
+                {
+                    string p = string.Join("\\", parts, 0, i) + '\\';
+                    if (!Exist(p))
+                        Create(p);
+                }
+            }
+
+            uint cluster = 0;
+            uint firstClusterOfParent = 0;
+
+            if (parts.Length > 1)
+            {
+                string parent = string.Join("\\", parts, 0, parts.Length - 1) + '\\';
+
+                firstClusterOfParent = FindEntry(parent).FirstCluster;
+                cluster = GetClusterChain(firstClusterOfParent).Last();
+            }
+            else
+            {
+                firstClusterOfParent = boot.RootCluster;
+                cluster = GetClusterChain(boot.RootCluster).Last();
+            }
+
+            if (IsClusterFull(cluster))
+                cluster = GetFreeCluster();
+
+            FileEntry entry = new FileEntry();
+            if (isDirectory)
+            {
+                entry.Attributes = FileAttributes.Directory;
+                entry.FirstCluster = GetFreeCluster();
+
+                FileEntry dot = new FileEntry();
+                dot.FirstCluster = entry.FirstCluster;
+                dot.Attributes = FileAttributes.Directory;
+
+                FileEntry dotdot = new FileEntry();
+                dotdot.Attributes = FileAttributes.Directory;
+                dotdot.FirstCluster = firstClusterOfParent;
+
+                Write(dot, entry.FirstCluster, 0);
+                Write(dotdot, entry.FirstCluster, 32);
+            }
+
+            entry.ShortName = parts.Last();
+
+            uint offset = (uint)GetSpaceOffsetForEntryInCluster(cluster);
+            Write(entry, cluster, offset);
+        }
+
+        /// <summary>
+        /// Writes an entry to the disk.
+        /// </summary>
+        /// <param name="entry">The entry to write down.</param>
+        /// <param name="cluster">The cluster the entry is written into.</param>
+        /// <param name="offset">The offset from the beginning cluster, in bytes.</param>
+        private void Write(FileEntry entry, uint cluster, uint offset)
+        {
+            uint position = FirstSectorOfCluster(cluster) * boot.BytesPerSector + offset;
+            int value = Source.ReadByte();
+
+            WriteStructure(position, entry);
+            if (value == 0)
+                Source.WriteByte(0);
+        }
+
+        /// <summary>
         /// Finds the entry with the given <paramref name="path"/>.
         /// </summary>
         /// <param name="path">The path to the entry.</param>
@@ -92,9 +184,13 @@ namespace Stop.FileSystems.Fat32
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
 
-            string[] parts = path.ToLower().Split('\\');
+            bool isDirectory = path.EndsWith("\\");
+            string[] parts = path.ToUpper().Split('\\');
 
-            return FindEntry(boot.RootCluster, parts, path.EndsWith("\\"));
+            if (isDirectory)
+                parts = parts.Take(parts.Length - 1).ToArray();
+
+            return FindEntry(boot.RootCluster, parts, isDirectory);
         }
 
         /// <summary>
@@ -108,56 +204,32 @@ namespace Stop.FileSystems.Fat32
         {
             foreach (FileEntry entry in GetEntriesInClusterChain(firstCluster))
             {
-                if (!entry.Attributes.HasFlag(FileAttributes.LongName))
+                if (entry.Attributes.HasFlag(FileAttributes.LongName))
+                    continue;
+                if (entry.Attributes.HasFlag(FileAttributes.VolumeId))
                     continue;
 
-                Source.Position -= 32;
-                string name = ReadLongName().ToLower();
-
-                FileEntry e = ReadStructure<FileEntry>(Source.Position);
-                if (e.Attributes.HasFlag(FileAttributes.Directory))
+                if (entry.Attributes.HasFlag(FileAttributes.Directory))
                 {
-                    if (name != parts[0])
+                    if (entry.ShortName != parts[0] || !isDirectory)
                         continue;
 
-                    if (parts.Length > 1)
-                    {
-                        FileEntry result = FindEntry(e.FirstCluster, parts.Skip(1).ToArray(), isDirectory);
-                        if (result != null)
-                            return result;
-                    }
-                    else if (!isDirectory)
-                        return e;
+                    if (parts.Length == 1)
+                        return entry;
+
+                    return FindEntry(entry.FirstCluster, parts.Skip(1).ToArray(), isDirectory);
                 }
                 else
                 {
                     if (isDirectory)
                         continue;
 
-                    if (parts.Length == 1 && name == parts[0])
-                        return e;
+                    if (parts.Length == 1 && entry.ShortName == parts[0])
+                        return entry;
                 }
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Reads the long name at the current position.
-        /// </summary>
-        /// <returns>The long name at the current position.</returns>
-        private string ReadLongName()
-        {
-            LongFileEntry first = ReadStructure<LongFileEntry>(Source.Position);
-
-            string name = first.Name;
-            for (int i = 0; i < first.NumberOfLongEntriesFollowing - 1; i++)
-            {
-                LongFileEntry next = ReadStructure<LongFileEntry>(Source.Position);
-                name += next.Name;
-            }
-
-            return name;
         }
 
         /// <summary>
@@ -232,12 +304,74 @@ namespace Stop.FileSystems.Fat32
 
                 Source.Read(bytes, 0, bytes.Length);
 
-                cluster = BitConverter.ToUInt16(bytes, 0);
+                cluster = BitConverter.ToUInt32(bytes, 0);
                 if (cluster == 0)
                     break;
 
                 yield return cluster;
             }
+        }
+
+        /// <summary>
+        /// Checks if a cluster is full.
+        /// </summary>
+        /// <param name="cluster">The cluster to check.</param>
+        /// <returns>True if the <paramref name="cluster"/>; otherwise false.</returns>
+        private bool IsClusterFull(uint cluster)
+        {
+            return GetSpaceOffsetForEntryInCluster(cluster) == -1;
+        }
+
+        private int GetSpaceOffsetForEntryInCluster(uint cluster)
+        {
+            uint start = FirstSectorOfCluster(cluster) * boot.BytesPerSector;
+            uint end = start + boot.BytesPerCluster;
+            
+            for (uint i = start; i < end; i += 32)
+            {
+                Source.Position = i;
+                byte value = (byte)Source.ReadByte();
+
+                if (value.IsOneOf(0, 0xE5))
+                    return (int)(i - start);
+            }
+
+            return -1;
+        }
+
+        /// <summary>
+        /// Gets a free cluster.
+        /// </summary>
+        /// <returns>A free cluster.</returns>
+        private uint GetFreeCluster()
+        {
+            uint freeCluster = info.NextFreeCluster;
+            info.LastFreeCluster = info.NextFreeCluster;
+
+            // Start looking at cluster 2.
+            Source.Position = boot.ReservedSectors + 2 * 4 / boot.BytesPerSector;
+            byte[] bytes = new byte[4];
+
+            do
+            {
+                Source.Read(bytes, 0, bytes.Length);
+                info.NextFreeCluster = BitConverter.ToUInt32(bytes, 0);
+
+                if (info.NextFreeCluster >= 0x0FFFFFF8)
+                    break;
+            }
+            while (info.NextFreeCluster != 0x0FFFFFF8);
+
+            return freeCluster;
+        }
+
+        /// <summary>
+        /// Writes crucial structures to disk.
+        /// </summary>
+        ~Fat32FileSystem()
+        {
+            WriteStructure(0, boot);
+            WriteStructure(boot.FileSystemInfoSector * boot.BytesPerSector, info);
         }
     }
 }

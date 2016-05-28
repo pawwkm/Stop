@@ -54,7 +54,7 @@
     <Compile Include="Fat32\FileEntry.cs" />
     <Compile Include="Fat32\Fat32FileSystem.cs" />
     <Compile Include="Fat32\BootSector.cs" />
-    <Compile Include="Fat32\LongFileEntry.cs" />
+    <Compile Include="Fat32\FileSystemInfo.cs" />
     <Compile Include="FileStream.cs" />
     <Compile Include="FileSystem.cs" />
     <Compile Include="NativeMethods.cs">

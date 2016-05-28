@@ -38,6 +38,18 @@ namespace Stop.FileSystems.Fat32
 
         private uint fileSize;
 
+        /// <summary>
+        /// The short name of the file entry.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="value"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="value"/> is longer than 11 excluding the dot.
+        /// </exception>
+        /// <remarks>
+        /// Long names are not supported!
+        /// </remarks>
         public string ShortName
         {
             get
@@ -52,6 +64,33 @@ namespace Stop.FileSystems.Fat32
                     return name;
 
                 return name + '.' + extension;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException(nameof(value));
+
+                if (value.Length > 11 && value.Length != 12 && value[7] != '.')
+                    throw new ArgumentOutOfRangeException(nameof(value));
+
+                byte[] bytes;
+
+                int dotIndex = value.IndexOf(".");
+                if (dotIndex == -1)
+                    bytes = Encoding.ASCII.GetBytes(value);
+                else
+                {
+                    string name = value.Substring(0, dotIndex);
+                    name = name.PadRight(8, ' ');
+                    name += value.Substring(dotIndex + 1);
+                    name = name.PadRight(11, ' ');
+
+                    bytes = Encoding.ASCII.GetBytes(name.ToUpper());
+                }
+
+                Buffer.BlockCopy(bytes, 0, shortName, 0, bytes.Length);
+                for (int i = value.Length; i < 11; i++)
+                    shortName[i] = 0x20; // Ascii space.
             }
         }
 
