@@ -11,10 +11,27 @@ namespace Stop.FileSystems.Fat32
     /// </summary>
     public class Fat32FileSystem : FileSystem
     {
+        private class PathSegment
+        {
+            public string Name
+            {
+                get;
+                set;
+            }
+
+            public bool IsDirectory
+            {
+                get;
+                set;
+            }
+        }
+
         private BootSector boot;
 
         private FileSystemInfo info;
 
+        private List<Fat32FileStream> openedFiles = new List<Fat32FileStream>();
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="Fat32FileSystem"/> class.
         /// </summary>
@@ -77,11 +94,23 @@ namespace Stop.FileSystems.Fat32
         /// </exception>
         public override Stream Open(string path)
         {
-            FileEntry entry = FindEntry(path);
-            if (entry == null)
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+
+            if (!Exist(path))
                 throw new FileNotFoundException("The file doesn't exist.", nameof(path));
 
-            return new FileStream(GetFileData(entry));
+            FileEntry entry = FindEntry(path);
+            long position = Source.Position - 32;
+            byte[] data = GetFileData(entry);
+
+            Fat32FileStream stream = new Fat32FileStream(data, entry, position);
+            stream.AfterFlush += Flush;
+            stream.AfterClose += Close;
+
+            openedFiles.Add(stream);
+
+            return stream;
         }
 
         /// <summary>
@@ -181,13 +210,26 @@ namespace Stop.FileSystems.Fat32
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
 
-            bool isDirectory = path.EndsWith("\\");
-            string[] parts = path.ToUpper().Split('\\');
+            List<PathSegment> segments = new List<PathSegment>();
+            string[] parts = path.Split('\\');
+            
+            for (int i = 0; i < parts.Length; i++)
+            {
+                PathSegment segment = new PathSegment();
+                segment.Name = FileEntry.ToShortName(parts[i]);
 
-            if (isDirectory)
-                parts = parts.Take(parts.Length - 1).ToArray();
+                if (i == parts.Length - 1)
+                {
+                    if (path.EndsWith("\\"))
+                        segment.IsDirectory = true;
+                }
+                else
+                    segment.IsDirectory = true;
 
-            return FindEntry(boot.RootCluster, parts, isDirectory);
+                segments.Add(segment);
+            }
+
+            return FindEntry(boot.RootCluster, segments);
         }
 
         /// <summary>
@@ -208,7 +250,7 @@ namespace Stop.FileSystems.Fat32
 
                 if (entry.Attributes.HasFlag(FileAttributes.Directory))
                 {
-                    if (entry.ShortName != parts[0] || !isDirectory)
+                    if (entry.ShortName != FileEntry.ToShortName(parts[0]) || !isDirectory)
                         continue;
 
                     if (parts.Length == 1)
@@ -221,7 +263,39 @@ namespace Stop.FileSystems.Fat32
                     if (isDirectory)
                         continue;
 
-                    if (parts.Length == 1 && entry.ShortName == parts[0])
+                    if (parts.Length == 1 && entry.ShortName == FileEntry.ToShortName(parts[0]))
+                        return entry;
+                }
+            }
+
+            return null;
+        }
+
+        private FileEntry FindEntry(uint firstCluster, List<PathSegment> segments)
+        {
+            foreach (FileEntry entry in GetEntriesInClusterChain(firstCluster))
+            {
+                if (entry.Attributes.HasFlag(FileAttributes.LongName))
+                    continue;
+                if (entry.Attributes.HasFlag(FileAttributes.VolumeId))
+                    continue;
+
+                if (entry.Attributes.HasFlag(FileAttributes.Directory))
+                {
+                    if (entry.ShortName != segments[0].Name || !segments[0].IsDirectory)
+                        continue;
+
+                    if (segments.Count == 1)
+                        return entry;
+
+                    return FindEntry(entry.FirstCluster, segments.Skip(1).ToList());
+                }
+                else
+                {
+                    if (segments[0].IsDirectory)
+                        continue;
+
+                    if (segments.Count == 1 && entry.ShortName == segments[0].Name)
                         return entry;
                 }
             }
@@ -268,15 +342,13 @@ namespace Stop.FileSystems.Fat32
             foreach (uint cluster in GetClusterChain(entry.FirstCluster))
             {
                 uint start = FirstSectorOfCluster(cluster) * boot.BytesPerSector;
-                byte[] chunk = ReadData(start, boot.BytesPerCluster);
-
                 uint size = amount > boot.BytesPerCluster ? boot.BytesPerCluster : amount;
-                Buffer.BlockCopy(chunk, 0, bytes, count * (int)boot.BytesPerCluster, (int)size);
 
-                if (amount - boot.BytesPerCluster <= 0)
-                    break;
+                Source.Position = start;
 
+                Source.Read(bytes, count * (int)boot.BytesPerCluster, (int)size);
                 amount -= boot.BytesPerCluster;
+                count++;
             }
 
             return bytes;
@@ -291,21 +363,17 @@ namespace Stop.FileSystems.Fat32
         /// </returns>
         private IEnumerable<uint> GetClusterChain(uint firstCluster)
         {
-            yield return firstCluster;
-
             uint cluster = firstCluster;
-            while (cluster != 0)
+            while (cluster < 0x0FFFFFF8 && cluster != 0)
             {
+                yield return cluster;
+
                 Source.Position = boot.ReservedSectors + cluster * 4 / boot.BytesPerSector;
                 byte[] bytes = new byte[4];
 
                 Source.Read(bytes, 0, bytes.Length);
 
-                cluster = BitConverter.ToUInt32(bytes, 0);
-                if (cluster == 0)
-                    break;
-
-                yield return cluster;
+                cluster = BitConverter.ToUInt32(bytes, 0) & 0x0FFFFFFF;
             }
         }
 
@@ -349,8 +417,12 @@ namespace Stop.FileSystems.Fat32
         /// <summary>
         /// Gets a free cluster.
         /// </summary>
+        /// <param name="previousCluster">
+        /// The cluster that points to the new free cluster.
+        /// The cluster chain is not updated if this is negative.
+        /// </param>
         /// <returns>A free cluster.</returns>
-        private uint GetFreeCluster()
+        private uint GetFreeCluster(long previousCluster = -1)
         {
             uint freeCluster = info.NextFreeCluster;
             info.LastFreeCluster = info.NextFreeCluster;
@@ -362,14 +434,77 @@ namespace Stop.FileSystems.Fat32
             do
             {
                 Source.Read(bytes, 0, bytes.Length);
-                info.NextFreeCluster = BitConverter.ToUInt32(bytes, 0);
-
-                if (info.NextFreeCluster >= 0x0FFFFFF8)
-                    break;
+                info.NextFreeCluster = BitConverter.ToUInt32(bytes, 0) & 0x0FFFFFFF;
             }
-            while (info.NextFreeCluster != 0x0FFFFFF8);
+            while (info.NextFreeCluster != 0);
+
+            if (previousCluster >= 0)
+            {
+                Source.Position = boot.ReservedSectors + previousCluster * 4 / boot.BytesPerSector;
+                bytes = BitConverter.GetBytes(freeCluster);
+
+                Source.Write(bytes, 0, bytes.Length);
+            }
 
             return freeCluster;
+        }
+
+        /// <summary>
+        /// Flushes a file's contents.
+        /// </summary>
+        /// <param name="sender">The file to flush.</param>
+        /// <param name="e">This is not used.</param>
+        /// <exception cref="InvalidOperationException">
+        /// The file has been closed.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// Overriding contents not supported.
+        /// </exception>
+        private void Flush(object sender, EventArgs e)
+        {
+            Fat32FileStream file = sender as Fat32FileStream;
+            if (!openedFiles.Contains(file))
+                throw new InvalidOperationException("The file has been closed.");
+
+            if (file.Entry.FileSize != 0)
+                throw new NotSupportedException("Overriding contents not supported.");
+
+            file.Entry.FileSize = (uint)file.Length;
+            file.Position = 0;
+
+            byte[] buffer = new byte[boot.BytesPerCluster];
+            long cluster = -1;
+
+            while (file.Position != file.Length)
+            {
+                cluster = GetFreeCluster(cluster);
+                if (file.Position == 0)
+                    file.Entry.FirstCluster = (uint)cluster;
+
+                Source.Position = FirstSectorOfCluster((uint)cluster) * boot.BytesPerSector;
+
+                int bytesRead = file.Read(buffer, 0, buffer.Length);
+                Source.Write(buffer, 0, buffer.Length);
+            }
+        }
+
+        /// <summary>
+        /// Closes a file.
+        /// </summary>
+        /// <param name="sender">The file to flush.</param>
+        /// <param name="e">This is not used.</param>
+        /// <exception cref="InvalidOperationException">
+        /// The file has already been closed.
+        /// </exception>
+        private void Close(object sender, EventArgs e)
+        {
+            Fat32FileStream stream = sender as Fat32FileStream;
+            if (!openedFiles.Contains(stream))
+                throw new InvalidOperationException("The file has already been closed.");
+
+            WriteStructure(stream.Offset, stream.Entry);
+
+            openedFiles.Remove(stream);
         }
 
         /// <summary>

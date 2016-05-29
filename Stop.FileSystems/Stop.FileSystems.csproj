@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DiskStream.cs" />
+    <Compile Include="Fat32\Fat32FileStream.cs" />
     <Compile Include="Fat32\FileAttributes.cs" />
     <Compile Include="Fat32\FileEntry.cs" />
     <Compile Include="Fat32\Fat32FileSystem.cs" />

@@ -54,43 +54,15 @@ namespace Stop.FileSystems.Fat32
         {
             get
             {
-                if (Attributes.HasFlag(FileAttributes.Directory))
-                    return Encoding.ASCII.GetString(shortName).Trim(' ');
-
-                string name = Encoding.ASCII.GetString(shortName, 0, 8).Trim(' ');
-                string extension = Encoding.ASCII.GetString(shortName, 8, 3).TrimEnd(' ');
-
-                if (extension.Length == 0)
-                    return name;
-
-                return name + '.' + extension;
+                return Encoding.ASCII.GetString(shortName);
             }
             set
             {
                 if (value == null)
                     throw new ArgumentNullException(nameof(value));
 
-                if (value.Length > 11 && value.Length != 12 && value[7] != '.')
-                    throw new ArgumentOutOfRangeException(nameof(value));
-
-                byte[] bytes;
-
-                int dotIndex = value.IndexOf(".");
-                if (dotIndex == -1)
-                    bytes = Encoding.ASCII.GetBytes(value);
-                else
-                {
-                    string name = value.Substring(0, dotIndex);
-                    name = name.PadRight(8, ' ');
-                    name += value.Substring(dotIndex + 1);
-                    name = name.PadRight(11, ' ');
-
-                    bytes = Encoding.ASCII.GetBytes(name.ToUpper());
-                }
-
+                byte[] bytes = Encoding.ASCII.GetBytes(ToShortName(value));
                 Buffer.BlockCopy(bytes, 0, shortName, 0, bytes.Length);
-                for (int i = value.Length; i < 11; i++)
-                    shortName[i] = 0x20; // Ascii space.
             }
         }
 
@@ -217,12 +189,14 @@ namespace Stop.FileSystems.Fat32
         {
             get
             {
-                return (uint)(firstClusterHigh << 16 | firstClusterLow);
+                int original = (firstClusterHigh << 16) | (firstClusterLow & 0xffff);
+
+                return (uint)original;
             }
             set
             {
-                firstClusterHigh = (ushort)(value & 0xFFFF0000);
-                firstClusterLow = (ushort)(value & 0x0000FFFF);
+                firstClusterHigh = (ushort)(value >> 16);
+                firstClusterLow = (ushort)(value & 0xFFFF);
             }
         }
 
@@ -250,6 +224,28 @@ namespace Stop.FileSystems.Fat32
             {
                 return shortName[0] != 0;
             }
+        }
+
+        public static string ToShortName(string name)
+        {
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+
+            if (name.Length > 11 && name.Length != 12 && name[7] != '.')
+                throw new ArgumentOutOfRangeException(nameof(name));
+
+            int dotIndex = name.IndexOf(".");
+
+            if (dotIndex == -1)
+                return name.ToUpper().PadRight(11, ' ');
+
+            string shortName = name.Substring(0, dotIndex);
+            shortName = shortName.PadRight(8, ' ');
+
+            shortName += name.Substring(dotIndex + 1);
+            shortName = shortName.PadRight(11, ' ');
+
+            return shortName.ToUpper();
         }
     }
 }

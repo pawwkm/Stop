@@ -509,5 +509,16 @@ namespace Stop.FileSystems.Fat32
                 return (uint)(SectorsPerCluster * BytesPerSector);
             }
         }
+
+        /// <summary>
+        /// The number of clusters in the FAT.
+        /// </summary>
+        public uint Clusters
+        {
+            get
+            {
+                return FatSize / SectorsPerCluster;
+            }
+        }
     }
 }

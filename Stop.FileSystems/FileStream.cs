@@ -18,12 +18,17 @@ namespace Stop.FileSystems
         /// <summary>
         /// Initializes a new instance of the <see cref="FileStream"/> class.
         /// </summary>
-        /// <param name="buffer">The content of the file.</param>
+        /// <param name="data">The content of the file.</param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="buffer"/> is null.
+        /// <paramref name="data"/> is null.
         /// </exception>
-        public FileStream(byte[] buffer) : base(buffer)
+        public FileStream(byte[] data)
         {
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+
+            Write(data, 0, data.Length);
+            Position = 0;
         }
 
         /// <summary>
