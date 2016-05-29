@@ -123,10 +123,7 @@ namespace Stop.FileSystems.Fat32
                 cluster = GetClusterChain(firstClusterOfParent).Last();
             }
             else
-            {
-                firstClusterOfParent = boot.RootCluster;
                 cluster = GetClusterChain(boot.RootCluster).Last();
-            }
 
             if (IsClusterFull(cluster))
                 cluster = GetFreeCluster();
@@ -322,6 +319,16 @@ namespace Stop.FileSystems.Fat32
             return GetSpaceOffsetForEntryInCluster(cluster) == -1;
         }
 
+        /// <summary>
+        /// Gets the offset where there is a 32 byte chunk of free space
+        /// in the given <paramref name="cluster"/>.
+        /// </summary>
+        /// <param name="cluster">The cluster to search in.</param>
+        /// <returns>
+        /// The offset where there is a 32 byte chunk of free space
+        /// in the given <paramref name="cluster"/> if there is one;
+        /// otherwise -1.
+        /// </returns>
         private int GetSpaceOffsetForEntryInCluster(uint cluster)
         {
             uint start = FirstSectorOfCluster(cluster) * boot.BytesPerSector;
