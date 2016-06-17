@@ -32,6 +32,32 @@ namespace Stop.FileSystems.Fat32
 
         private List<Fat32FileStream> openedFiles = new List<Fat32FileStream>();
         
+        private uint this[uint index]
+        {
+            get
+            {
+                if (index > boot.Clusters - 1)
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                
+                Source.Position = boot.ReservedSectors * boot.BytesPerSector + index * 4;
+
+                byte[] bytes = new byte[4];
+                Source.Read(bytes, 0, bytes.Length);
+
+                return BitConverter.ToUInt32(bytes, 0) & 0x0FFFFFFF;
+            }
+            set
+            {
+                if (index > boot.Clusters - 1)
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                
+                Source.Position = boot.ReservedSectors * boot.BytesPerSector + index * 4;
+
+                byte[] bytes = BitConverter.GetBytes(value);
+                Source.Write(bytes, 0, bytes.Length);
+            }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Fat32FileSystem"/> class.
         /// </summary>
@@ -304,7 +330,7 @@ namespace Stop.FileSystems.Fat32
         }
 
         /// <summary>
-        /// Calculates the first sector the given <paramref name="cluster"/>.
+        /// Calculates the first sector of the given <paramref name="cluster"/>.
         /// </summary>
         /// <param name="cluster">The cluster to find the first sector of.</param>
         /// <returns>The first sector of the <paramref name="cluster"/>.</returns>
@@ -368,12 +394,7 @@ namespace Stop.FileSystems.Fat32
             {
                 yield return cluster;
 
-                Source.Position = boot.ReservedSectors + cluster * 4 / boot.BytesPerSector;
-                byte[] bytes = new byte[4];
-
-                Source.Read(bytes, 0, bytes.Length);
-
-                cluster = BitConverter.ToUInt32(bytes, 0) & 0x0FFFFFFF;
+                cluster = this[cluster];
             }
         }
 
@@ -427,24 +448,18 @@ namespace Stop.FileSystems.Fat32
             uint freeCluster = info.NextFreeCluster;
             info.LastFreeCluster = info.NextFreeCluster;
 
-            // Start looking at cluster 2.
-            Source.Position = boot.ReservedSectors + 2 * 4 / boot.BytesPerSector;
-            byte[] bytes = new byte[4];
-
-            do
+            this[freeCluster] = 0x0FFFFFFF;          // End of chain.
+            for (uint i = 2; i < uint.MaxValue; i++) // Start looking at cluster 2. Cluster 0 and 1 are special.
             {
-                Source.Read(bytes, 0, bytes.Length);
-                info.NextFreeCluster = BitConverter.ToUInt32(bytes, 0) & 0x0FFFFFFF;
+                if (this[i] == 0)
+                {
+                    info.NextFreeCluster = i;
+                    break;
+                }
             }
-            while (info.NextFreeCluster != 0);
 
             if (previousCluster >= 0)
-            {
-                Source.Position = boot.ReservedSectors + previousCluster * 4 / boot.BytesPerSector;
-                bytes = BitConverter.GetBytes(freeCluster);
-
-                Source.Write(bytes, 0, bytes.Length);
-            }
+                this[(uint)previousCluster] = freeCluster;
 
             return freeCluster;
         }
@@ -475,16 +490,26 @@ namespace Stop.FileSystems.Fat32
             byte[] buffer = new byte[boot.BytesPerCluster];
             long cluster = -1;
 
-            while (file.Position != file.Length)
+            using (var chain = File.Create("D:\\Chain.txt"))
             {
-                cluster = GetFreeCluster(cluster);
-                if (file.Position == 0)
-                    file.Entry.FirstCluster = (uint)cluster;
+                using (StreamWriter writer = new StreamWriter(chain))
+                {
+                    while (file.Position != file.Length)
+                    {
+                        cluster = GetFreeCluster(cluster);
+                        if (file.Position == 0)
+                            file.Entry.FirstCluster = (uint)cluster;
 
-                Source.Position = FirstSectorOfCluster((uint)cluster) * boot.BytesPerSector;
+                        Source.Position = FirstSectorOfCluster((uint)cluster) * boot.BytesPerSector;
 
-                int bytesRead = file.Read(buffer, 0, buffer.Length);
-                Source.Write(buffer, 0, buffer.Length);
+                        int bytesRead = file.Read(buffer, 0, buffer.Length);
+                        Source.Write(buffer, 0, buffer.Length);
+
+                        writer.WriteLine(cluster);
+                    }
+
+                    chain.Flush();
+                }
             }
         }
 

@@ -43,7 +43,7 @@ namespace Stop.FileSystems.Fat32
         }
 
         /// <summary>
-        /// Tests that <see cref="Fat32FileSystem"/> can read  a file that was already on the image.
+        /// Tests that <see cref="Fat32FileSystem"/> can read a file that was already on the image.
         /// </summary>
         [Test]
         public void ReadFile()

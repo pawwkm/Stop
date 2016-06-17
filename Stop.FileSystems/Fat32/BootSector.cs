@@ -340,7 +340,7 @@ namespace Stop.FileSystems.Fat32
             }
             set
             {
-
+                rootCluster = value;
             }
         }
 
@@ -517,7 +517,7 @@ namespace Stop.FileSystems.Fat32
         {
             get
             {
-                return FatSize / SectorsPerCluster;
+                return FatSize * BytesPerSector / 4;
             }
         }
     }
