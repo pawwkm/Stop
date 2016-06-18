@@ -6,7 +6,7 @@ namespace Stop.FileSystems.Fat32
     /// The structure pointed to by <see cref="BootSector.FileSystemInfoSector"/>.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 512)]
-    internal class FileSystemInfo
+    public class FileSystemInfo
     {
         private uint leadSignature = 0x41615252;
 

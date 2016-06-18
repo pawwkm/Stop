@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Linq;
 using Pote;
 
 namespace Stop.FileSystems.Fat32
@@ -9,7 +10,7 @@ namespace Stop.FileSystems.Fat32
     /// This is the first sector of a Fat32.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 90)]
-    internal class BootSector
+    public class BootSector
     {
         private const string Fat12 = "FAT12   ";
 
@@ -18,16 +19,16 @@ namespace Stop.FileSystems.Fat32
         private const string Fat32 = "FAT32   ";
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        private byte[] jump;
+        private byte[] jump = { 0xEB, 0x58, 0x90 };
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
         private byte[] oemName = new byte[8];
 
         private ushort bytesPerSector = 512;
 
-        private byte sectorsPerCluster = 32;
+        private byte sectorsPerCluster = 1;
 
-        private ushort reservedSectors = 32;
+        private ushort reservedSectors = 1;
 
         private byte fats = 1;
 
@@ -35,7 +36,7 @@ namespace Stop.FileSystems.Fat32
 
         private ushort sectors16;
 
-        private byte media;
+        private byte media = 0xF8;  // Hard disc.
 
         private ushort fatSize16;
 
@@ -53,9 +54,9 @@ namespace Stop.FileSystems.Fat32
 
         private ushort version;
 
-        private uint rootCluster;
+        private uint rootCluster = 2;
 
-        private ushort fileSystemInfoSector;
+        private ushort fileSystemInfoSector = 1;
 
         private ushort backupBootSector;
 
@@ -68,13 +69,22 @@ namespace Stop.FileSystems.Fat32
 
         private byte bootSignature;
 
-        private uint id;
+        private uint id = (uint)DateTime.Now.Ticks;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 11)]
         private byte[] label = new byte[11];
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
         private byte[] systemType = new byte[8];
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BootSector"/> class.
+        /// </summary>
+        public BootSector()
+        {
+            Label = "Disk";
+            OemName = "MSWIN4.1";
+        }
 
         /// <summary>
         /// This is only a name string that nobody really pays any attention to.
@@ -86,7 +96,11 @@ namespace Stop.FileSystems.Fat32
         {
             get
             {
-                return Encoding.ASCII.GetString(oemName);
+                int index = Array.IndexOf<byte>(oemName, 0);
+                if (index == -1)
+                    return Encoding.ASCII.GetString(oemName);
+
+                return Encoding.ASCII.GetString(oemName.Take(index).ToArray());
             }
             set
             {
@@ -446,7 +460,11 @@ namespace Stop.FileSystems.Fat32
         {
             get
             {
-                return Encoding.ASCII.GetString(label);
+                int index = Array.IndexOf<byte>(label, 0);
+                if (index == -1)
+                    return Encoding.ASCII.GetString(label);
+
+                return Encoding.ASCII.GetString(label.Take(index).ToArray());
             }
             set
             {

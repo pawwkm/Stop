@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Pote;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Pote;
 
 namespace Stop.FileSystems.Fat32
 {
@@ -56,6 +56,58 @@ namespace Stop.FileSystems.Fat32
                 byte[] bytes = BitConverter.GetBytes(value);
                 Source.Write(bytes, 0, bytes.Length);
             }
+        }
+
+        /// <summary>
+        /// Creates Fat32 file system on the <paramref name="stream"/>.
+        /// </summary>
+        /// <param name="stream">The stream the file system is written on.</param>
+        /// <param name="boot">The boot sector of the file system.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="stream"/> or <paramref name="boot"/> is null.
+        /// </exception>
+        public static void Create(Stream stream, BootSector boot)
+        {
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
+            if (boot == null)
+                throw new ArgumentNullException(nameof(boot));
+
+            if (boot.Fats != 1)
+                throw new ArgumentOutOfRangeException(nameof(boot), "This must be 1.");
+
+            byte[] bytes = Structures.ToBytes(boot);
+            stream.Position = 0;
+            stream.Write(bytes, 0, bytes.Length);
+
+            bytes = Structures.ToBytes(new FileSystemInfo());
+            stream.Position = boot.FileSystemInfoSector * boot.BytesPerSector;
+            stream.Write(bytes, 0, bytes.Length);
+
+            FileEntry volume = new FileEntry();
+            volume.ShortName = "SD Card";
+            volume.Attributes = FileAttributes.VolumeId;
+
+            uint firstDataSector = boot.ReservedSectors + (boot.Fats * boot.FatSize);
+            uint firstByteOfRootCluster = ((boot.RootCluster - 2) * boot.SectorsPerCluster) + firstDataSector;
+
+            bytes = Structures.ToBytes(volume);
+            stream.Position = firstByteOfRootCluster;
+            stream.Write(bytes, 0, bytes.Length);
+
+            // Allocate the root cluster.
+            bytes = BitConverter.GetBytes(0xFFFFFFFF);
+            stream.Position = boot.ReservedSectors * boot.BytesPerSector + boot.RootCluster * 4;
+            stream.Write(bytes, 0, bytes.Length);
+
+            // Place signature.
+            bytes = BitConverter.GetBytes((ushort)0xAA55);
+            stream.Position = 510;
+            stream.Write(bytes, 0, bytes.Length);
+
+            // Reach the end of the disk to allocated it.
+            stream.Position = boot.Sectors * boot.BytesPerSector;
+            stream.WriteByte(0);
         }
 
         /// <summary>
@@ -445,23 +497,31 @@ namespace Stop.FileSystems.Fat32
         /// <returns>A free cluster.</returns>
         private uint GetFreeCluster(long previousCluster = -1)
         {
+            if (info.NextFreeCluster == 0xFFFFFFFF)
+                Lol();
+
             uint freeCluster = info.NextFreeCluster;
-            info.LastFreeCluster = info.NextFreeCluster;
+            this[freeCluster] = 0x0FFFFFFF; // End of chain.
 
-            this[freeCluster] = 0x0FFFFFFF;          // End of chain.
-            for (uint i = 2; i < uint.MaxValue; i++) // Start looking at cluster 2. Cluster 0 and 1 are special.
-            {
-                if (this[i] == 0)
-                {
-                    info.NextFreeCluster = i;
-                    break;
-                }
-            }
-
+            Lol();
             if (previousCluster >= 0)
                 this[(uint)previousCluster] = freeCluster;
 
             return freeCluster;
+        }
+
+        private void Lol()
+        {
+            for (uint i = 2; i < uint.MaxValue; i++) // Start looking at cluster 2. Cluster 0 and 1 are special.
+            {
+                if (this[i] == 0)
+                {
+                    info.LastFreeCluster = info.NextFreeCluster;
+                    info.NextFreeCluster = i;
+
+                    return;
+                }
+            }
         }
 
         /// <summary>
@@ -490,26 +550,16 @@ namespace Stop.FileSystems.Fat32
             byte[] buffer = new byte[boot.BytesPerCluster];
             long cluster = -1;
 
-            using (var chain = File.Create("D:\\Chain.txt"))
+            while (file.Position != file.Length)
             {
-                using (StreamWriter writer = new StreamWriter(chain))
-                {
-                    while (file.Position != file.Length)
-                    {
-                        cluster = GetFreeCluster(cluster);
-                        if (file.Position == 0)
-                            file.Entry.FirstCluster = (uint)cluster;
+                cluster = GetFreeCluster(cluster);
+                if (file.Position == 0)
+                    file.Entry.FirstCluster = (uint)cluster;
 
-                        Source.Position = FirstSectorOfCluster((uint)cluster) * boot.BytesPerSector;
+                Source.Position = FirstSectorOfCluster((uint)cluster) * boot.BytesPerSector;
 
-                        int bytesRead = file.Read(buffer, 0, buffer.Length);
-                        Source.Write(buffer, 0, buffer.Length);
-
-                        writer.WriteLine(cluster);
-                    }
-
-                    chain.Flush();
-                }
+                int bytesRead = file.Read(buffer, 0, buffer.Length);
+                Source.Write(buffer, 0, buffer.Length);
             }
         }
 

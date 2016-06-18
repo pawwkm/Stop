@@ -9,7 +9,7 @@ namespace Stop.FileSystems.Fat32
     /// <summary>
     /// A type of FAT.
     /// </summary>
-    internal enum SystemType
+    public enum SystemType
     {
         /// <summary>
         /// The system is FAT12.

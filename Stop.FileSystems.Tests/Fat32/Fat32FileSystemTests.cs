@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 using System.IO;
 
 namespace Stop.FileSystems.Fat32
@@ -9,56 +10,41 @@ namespace Stop.FileSystems.Fat32
     public class Fat32FileSystemTests
     {
         /// <summary>
-        /// Tests that <see cref="Fat32FileSystem"/> can read and write files.
+        /// Tests taht <see cref="Fat32FileSystem.Create(Stream, BootSector)"/> creates
+        /// a system that can be written and read from by craeting a system, then 
+        /// creates a file and read it back.
         /// </summary>
         [Test]
-        public void Test()
+        public void Create_CreateFileSystemAndReadFile_Success()
         {
-            string myFile = "myfile.txt";
+            // The minimum number of clusters for Fat32 is 65525.
+            const int amountOfClusters = 65525;
 
-            using (var file = File.Open("D:\\Fat32.bin", FileMode.Open))
+            using (MemoryStream disk = new MemoryStream())
             {
-                var system = new Fat32FileSystem(file);
-                system.Create(myFile);
+                BootSector boot = new BootSector();
+                boot.FatSize = (uint)Math.Ceiling(amountOfClusters / (double)boot.BytesPerSector);
+                boot.Sectors = (uint)boot.SectorsPerCluster * amountOfClusters + boot.ReservedSectors + boot.FatSize;
 
-                using (var original = File.OpenRead("D:\\Hamlet.txt"))
+                Fat32FileSystem.Create(disk, boot);
+
+                byte[] bytes = new byte[4600]; // Use multiple clusters.
+                Random random = new Random();
+                random.NextBytes(bytes);
+
+                using (MemoryStream expected = new MemoryStream(bytes))
                 {
-                    Assert.True(system.Exist(myFile));
-                    using (var stream = system.Open(myFile))
-                    {
-                        original.CopyTo(stream);
-                        stream.Flush();
-                    }
-                }
+                    Fat32FileSystem system = new Fat32FileSystem(disk);
+                    system.Create("Data.bin");
 
-                using (var dump = File.Create("D:\\copy.txt"))
-                {
-                    using (var stream = system.Open(myFile))
+                    using (Stream file = system.Open("Data.bin"))
                     {
-                        stream.CopyTo(dump);
-                        dump.Flush();
+                        expected.CopyTo(file);
+                        file.Flush();
                     }
-                }
-            }
-        }
 
-        /// <summary>
-        /// Tests that <see cref="Fat32FileSystem"/> can read a file that was already on the image.
-        /// </summary>
-        [Test]
-        public void ReadFile()
-        {
-            using (var image = File.Open("D:\\Fat32.bin", FileMode.Open))
-            {
-                var system = new Fat32FileSystem(image);
-
-                using (var file = system.Open("ReadMe.txt"))
-                {
-                    using (var dump = File.Create("D:\\ReadMe.txt"))
-                    {
-                        file.CopyTo(dump);
-                        dump.Flush();
-                    }
+                    using (Stream file = system.Open("Data.bin"))
+                        FileAssert.AreEqual(expected, file);
                 }
             }
         }
