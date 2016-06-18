@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Topz.FileSystems", "Topz.Fi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Topz.FileSystems.Tests", "Topz.FileSystems.Tests\Topz.FileSystems.Tests.csproj", "{6F4EF3AF-F502-4BA5-87F0-29F3F5815397}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linker", "Linker\Linker.csproj", "{36D3E38A-265B-431D-94AD-94C04DBEF269}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{6F4EF3AF-F502-4BA5-87F0-29F3F5815397}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F4EF3AF-F502-4BA5-87F0-29F3F5815397}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F4EF3AF-F502-4BA5-87F0-29F3F5815397}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36D3E38A-265B-431D-94AD-94C04DBEF269}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36D3E38A-265B-431D-94AD-94C04DBEF269}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36D3E38A-265B-431D-94AD-94C04DBEF269}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36D3E38A-265B-431D-94AD-94C04DBEF269}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
