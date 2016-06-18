@@ -32,6 +32,11 @@ namespace Topz.FileSystems.Fat32
 
         private List<Fat32FileStream> openedFiles = new List<Fat32FileStream>();
         
+        /// <summary>
+        /// Gets or sets the cluster at a given index.
+        /// </summary>
+        /// <param name="index">The index of the cluster.</param>
+        /// <returns>The cluster at <paramref name="index"/>.</returns>
         private uint this[uint index]
         {
             get
@@ -498,19 +503,22 @@ namespace Topz.FileSystems.Fat32
         private uint GetFreeCluster(long previousCluster = -1)
         {
             if (info.NextFreeCluster == 0xFFFFFFFF)
-                Lol();
+                UpdateNextFreeCluster();
 
             uint freeCluster = info.NextFreeCluster;
             this[freeCluster] = 0x0FFFFFFF; // End of chain.
 
-            Lol();
+            UpdateNextFreeCluster();
             if (previousCluster >= 0)
                 this[(uint)previousCluster] = freeCluster;
 
             return freeCluster;
         }
 
-        private void Lol()
+        /// <summary>
+        /// Puts a new free cluster in <see cref="FileSystemInfo.NextFreeCluster"/>.
+        /// </summary>
+        private void UpdateNextFreeCluster()
         {
             for (uint i = 2; i < uint.MaxValue; i++) // Start looking at cluster 2. Cluster 0 and 1 are special.
             {
