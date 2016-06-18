@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stop.FileFormats.Tests", "S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stop.FileSystems", "Stop.FileSystems\Stop.FileSystems.csproj", "{E08E9DB2-CF5E-441D-AAA3-9EF2A67093EB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stop.FileSystems.Tests", "Stop.FileSystems.Tests\Stop.FileSystems.Tests.csproj", "{6F4EF3AF-F502-4BA5-87F0-29F3F5815397}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{E08E9DB2-CF5E-441D-AAA3-9EF2A67093EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E08E9DB2-CF5E-441D-AAA3-9EF2A67093EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E08E9DB2-CF5E-441D-AAA3-9EF2A67093EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F4EF3AF-F502-4BA5-87F0-29F3F5815397}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F4EF3AF-F502-4BA5-87F0-29F3F5815397}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F4EF3AF-F502-4BA5-87F0-29F3F5815397}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F4EF3AF-F502-4BA5-87F0-29F3F5815397}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

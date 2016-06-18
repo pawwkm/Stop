@@ -2,6 +2,7 @@
   <Settings activeconfig="Debug" />
   <Config name="Debug" binpathtype="Auto">
     <assembly path="Stop.FileFormats.Tests\bin\Debug\Stop.FileFormats.Tests.dll" />
+    <assembly path="Stop.FileSystems.Tests\bin\Debug\Stop.FileSystems.Tests.dll" />
   </Config>
   <Config name="Release" binpathtype="Auto" />
 </NUnitProject>

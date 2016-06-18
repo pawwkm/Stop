@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E08E9DB2-CF5E-441D-AAA3-9EF2A67093EB}</ProjectGuid>
+    <ProjectGuid>{6F4EF3AF-F502-4BA5-87F0-29F3F5815397}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Stop.FileSystems</RootNamespace>
-    <AssemblyName>Stop.FileSystems</AssemblyName>
+    <AssemblyName>Stop.FileSystems.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -21,10 +21,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DocumentationFile>bin\Debug\Stop.FileSystems.XML</DocumentationFile>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <CodeAnalysisRuleSet>ExtendedDesignGuidelineRules.ruleset</CodeAnalysisRuleSet>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Debug\Stop.FileSystems.Tests.XML</DocumentationFile>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,42 +32,30 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DocumentationFile>bin\Release\Stop.FileSystems.XML</DocumentationFile>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <CodeAnalysisRuleSet>ExtendedDesignGuidelineRules.ruleset</CodeAnalysisRuleSet>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Release\Stop.FileSystems.Tests.XML</DocumentationFile>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Pote, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Pote.1.0.1\lib\net45\Pote.dll</HintPath>
+    <Reference Include="nunit.framework, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Management" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DiskStream.cs" />
-    <Compile Include="Fat32\Fat32FileStream.cs" />
-    <Compile Include="Fat32\FileAttributes.cs" />
-    <Compile Include="Fat32\FileEntry.cs" />
-    <Compile Include="Fat32\Fat32FileSystem.cs" />
-    <Compile Include="Fat32\BootSector.cs" />
-    <Compile Include="Fat32\FileSystemInfo.cs" />
-    <Compile Include="FileStream.cs" />
-    <Compile Include="FileSystem.cs" />
-    <Compile Include="NativeMethods.cs">
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="Fat32\Fat32FileSystemTests.cs" />
+    <Compile Include="Fat32\FileEntryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Structures.cs" />
-    <Compile Include="Fat32\SystemType.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <CodeAnalysisDictionary Include="CustomDictionary.xml" />
+    <ProjectReference Include="..\Stop.FileSystems\Stop.FileSystems.csproj">
+      <Project>{e08e9db2-cf5e-441d-aaa3-9ef2a67093eb}</Project>
+      <Name>Stop.FileSystems</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
