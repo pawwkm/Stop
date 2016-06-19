@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.InteropServices;
+using System.Reflection;
 
 namespace Topz.FileSystems
 {
@@ -280,35 +280,11 @@ namespace Topz.FileSystems
         protected T ReadStructure<T>(long position)
         {
             Source.Position = position;
-            
-            byte[] buffer = new byte[Marshal.SizeOf(typeof(T))];
-            BinaryReader reader = new BinaryReader(Source);
-            buffer = reader.ReadBytes(buffer.Length);
 
-            GCHandle handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-            T data = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
-            handle.Free();
+            var attribute = typeof(T).GetCustomAttribute<SerializerAttribute>(true);
+            ISerializer<T> serializer = (ISerializer<T>)Activator.CreateInstance(attribute.Serializer);
 
-            return data;
-        }
-
-        /// <summary>
-        /// Reads the specified <paramref name="amount"/> of data
-        /// starting at the given <paramref name="position"/> from
-        /// the <see cref="Source"/>.
-        /// </summary>
-        /// <param name="position">The position to start reading.</param>
-        /// <param name="amount">The amount of bytes to be read.</param>
-        /// <returns>The bytes read from the <see cref="Source"/>.</returns>
-        protected byte[] ReadData(long position, long amount)
-        {
-            Source.Position = position;
-            byte[] buffer = new byte[amount];
-
-            BinaryReader reader = new BinaryReader(Source);
-            buffer = reader.ReadBytes(buffer.Length);
-
-            return buffer;
+            return serializer.Deserialize(Source);
         }
 
         /// <summary>
@@ -322,46 +298,12 @@ namespace Topz.FileSystems
         /// </exception>
         protected void WriteStructure<T>(long position, T structure)
         {
-            byte[] bytes = Structures.ToBytes(structure);
-            WriteData(position, bytes);
-        }
-
-        /// <summary>
-        /// Writes a sequence of bytes to the image.
-        /// </summary>
-        /// <param name="position">The position to start writing.</param>
-        /// <param name="data">The data to write to the disk.</param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="data"/> is null.
-        /// </exception>
-        protected void WriteData(long position, params byte[] data)
-        {
-            if (data == null)
-                throw new ArgumentNullException("data");
-
             Source.Position = position;
-            Source.Write(data, 0, data.Length);
-        }
 
-        /// <summary>
-        /// Writes a sequence of bytes to the image.
-        /// </summary>
-        /// <param name="position">The position to start writing.</param>
-        /// <param name="index">
-        /// The index in the <paramref name="data"/> to begin
-        /// writing from.
-        /// </param>
-        /// <param name="data">The data to write to the disk.</param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="data"/> is null.
-        /// </exception>
-        protected void WriteData(long position, int index, params byte[] data)
-        {
-            if (data == null)
-                throw new ArgumentNullException("data");
+            var attribute = typeof(T).GetCustomAttribute<SerializerAttribute>(true);
+            ISerializer<T> serializer = (ISerializer<T>)Activator.CreateInstance(attribute.Serializer);
 
-            Source.Position = position;
-            Source.Write(data, index, data.Length - index);
+            serializer.Serialize(structure, Source);
         }
     }
 }

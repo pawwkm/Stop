@@ -10,33 +10,37 @@ namespace Topz.FileSystems.Fat32
     /// <summary>
     /// A file entry in the FAT.
     /// </summary>
-    [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 32)]
-    internal class FileEntry
+    [Serializer(typeof(FileEntrySerializer))]
+    public class FileEntry
     {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 11)]
         private byte[] shortName = new byte[11];
 
-        private FileAttributes attributes;
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileEntry"/> class.
+        /// </summary>
+        public FileEntry()
+        {
+        }
 
-        private byte reserved;
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileEntry"/> class.
+        /// </summary>
+        /// <param name="shortName">The raw short name of 11 bytes.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="shortName"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Length of <paramref name="shortName"/> is not 11.
+        /// </exception>
+        public FileEntry(byte[] shortName)
+        {
+            if (shortName == null)
+                throw new ArgumentNullException(nameof(shortName));
+            if (shortName.Length != 11)
+                throw new ArgumentOutOfRangeException(nameof(shortName));
 
-        private byte creationTimeMilliseconds;
-
-        private ushort creationTime;
-
-        private ushort creationDate;
-
-        private ushort lastAccessDate;
-
-        private ushort firstClusterHigh;
-
-        private ushort writeTime;
-
-        private ushort writeDate;
-
-        private ushort firstClusterLow;
-
-        private uint fileSize;
+            this.shortName = shortName;
+        }
 
         /// <summary>
         /// The short name of the file entry.
@@ -71,14 +75,8 @@ namespace Topz.FileSystems.Fat32
         /// </summary>
         public FileAttributes Attributes
         {
-            get
-            {
-                return attributes;
-            }
-            set
-            {
-                attributes = value;
-            }
+            get;
+            set;
         }
 
         /// <summary>
@@ -93,17 +91,8 @@ namespace Topz.FileSystems.Fat32
         /// </exception>
         public byte CreationTimeMilliseconds
         {
-            get
-            {
-                return creationTimeMilliseconds;
-            }
-            set
-            {
-                if (value > 199)
-                    throw new ArgumentOutOfRangeException(nameof(value), "The valid range is 0-199 inclusive.");
-
-                creationTimeMilliseconds = value;
-            }
+            get;
+            set;
         }
 
         /// <summary>
@@ -111,14 +100,8 @@ namespace Topz.FileSystems.Fat32
         /// </summary>
         public ushort CreationTime
         {
-            get
-            {
-                return creationTime;
-            }
-            set
-            {
-                creationTime = value;
-            }
+            get;
+            set;
         }
 
         /// <summary>
@@ -126,14 +109,8 @@ namespace Topz.FileSystems.Fat32
         /// </summary>
         public ushort CreationDate
         {
-            get
-            {
-                return creationDate;
-            }
-            set
-            {
-                creationDate = value;
-            }
+            get;
+            set;
         }
 
         /// <summary>
@@ -142,14 +119,8 @@ namespace Topz.FileSystems.Fat32
         /// </summary>
         public ushort LastAccessDate
         {
-            get
-            {
-                return lastAccessDate;
-            }
-            set
-            {
-                lastAccessDate = value;
-            }
+            get;
+            set;
         }
 
         /// <summary>
@@ -157,14 +128,8 @@ namespace Topz.FileSystems.Fat32
         /// </summary>
         public ushort WriteTime
         {
-            get
-            {
-                return writeTime;
-            }
-            set
-            {
-                writeTime = value;
-            }
+            get;
+            set;
         }
 
         /// <summary>
@@ -172,14 +137,8 @@ namespace Topz.FileSystems.Fat32
         /// </summary>
         public ushort WriteDate
         {
-            get
-            {
-                return writeDate;
-            }
-            set
-            {
-                writeDate = value;
-            }
+            get;
+            set;
         }
 
         /// <summary>
@@ -189,15 +148,33 @@ namespace Topz.FileSystems.Fat32
         {
             get
             {
-                int original = (firstClusterHigh << 16) | (firstClusterLow & 0xffff);
+                int original = (FirstClusterHigh << 16) | (FirstClusterLow & 0xffff);
 
                 return (uint)original;
             }
             set
             {
-                firstClusterHigh = (ushort)(value >> 16);
-                firstClusterLow = (ushort)(value & 0xFFFF);
+                FirstClusterHigh = (ushort)(value >> 16);
+                FirstClusterLow = (ushort)(value & 0xFFFF);
             }
+        }
+
+        /// <summary>
+        /// The high part of the first cluster.
+        /// </summary>
+        public ushort FirstClusterHigh
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// The low part of the first cluster.
+        /// </summary>
+        public ushort FirstClusterLow
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -205,14 +182,8 @@ namespace Topz.FileSystems.Fat32
         /// </summary>
         public uint FileSize
         {
-            get
-            {
-                return fileSize;
-            }
-            set
-            {
-                fileSize = value;
-            }
+            get;
+            set;
         }
 
         /// <summary>
@@ -226,6 +197,11 @@ namespace Topz.FileSystems.Fat32
             }
         }
 
+        /// <summary>
+        /// Creates a 8.3 name for a string.
+        /// </summary>
+        /// <param name="name">The string to shorten.</param>
+        /// <returns>The 8.3 name.</returns>
         public static string ToShortName(string name)
         {
             if (name == null)

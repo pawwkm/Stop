@@ -81,13 +81,12 @@ namespace Topz.FileSystems.Fat32
             if (boot.Fats != 1)
                 throw new ArgumentOutOfRangeException(nameof(boot), "This must be 1.");
 
-            byte[] bytes = Structures.ToBytes(boot);
-            stream.Position = 0;
-            stream.Write(bytes, 0, bytes.Length);
+            BootSectorSerializer bss = new BootSectorSerializer();
+            bss.Serialize(boot, stream);
 
-            bytes = Structures.ToBytes(new FileSystemInfo());
+            FileSystemInfoSerializer fsis = new FileSystemInfoSerializer();
             stream.Position = boot.FileSystemInfoSector * boot.BytesPerSector;
-            stream.Write(bytes, 0, bytes.Length);
+            fsis.Serialize(new FileSystemInfo(), stream);
 
             FileEntry volume = new FileEntry();
             volume.ShortName = "SD Card";
@@ -96,12 +95,12 @@ namespace Topz.FileSystems.Fat32
             uint firstDataSector = boot.ReservedSectors + (boot.Fats * boot.FatSize);
             uint firstByteOfRootCluster = ((boot.RootCluster - 2) * boot.SectorsPerCluster) + firstDataSector;
 
-            bytes = Structures.ToBytes(volume);
+            FileEntrySerializer fis = new FileEntrySerializer();
             stream.Position = firstByteOfRootCluster;
-            stream.Write(bytes, 0, bytes.Length);
+            fis.Serialize(volume, stream);
 
             // Allocate the root cluster.
-            bytes = BitConverter.GetBytes(0xFFFFFFFF);
+            byte[] bytes = BitConverter.GetBytes(0xFFFFFFFF);
             stream.Position = boot.ReservedSectors * boot.BytesPerSector + boot.RootCluster * 4;
             stream.Write(bytes, 0, bytes.Length);
 
