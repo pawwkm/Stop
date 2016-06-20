@@ -13,30 +13,44 @@ namespace Topz.FileSystems
         /// Initializes a new instance of the <see cref="FileSystem"/> class.
         /// </summary>
         /// <param name="stream">The stream containing the image of the file system.</param>
+        /// <param name="partition">The partition the file system is on.</param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="stream"/> is null.
+        /// <paramref name="stream"/> or <paramref name="partition"/> is null.
         /// </exception>
         /// <exception cref="ArgumentException">
         /// <paramref name="stream"/> cannot be read or written or seeked.
         /// </exception>
-        protected FileSystem(Stream stream)
+        protected FileSystem(Stream stream, Partition partition)
         {
             if (stream == null)
-                throw new ArgumentNullException("stream");
-            else if (!stream.CanRead)
-                throw new ArgumentException("The stream cannot be read from.", "stream");
-            else if (!stream.CanWrite)
-                throw new ArgumentException("The stream cannot be written to.", "stream");
-            else if (!stream.CanSeek)
-                throw new ArgumentException("The stream is not seekable.", "stream");
+                throw new ArgumentNullException(nameof(partition));
+            if (!stream.CanRead)
+                throw new ArgumentException("The stream cannot be read from.", nameof(partition));
+            if (!stream.CanWrite)
+                throw new ArgumentException("The stream cannot be written to.", nameof(partition));
+            if (!stream.CanSeek)
+                throw new ArgumentException("The stream is not seekable.", nameof(partition));
+
+            if (partition == null)
+                throw new ArgumentNullException(nameof(partition));
 
             Source = stream;
+            Partition = partition;
         }
 
         /// <summary>
         /// The stream containing the image of the file system.
         /// </summary>
         public Stream Source
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// The partition the file system is on.
+        /// </summary>
+        public Partition Partition
         {
             get;
             private set;

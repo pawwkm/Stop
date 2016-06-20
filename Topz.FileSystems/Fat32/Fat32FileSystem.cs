@@ -44,7 +44,7 @@ namespace Topz.FileSystems.Fat32
                 if (index > boot.Clusters - 1)
                     throw new ArgumentOutOfRangeException(nameof(index));
                 
-                Source.Position = boot.ReservedSectors * boot.BytesPerSector + index * 4;
+                Source.Position = boot.ReservedSectors * boot.BytesPerSector + index * 4 + Partition.Offset * 512;
 
                 byte[] bytes = new byte[4];
                 Source.Read(bytes, 0, bytes.Length);
@@ -56,7 +56,7 @@ namespace Topz.FileSystems.Fat32
                 if (index > boot.Clusters - 1)
                     throw new ArgumentOutOfRangeException(nameof(index));
                 
-                Source.Position = boot.ReservedSectors * boot.BytesPerSector + index * 4;
+                Source.Position = boot.ReservedSectors * boot.BytesPerSector + index * 4 + Partition.Offset * 512;
 
                 byte[] bytes = BitConverter.GetBytes(value);
                 Source.Write(bytes, 0, bytes.Length);
@@ -67,25 +67,37 @@ namespace Topz.FileSystems.Fat32
         /// Creates Fat32 file system on the <paramref name="stream"/>.
         /// </summary>
         /// <param name="stream">The stream the file system is written on.</param>
+        /// <param name="partition">The partition the file system is on.</param>
         /// <param name="boot">The boot sector of the file system.</param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="stream"/> or <paramref name="boot"/> is null.
+        /// <paramref name="stream"/>, <paramref name="partition"/> or <paramref name="boot"/> is null.
         /// </exception>
-        public static void Create(Stream stream, BootSector boot)
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// There is more than one fat.
+        /// The file system is bigger than the partition.
+        /// </exception>
+        public static void Create(Stream stream, Partition partition, BootSector boot)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
+            if (partition == null)
+                throw new ArgumentNullException(nameof(partition));
             if (boot == null)
                 throw new ArgumentNullException(nameof(boot));
 
             if (boot.Fats != 1)
                 throw new ArgumentOutOfRangeException(nameof(boot), "This must be 1.");
+            if (boot.Sectors * boot.BytesPerSector > partition.Sectors * 512)
+                throw new ArgumentOutOfRangeException(nameof(boot), "The file system can't fit in the partition.");
 
+            uint offset = partition.Offset * 512;
+
+            stream.Position = offset;
             BootSectorSerializer bss = new BootSectorSerializer();
             bss.Serialize(boot, stream);
 
             FileSystemInfoSerializer fsis = new FileSystemInfoSerializer();
-            stream.Position = boot.FileSystemInfoSector * boot.BytesPerSector;
+            stream.Position = boot.FileSystemInfoSector * boot.BytesPerSector + offset;
             fsis.Serialize(new FileSystemInfo(), stream);
 
             FileEntry volume = new FileEntry();
@@ -93,7 +105,7 @@ namespace Topz.FileSystems.Fat32
             volume.Attributes = FileAttributes.VolumeId;
 
             uint firstDataSector = boot.ReservedSectors + (boot.Fats * boot.FatSize);
-            uint firstByteOfRootCluster = ((boot.RootCluster - 2) * boot.SectorsPerCluster) + firstDataSector;
+            uint firstByteOfRootCluster = ((boot.RootCluster - 2) * boot.SectorsPerCluster) + firstDataSector + offset;
 
             FileEntrySerializer fis = new FileEntrySerializer();
             stream.Position = firstByteOfRootCluster;
@@ -101,16 +113,16 @@ namespace Topz.FileSystems.Fat32
 
             // Allocate the root cluster.
             byte[] bytes = BitConverter.GetBytes(0xFFFFFFFF);
-            stream.Position = boot.ReservedSectors * boot.BytesPerSector + boot.RootCluster * 4;
+            stream.Position = boot.ReservedSectors * boot.BytesPerSector + boot.RootCluster * 4 + offset;
             stream.Write(bytes, 0, bytes.Length);
 
             // Place signature.
             bytes = BitConverter.GetBytes((ushort)0xAA55);
-            stream.Position = 510;
+            stream.Position = 510 + offset;
             stream.Write(bytes, 0, bytes.Length);
 
             // Reach the end of the disk to allocated it.
-            stream.Position = boot.Sectors * boot.BytesPerSector;
+            stream.Position = boot.Sectors * boot.BytesPerSector + offset;
             stream.WriteByte(0);
         }
 
@@ -118,16 +130,17 @@ namespace Topz.FileSystems.Fat32
         /// Initializes a new instance of the <see cref="Fat32FileSystem"/> class.
         /// </summary>
         /// <param name="stream">The stream containing the image of the file system.</param>
+        /// <param name="partition">The partition the file system is on.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="stream"/> is null.
         /// </exception>
         /// <exception cref="ArgumentException">
         /// <paramref name="stream"/> cannot be read or written or seeked.
         /// </exception>
-        public Fat32FileSystem(Stream stream) : base(stream)
+        public Fat32FileSystem(Stream stream, Partition partition) : base(stream, partition)
         {
-            boot = ReadStructure<BootSector>(0);
-            info = ReadStructure<FileSystemInfo>(boot.FileSystemInfoSector * boot.BytesPerSector);
+            boot = ReadStructure<BootSector>(Partition.Offset * 512);
+            info = ReadStructure<FileSystemInfo>((boot.FileSystemInfoSector * boot.BytesPerSector) + (Partition.Offset * 512));
 
             if (!info.IsFileSystemInfo)
                 throw new ArgumentException("File System Info is corrupted.", nameof(stream));
@@ -271,7 +284,7 @@ namespace Topz.FileSystems.Fat32
         /// <param name="offset">The offset from the beginning cluster, in bytes.</param>
         private void Write(FileEntry entry, uint cluster, uint offset)
         {
-            uint position = FirstSectorOfCluster(cluster) * boot.BytesPerSector + offset;
+            uint position = FirstSectorOfCluster(cluster) * boot.BytesPerSector + offset + Partition.Offset * 512;
             int value = Source.ReadByte();
 
             WriteStructure(position, entry);
@@ -318,41 +331,8 @@ namespace Topz.FileSystems.Fat32
         /// Finds the entry of a file or directory.
         /// </summary>
         /// <param name="firstCluster">The first cluster to search.</param>
-        /// <param name="parts">The parts of the path.</param>
-        /// <param name="isDirectory">True if the expected entry is a directory.</param>
+        /// <param name="segments">The parts of the path.</param>
         /// <returns>The entry if it exists; otherwise null.</returns>
-        private FileEntry FindEntry(uint firstCluster, string[] parts, bool isDirectory)
-        {
-            foreach (FileEntry entry in GetEntriesInClusterChain(firstCluster))
-            {
-                if (entry.Attributes.HasFlag(FileAttributes.LongName))
-                    continue;
-                if (entry.Attributes.HasFlag(FileAttributes.VolumeId))
-                    continue;
-
-                if (entry.Attributes.HasFlag(FileAttributes.Directory))
-                {
-                    if (entry.ShortName != FileEntry.ToShortName(parts[0]) || !isDirectory)
-                        continue;
-
-                    if (parts.Length == 1)
-                        return entry;
-
-                    return FindEntry(entry.FirstCluster, parts.Skip(1).ToArray(), isDirectory);
-                }
-                else
-                {
-                    if (isDirectory)
-                        continue;
-
-                    if (parts.Length == 1 && entry.ShortName == FileEntry.ToShortName(parts[0]))
-                        return entry;
-                }
-            }
-
-            return null;
-        }
-
         private FileEntry FindEntry(uint firstCluster, List<PathSegment> segments)
         {
             foreach (FileEntry entry in GetEntriesInClusterChain(firstCluster))
@@ -404,7 +384,7 @@ namespace Topz.FileSystems.Fat32
         {
             foreach (uint cluster in GetClusterChain(firstCluster))
             {
-                uint start = FirstSectorOfCluster(cluster) * boot.BytesPerSector;
+                uint start = FirstSectorOfCluster(cluster) * boot.BytesPerSector + Partition.Offset * 512;
                 for (uint i = 0; i < boot.BytesPerCluster; i += 32)
                     yield return ReadStructure<FileEntry>(start + i);
             }
@@ -423,7 +403,7 @@ namespace Topz.FileSystems.Fat32
 
             foreach (uint cluster in GetClusterChain(entry.FirstCluster))
             {
-                uint start = FirstSectorOfCluster(cluster) * boot.BytesPerSector;
+                uint start = FirstSectorOfCluster(cluster) * boot.BytesPerSector + Partition.Offset * 512;
                 uint size = amount > boot.BytesPerCluster ? boot.BytesPerCluster : amount;
 
                 Source.Position = start;
@@ -476,7 +456,7 @@ namespace Topz.FileSystems.Fat32
         /// </returns>
         private int GetSpaceOffsetForEntryInCluster(uint cluster)
         {
-            uint start = FirstSectorOfCluster(cluster) * boot.BytesPerSector;
+            uint start = FirstSectorOfCluster(cluster) * boot.BytesPerSector + Partition.Offset * 512;
             uint end = start + boot.BytesPerCluster;
             
             for (uint i = start; i < end; i += 32)
@@ -563,9 +543,9 @@ namespace Topz.FileSystems.Fat32
                 if (file.Position == 0)
                     file.Entry.FirstCluster = (uint)cluster;
 
-                Source.Position = FirstSectorOfCluster((uint)cluster) * boot.BytesPerSector;
+                Source.Position = FirstSectorOfCluster((uint)cluster) * boot.BytesPerSector + Partition.Offset * 512;
 
-                int bytesRead = file.Read(buffer, 0, buffer.Length);
+                file.Read(buffer, 0, buffer.Length);
                 Source.Write(buffer, 0, buffer.Length);
             }
         }
