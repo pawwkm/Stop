@@ -47,6 +47,7 @@
     <Compile Include="Fat32\Fat32FileSystemTests.cs" />
     <Compile Include="Fat32\FileEntryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StreamExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

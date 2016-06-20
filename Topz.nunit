@@ -1,8 +1,8 @@
 ﻿<NUnitProject>
   <Settings activeconfig="Debug" />
   <Config name="Debug" binpathtype="Auto">
-    <assembly path="Stop.FileFormats.Tests\bin\Debug\Stop.FileFormats.Tests.dll" />
-    <assembly path="Stop.FileSystems.Tests\bin\Debug\Stop.FileSystems.Tests.dll" />
+    <assembly path="Topz.FileFormats.Tests\bin\Debug\Topz.FileFormats.Tests.dll" />
+    <assembly path="Topz.FileSystems.Tests\bin\Debug\Topz.FileSystems.Tests.dll" />
   </Config>
   <Config name="Release" binpathtype="Auto" />
 </NUnitProject>

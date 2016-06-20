@@ -1,29 +1,11 @@
-﻿using System.Runtime.InteropServices;
-
-namespace Topz.FileSystems.Fat32
+﻿namespace Topz.FileSystems.Fat32
 {
     /// <summary>
     /// The structure pointed to by <see cref="BootSector.FileSystemInfoSector"/>.
     /// </summary>
-    [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 512)]
+    [Serializer(typeof(FileSystemInfoSerializer))]
     public class FileSystemInfo
     {
-        private uint leadSignature = 0x41615252;
-
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 480)]
-        private byte[] reserved1 = new byte[480];
-
-        private uint structSignature = 0x61417272;
-
-        private uint lastFreeCluster = 0xFFFFFFFF;
-
-        private uint nextFreeCluster = 0xFFFFFFFF;
-
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
-        private byte[] reserved2 = new byte[12];
-
-        private uint trailSignature = 0xAA550000;
-
         /// <summary>
         /// True if this is indeed a <see cref="FileSystemInfo"/>.
         /// </summary>
@@ -31,9 +13,9 @@ namespace Topz.FileSystems.Fat32
         {
             get
             {
-                return leadSignature == 0x41615252 &&
-                       structSignature == 0x61417272 &&
-                       trailSignature == 0xAA550000;
+                return LeadSignature == 0x41615252 &&
+                       StructSignature == 0x61417272 &&
+                       TrailSignature == 0xAA550000;
             }
         }
 
@@ -48,15 +30,9 @@ namespace Topz.FileSystems.Fat32
         /// </summary>
         public uint LastFreeCluster
         {
-            get
-            {
-                return lastFreeCluster;
-            }
-            set
-            {
-                lastFreeCluster = value;
-            }
-        }
+            get;
+            set;
+        } = 0xFFFFFFFF;
 
         /// <summary>
         /// This is a hint for the FAT driver.It indicates the cluster number at
@@ -72,14 +48,35 @@ namespace Topz.FileSystems.Fat32
         /// </summary>
         public uint NextFreeCluster
         {
-            get
-            {
-                return nextFreeCluster;
-            }
-            set
-            {
-                nextFreeCluster = value;
-            }
-        }
+            get;
+            set;
+        } = 0xFFFFFFFF;
+
+        /// <summary>
+        /// The first signature.
+        /// </summary>
+        public uint LeadSignature
+        {
+            get;
+            set;
+        } = 0x41615252;
+
+        /// <summary>
+        /// The signature in the middle.
+        /// </summary>
+        public uint StructSignature
+        {
+            get;
+            set;
+        } = 0x61417272;
+
+        /// <summary>
+        /// The trailing signature.
+        /// </summary>
+        public uint TrailSignature
+        {
+            get;
+            set;
+        } = 0xAA550000;
     }
 }

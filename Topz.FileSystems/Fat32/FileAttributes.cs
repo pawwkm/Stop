@@ -6,7 +6,7 @@ namespace Topz.FileSystems.Fat32
     /// Attributes used by <see cref="FileEntry.Attributes"/>.
     /// </summary>
     [Flags]
-    internal enum FileAttributes : byte
+    public enum FileAttributes : byte
     {
         /// <summary>
         /// The file is read only.

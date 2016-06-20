@@ -9,7 +9,7 @@ namespace Topz.FileSystems.Fat32
     /// <summary>
     /// This is the first sector of a Fat32.
     /// </summary>
-    [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 90)]
+    [Serializer(typeof(BootSectorSerializer))]
     public class BootSector
     {
         private const string Fat12 = "FAT12   ";
@@ -17,11 +17,9 @@ namespace Topz.FileSystems.Fat32
         private const string Fat16 = "FAT16   ";
 
         private const string Fat32 = "FAT32   ";
-
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        
         private byte[] jump = { 0xEB, 0x58, 0x90 };
-
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+        
         private byte[] oemName = new byte[8];
 
         private ushort bytesPerSector = 512;
@@ -31,14 +29,6 @@ namespace Topz.FileSystems.Fat32
         private ushort reservedSectors = 1;
 
         private byte fats = 1;
-
-        private ushort rootEntries;
-
-        private ushort sectors16;
-
-        private byte media = 0xF8;  // Hard disc.
-
-        private ushort fatSize16;
 
         private ushort sectorsPerTrack;
 
@@ -60,21 +50,14 @@ namespace Topz.FileSystems.Fat32
 
         private ushort backupBootSector;
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
-        private byte[] reserved1;
-
         private byte driveNumber;
-
-        private byte reserved2;
 
         private byte bootSignature;
 
         private uint id = (uint)DateTime.Now.Ticks;
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 11)]
         private byte[] label = new byte[11];
-
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+        
         private byte[] systemType = new byte[8];
 
         /// <summary>
@@ -472,7 +455,7 @@ namespace Topz.FileSystems.Fat32
                     throw new ArgumentNullException(nameof(value));
 
                 var name = Encoding.ASCII.GetBytes(value);
-                if (name.Length > 8)
+                if (name.Length > 11)
                     throw new ArgumentOutOfRangeException(nameof(value), "The lable must be 11 characters or less.");
 
                 Buffer.BlockCopy(name, 0, label, 0, name.Length);
