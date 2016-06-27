@@ -18,7 +18,8 @@ namespace Topz.FileSystems.Scripting
         private static readonly string[] Keywords =
         {
             "select", "disk",
-            "create", "mbr", "partition", "offset", "sectors"
+            "create", "mbr", "partition", "offset", "sectors",
+            "ask"
         };
 
         /// <summary>

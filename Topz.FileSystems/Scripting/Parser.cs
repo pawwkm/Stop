@@ -64,12 +64,14 @@ namespace Topz.FileSystems.Scripting
             switch (obj.Text.ToLower())
             {
                 case "disk":
-                    if (operand.Type == TokenType.Integer)
+                    if (operand.Text.ToLower() == "ask")
+                        commands.Add(new SelectDiskCommand());
+                    else if (operand.Type == TokenType.Integer)
                         commands.Add(new SelectDiskCommand(int.Parse(operand.Text)));
                     else if (operand.Type == TokenType.String)
                         commands.Add(new SelectDiskCommand(operand.Text));
                     else
-                        throw new ParsingException(operand.Position.ToString("Expected a string or an integer."));
+                        throw new ParsingException(operand.Position.ToString("Expected a string, integer or the 'ask' keyword."));
                     break;
                 default:
                     throw new ParsingException(obj.Position.ToString("Expected the 'disk' keyword."));
