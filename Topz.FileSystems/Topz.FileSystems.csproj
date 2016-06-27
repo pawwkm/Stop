@@ -45,6 +45,10 @@
       <HintPath>..\packages\Pote.1.0.1\lib\net45\Pote.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Pote.Text, Version=0.7.0.2, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Pote.Text.0.7.4\lib\net45\Pote.Text.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Management" />
@@ -72,6 +76,15 @@
     <Compile Include="PartitionStatus.cs" />
     <Compile Include="PartitionType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scripting\Command.cs" />
+    <Compile Include="Scripting\Context.cs" />
+    <Compile Include="Scripting\CreateMbrCommand.cs" />
+    <Compile Include="Scripting\CreatePartitionCommand.cs" />
+    <Compile Include="Scripting\LexicalAnalyzer.cs" />
+    <Compile Include="Scripting\Parser.cs" />
+    <Compile Include="Scripting\Script.cs" />
+    <Compile Include="Scripting\SelectDiskCommand.cs" />
+    <Compile Include="Scripting\TokenType.cs" />
     <Compile Include="SerializerAttribute.cs" />
     <Compile Include="Fat32\SystemType.cs" />
   </ItemGroup>
