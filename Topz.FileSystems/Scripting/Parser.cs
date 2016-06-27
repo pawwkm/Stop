@@ -73,11 +73,28 @@ namespace Topz.FileSystems.Scripting
                     else
                         throw new ParsingException(operand.Position.ToString("Expected a string, integer or the 'ask' keyword."));
                     break;
+                case "partition":
+                    Token<TokenType> token = source.Next();
+                    int index = 0;
+
+                    if (token.Type != TokenType.Integer)
+                        throw new ParsingException(token.Position.ToString("Expected integer."));
+                    else
+                        index = int.Parse(token.Text);
+
+                    if (1 > index || 4 < index)
+                        throw new ParsingException(token.Position.ToString("Must be from 1 to 4."));
+
+                    commands.Add(new SelectPartitionCommand(index));
+                    break;
                 default:
                     throw new ParsingException(obj.Position.ToString("Expected the 'disk' keyword."));
             }
         }
 
+        /// <summary>
+        /// Parses a create command.
+        /// </summary>
         private void Create()
         {
             Token<TokenType> create = source.Next();

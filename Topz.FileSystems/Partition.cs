@@ -10,8 +10,16 @@ namespace Topz.FileSystems
         /// <summary>
         /// Initializes a new instance of the <see cref="Partition"/> class.
         /// </summary>
-        public Partition()
+        /// <param name="index">The index of the partition in the mbr, starting at 1.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> is not from 1 to 4.
+        /// </exception>
+        public Partition(int index)
         {
+            if (1 > index || 4 < index)
+                throw new ArgumentOutOfRangeException(nameof(index), "Must be from 1 to 4.");
+
+            Index = index;
         }
 
         /// <summary>
@@ -66,6 +74,15 @@ namespace Topz.FileSystems
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// The index of the partition in the mbr.
+        /// </summary>
+        public int Index
+        {
+            get;
+            private set;
         }
     }
 }

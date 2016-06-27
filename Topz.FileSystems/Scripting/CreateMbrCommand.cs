@@ -25,10 +25,10 @@ namespace Topz.FileSystems.Scripting
             {
                 Partition[] partitions =
                 {
-                    new Partition(),
-                    new Partition(),
-                    new Partition(),
-                    new Partition()
+                    new Partition(1),
+                    new Partition(2),
+                    new Partition(3),
+                    new Partition(4)
                 };
 
                 MasterBootRecord mbr = new MasterBootRecord(partitions);

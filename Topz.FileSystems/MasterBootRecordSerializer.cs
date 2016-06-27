@@ -26,7 +26,7 @@ namespace Topz.FileSystems
             Partition[] partitions = new Partition[4];
             for (int i = 0; i < 4; i++)
             {
-                partitions[i] = new Partition();
+                partitions[i] = new Partition(i + 1);
 
                 int status = stream.ReadByte();
                 if (status == 0x80)

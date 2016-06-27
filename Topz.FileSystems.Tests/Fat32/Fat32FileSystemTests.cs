@@ -19,16 +19,16 @@ namespace Topz.FileSystems.Fat32
         {
             Partition[] partitions =
             {
-                new Partition()
+                new Partition(1)
                 {
                     Offset = 2048,
                     Sectors = 69632, // 34MB.
                     PartitionType = PartitionType.Fat32,
                     Status = PartitionStatus.Bootable
                 },
-                new Partition(),
-                new Partition(),
-                new Partition()
+                new Partition(2),
+                new Partition(3),
+                new Partition(4)
             };
 
             MasterBootRecord mbr = new MasterBootRecord(partitions);

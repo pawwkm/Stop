@@ -15,5 +15,14 @@ namespace Topz.FileSystems.Scripting
             get;
             set;
         }
+
+        /// <summary>
+        /// The currently selected partition of the <see cref="Disk"/>; otherwise null.
+        /// </summary>
+        public Partition Partition
+        {
+            get;
+            set;
+        }
     }
 }

@@ -84,6 +84,7 @@
     <Compile Include="Scripting\Parser.cs" />
     <Compile Include="Scripting\Script.cs" />
     <Compile Include="Scripting\SelectDiskCommand.cs" />
+    <Compile Include="Scripting\SelectPartitionCommand.cs" />
     <Compile Include="Scripting\TokenType.cs" />
     <Compile Include="SerializerAttribute.cs" />
     <Compile Include="Fat32\SystemType.cs" />
