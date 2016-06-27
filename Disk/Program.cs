@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pote.Text;
+using System;
 using System.IO;
 using Topz.FileSystems.Scripting;
 
@@ -33,7 +34,14 @@ namespace Disk
                 if (code.ToLower() == "exit")
                     break;
 
-                script.Run(code);
+                try
+                {
+                    script.Run(code);
+                }
+                catch (ParsingException ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             }
         }
 
@@ -43,10 +51,17 @@ namespace Disk
         /// <param name="path">The path to the script to run.</param>
         private static void RunScript(string path)
         {
-            using (Stream stream = File.OpenRead(path))
+            try
             {
-                Script script = new Script(stream);
-                script.Run();
+                using (Stream stream = File.OpenRead(path))
+                {
+                    Script script = new Script(stream);
+                    script.Run();
+                }
+            }
+            catch (ParsingException ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
     }
