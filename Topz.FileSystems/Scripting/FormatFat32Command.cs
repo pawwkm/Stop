@@ -42,6 +42,13 @@ namespace Topz.FileSystems.Scripting
                 boot.Sectors = context.Partition.Sectors * 512 / boot.BytesPerSector;
 
                 Fat32FileSystem.Create(context.Disk, context.Partition, boot);
+
+                context.Partition.PartitionType = PartitionType.Fat32WithLbaExtensions;
+                MasterBootRecordSerializer serializer = new MasterBootRecordSerializer();
+                MasterBootRecord mbr = serializer.Deserialize(context.Disk);
+
+                mbr.Partitions[context.Partition.Index - 1] = context.Partition;
+                serializer.Serialize(mbr, context.Disk);
             }
         }
     }
