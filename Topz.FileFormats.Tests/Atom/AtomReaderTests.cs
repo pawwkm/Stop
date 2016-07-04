@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
-using System.IO;
 using Pote;
+using System.IO;
 
 namespace Topz.FileFormats.Atom
 {

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32.SafeHandles;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 namespace Topz.FileSystems
@@ -106,7 +107,7 @@ namespace Topz.FileSystems
         /// <returns>
         /// If the function succeeds, the return value is an open handle to the specified file, device, named pipe, or mail slot.
         /// </returns>
-        [DllImport(Dll, SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport(Dll, SetLastError = true, CharSet = CharSet.Unicode)]
         public static extern SafeFileHandle CreateFile(string lpFileName, uint dwDesiredAccess, uint dwShareMode, IntPtr lpSecurityAttributes, uint dwCreationDisposition, uint dwFlagsAndAttributes, IntPtr hTemplateFile);
 
         [DllImport(Dll, SetLastError = true, CharSet = CharSet.Auto)]
@@ -116,12 +117,14 @@ namespace Topz.FileSystems
         public static extern bool DeviceIoControl(SafeFileHandle hDevice, uint IoControlCode, [MarshalAs(UnmanagedType.AsAny)][In] object InBuffer, uint nInBufferSize, [MarshalAs(UnmanagedType.AsAny)] [Out] object OutBuffer, uint nOutBufferSize, ref uint pBytesReturned, [In] IntPtr Overlapped);
 
         [DllImport(Dll, SetLastError = true, CharSet = CharSet.Auto)]
+        [SuppressMessage("Microsoft.Interoperability", "CA1415:DeclarePInvokesCorrectly", Justification = Justifications.ItWorksNoTouchy)]
         public static extern unsafe bool ReadFile(SafeFileHandle hFile, byte* pBuffer, uint NumberOfBytesToRead, uint* pNumberOfBytesRead, IntPtr Overlapped);
 
         [DllImport(Dll, SetLastError = true, CharSet = CharSet.Auto)]
         public static extern bool SetFilePointerEx(SafeFileHandle hFile, ulong liDistanceToMove, out ulong lpNewFilePointer, uint dwMoveMethod);
 
         [DllImport(Dll, SetLastError = true, CharSet = CharSet.Auto)]
+        [SuppressMessage("Microsoft.Interoperability", "CA1415:DeclarePInvokesCorrectly", Justification = Justifications.ItWorksNoTouchy)]
         public static extern unsafe bool WriteFile(SafeFileHandle hFile, byte* pBuffer, uint NumberOfBytesToWrite, uint* pNumberOfBytesWritten, IntPtr Overlapped);
     }
 }

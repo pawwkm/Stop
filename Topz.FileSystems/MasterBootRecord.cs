@@ -26,7 +26,7 @@ namespace Topz.FileSystems
             if (partitions == null)
                 throw new ArgumentNullException(nameof(partitions));
             if (partitions.Count != 4)
-                throw new ArgumentOutOfRangeException("There must be exactly 4 partitions.", nameof(partitions));
+                throw new ArgumentOutOfRangeException(nameof(partitions), "There must be exactly 4 partitions.");
 
             for (int i = 0; i < 4; i++)
             {
@@ -40,7 +40,7 @@ namespace Topz.FileSystems
         /// <summary>
         /// The 4 partitions of the Mbr.
         /// </summary>
-        public Partition[] Partitions
+        public IList<Partition> Partitions
         {
             get
             {

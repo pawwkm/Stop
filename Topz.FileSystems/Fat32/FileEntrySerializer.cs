@@ -16,7 +16,7 @@ namespace Topz.FileSystems.Fat32
         /// Deserializes a piece of data from a stream. 
         /// </summary>
         /// <param name="stream">The stream to deserialize the data from.</param>
-        /// <returns></returns>
+        /// <returns>The deserialized data.</returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="stream"/> is null.
         /// </exception>

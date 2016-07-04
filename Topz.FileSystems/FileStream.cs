@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace Topz.FileSystems
@@ -22,6 +23,7 @@ namespace Topz.FileSystems
         /// <exception cref="ArgumentNullException">
         /// <paramref name="data"/> is null.
         /// </exception>
+        [SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification = Justifications.CallStackIsCorrect)]
         public FileStream(byte[] data)
         {
             if (data == null)

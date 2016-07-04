@@ -1,11 +1,12 @@
-﻿using Pote;
-using System;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Topz.FileFormats.Atom
 {
     /// <summary>
     /// Defines an atom in an object file.
     /// </summary>
+    [SuppressMessage("Microsoft.Naming", "CA1724:TypeNamesShouldNotMatchNamespaces", Justification = Justifications.AcceptableConflict)]
     public abstract class Atom
     {
         private string name = "";

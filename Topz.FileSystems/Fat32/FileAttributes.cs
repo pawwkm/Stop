@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Topz.FileSystems.Fat32
 {
@@ -6,6 +7,7 @@ namespace Topz.FileSystems.Fat32
     /// Attributes used by <see cref="FileEntry.Attributes"/>.
     /// </summary>
     [Flags]
+    [SuppressMessage("Microsoft.Design", "CA1028:EnumStorageShouldBeInt32", Justification = Justifications.UnderlyingTypeIsRequired)]
     public enum FileAttributes : byte
     {
         /// <summary>

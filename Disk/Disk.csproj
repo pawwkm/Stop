@@ -4,15 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{60231FA6-15C6-4FA3-9DCE-A4BE20D7C36A}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{0D7B7B90-D603-4661-9858-8B7F9F0E2120}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Topz.FileFormats</RootNamespace>
-    <AssemblyName>Topz.FileFormats</AssemblyName>
+    <RootNamespace>Disk</RootNamespace>
+    <AssemblyName>Disk</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -20,56 +21,54 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <CodeAnalysisRuleSet>ExtendedDesignGuidelineRules.ruleset</CodeAnalysisRuleSet>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DocumentationFile>bin\Debug\Topz.FileFormats.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\Disk.XML</DocumentationFile>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <CodeAnalysisRuleSet>ExtendedDesignGuidelineRules.ruleset</CodeAnalysisRuleSet>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DocumentationFile>bin\Release\Topz.FileFormats.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\Disk.XML</DocumentationFile>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Pote, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Pote.1.0.1\lib\net45\Pote.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Pote.Text, Version=0.7.0.2, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Pote.Text.0.7.4\lib\net45\Pote.Text.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Atom\Atom.cs" />
-    <Compile Include="Atom\AtomLinker.cs" />
-    <Compile Include="Atom\AtomReader.cs" />
-    <Compile Include="Atom\AtomWriter.cs" />
-    <Compile Include="Atom\Data.cs" />
-    <Compile Include="Atom\InvalidObjectFileException.cs" />
-    <Compile Include="Atom\NullTerminatedString.cs" />
-    <Compile Include="Atom\ObjectFile.cs" />
-    <Compile Include="Atom\Procedure.cs" />
-    <Compile Include="BinaryReaderExtensions.cs" />
-    <Compile Include="BinaryWriterExtensions.cs" />
-    <Compile Include="Justifications.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Atom\Reference.cs" />
-    <Compile Include="StreamExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <CodeAnalysisDictionary Include="CustomDictionary.xml" />
+    <ProjectReference Include="..\Topz.FileSystems\Topz.FileSystems.csproj">
+      <Project>{e08e9db2-cf5e-441d-aaa3-9ef2a67093eb}</Project>
+      <Name>Topz.FileSystems</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "$(TargetPath)" "$(SolutionDir)Tools\" /s /Y
+xcopy "$(TargetPath).config" "$(SolutionDir)Tools\" /s /Y
+xcopy "$(TargetDir)*.dll" "$(SolutionDir)Tools\" /s /Y</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
