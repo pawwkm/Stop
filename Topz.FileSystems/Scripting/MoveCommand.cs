@@ -64,33 +64,54 @@ namespace Topz.FileSystems.Scripting
             else
             {
                 string[] files = null;
-
-                FileAttributes attributes = File.GetAttributes(Source);
-                if (attributes.HasFlag(FileAttributes.Directory))
+                if (IsHostPathADirctory(Source))
                     files = Directory.GetFiles(Source, "*.*", SearchOption.AllDirectories);
                 else
                     files = new[] { Source };
 
-                foreach (string file in files)
+                if (!Destination.StartsWith("/"))
+                    throw new InvalidOperationException();
+
+                MoveFilesFromHostToVirtual(files);
+            }
+        }
+
+        private void MoveFilesFromHostToVirtual(IEnumerable<string> files)
+        {
+            string destination = Destination.Substring(1);
+            foreach (string file in files)
+            {
+                string path = destination + Path.GetFileName(file);
+
+                if (!FileSystem.Exist(path))
+                    FileSystem.Create(path);
+
+                using (Stream s = File.OpenRead(file))
                 {
-                    if (Destination.StartsWith("/"))
+                    using (Stream d = FileSystem.Open(path))
                     {
-                        string destination = Destination.Substring(1);
-                        string path = destination + Path.GetFileName(file);
-
-                        if (!FileSystem.Exist(path))
-                            FileSystem.Create(path);
-
-                        using (Stream s = File.OpenRead(file))
-                        {
-                            using (Stream d = FileSystem.Open(path))
-                            {
-                                s.CopyTo(d);
-                                d.Flush();
-                            }
-                        }
+                        s.CopyTo(d);
+                        d.Flush();
                     }
                 }
+            }
+        }
+
+        private bool IsHostPathADirctory(string path)
+        {
+            try
+            {
+                FileAttributes attributes = File.GetAttributes(path);
+
+                return attributes.HasFlag(FileAttributes.Directory);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return true;
+            }
+            catch (FileNotFoundException)
+            {
+                return false;
             }
         }
     }
