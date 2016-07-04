@@ -85,6 +85,25 @@ namespace Topz.FileSystems.Scripting
         }
 
         /// <summary>
+        /// Postfixes a number of bytes with the appropriate unit.
+        /// </summary>
+        /// <param name="bytes">The number of bytes to postfix.</param>
+        /// <returns>The of bytes with a unit.</returns>
+        private static string ToSize(long bytes)
+        {
+            string[] sizes = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+
+            for (int i = 0; i < 8; i++)
+            {
+                var temp = bytes / Math.Pow(1024, i);
+                if (temp < 1024)
+                    return temp.ToString("#.##") + sizes[i];
+            }
+
+            return "";
+        }
+
+        /// <summary>
         /// List the currently available physical disks.
         /// </summary>
         private void ListDisks()
@@ -105,25 +124,6 @@ namespace Topz.FileSystems.Scripting
                     Console.WriteLine("{0}\t\t{1}", number, ToSize(raw));
                 }
             }
-        }
-
-        /// <summary>
-        /// Postfixes a number of bytes with the appropriate unit.
-        /// </summary>
-        /// <param name="bytes">The number of bytes to postfix.</param>
-        /// <returns>The of bytes with a unit.</returns>
-        private static string ToSize(long bytes)
-        {
-            string[] sizes = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
-
-            for (int i = 0; i < 8; i++)
-            {
-                var temp = bytes / Math.Pow(1024, i);
-                if (temp < 1024)
-                    return temp.ToString("#.##") + sizes[i];
-            }
-
-            return "";
         }
     }
 }

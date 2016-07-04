@@ -149,7 +149,6 @@ namespace Topz.FileSystems.Fat32
                 if (value * BytesPerSector > 32768)
                     throw new ArgumentException(nameof(SectorsPerCluster) + " * " + nameof(BytesPerSector) + " > 32k", nameof(value));
 
-
                 sectorsPerCluster = value;
             }
         }
@@ -201,7 +200,7 @@ namespace Topz.FileSystems.Fat32
 
         /// <summary>
         /// The number of sectors per track. This is only relevant for
-        /// media that has geometri.
+        /// media that has geometry.
         /// </summary>
         public ushort SectorsPerTrack
         {
@@ -216,8 +215,8 @@ namespace Topz.FileSystems.Fat32
         }
 
         /// <summary>
-        /// The number of heads on the media. This is only relavent for
-        /// media that has geometri.
+        /// The number of heads on the media. This is only relevant for
+        /// media that has geometry.
         /// </summary>
         public ushort Heads
         {
@@ -283,7 +282,6 @@ namespace Topz.FileSystems.Fat32
             }
             set
             {
-
                 fatSize = value;
             }
         }
@@ -396,7 +394,7 @@ namespace Topz.FileSystems.Fat32
 
         /// <summary>
         /// Extended boot signature (0x29). This is a signature byte that indicates that the following three
-        /// properties <see cref="Id"/>, <see cref="Label"/> and <see cref="SystemType"/> are pressent in the
+        /// properties <see cref="Id"/>, <see cref="Label"/> and <see cref="SystemType"/> are present in the
         /// boot sector.
         /// </summary>
         public byte BootSignature

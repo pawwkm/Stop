@@ -1,5 +1,8 @@
 ﻿namespace Topz.FileSystems.Scripting
 {
+    /// <summary>
+    /// The type of tokens in a script.
+    /// </summary>
     internal enum TokenType
     {
         /// <summary>

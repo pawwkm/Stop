@@ -91,7 +91,7 @@ namespace Topz.FileSystems.Scripting
                     else
                         index = int.Parse(operand.Text);
 
-                    if (1 > index || 4 < index)
+                    if (index < 1 || index > 4)
                         throw new ParsingException(operand.Position.ToString("Must be from 1 to 4."));
 
                     commands.Add(new SelectPartitionCommand(index));
@@ -125,7 +125,7 @@ namespace Topz.FileSystems.Scripting
                     else
                         command.Index = int.Parse(token.Text);
 
-                    if (1 > command.Index || 4 < command.Index)
+                    if (command.Index < 1 || command.Index > 4)
                         throw new ParsingException(token.Position.ToString("Must be from 1 to 4."));
 
                     token = source.Next();
@@ -151,7 +151,7 @@ namespace Topz.FileSystems.Scripting
                     commands.Add(command);
                     break;
                 default:
-                    throw new ParsingException(obj.Position.ToString("Expected the '" + Keywords.Mbr +"' or '" + Keywords.Partition + "' keyword."));
+                    throw new ParsingException(obj.Position.ToString("Expected the '" + Keywords.Mbr + "' or '" + Keywords.Partition + "' keyword."));
             }
         }
 

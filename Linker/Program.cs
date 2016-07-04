@@ -3,7 +3,7 @@
 namespace Linker
 {
     /// <summary>
-    /// The manin class of the progam. 
+    /// The main class of the progam. 
     /// </summary>
     internal class Program
     {

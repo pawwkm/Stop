@@ -79,42 +79,6 @@ namespace Topz.FileFormats.Atom
         }
 
         /// <summary>
-        /// Copies the references from the object <paramref name="files"/>.
-        /// </summary>
-        /// <param name="files">The object files to copy references from.</param>
-        /// <param name="combined">The object file that owns the copied references.</param>
-        private static void CopyReferences(IEnumerable<ObjectFile> files, ObjectFile combined)
-        {
-            foreach (var file in files)
-            {
-                foreach (var procedure in file.OfType<Procedure>().Where(p => p.IsDefined))
-                {
-                    foreach (var reference in procedure.References)
-                    {
-                        var proc = combined.OfType<Procedure>().First(p => p.Name == procedure.Name);
-                        var referenced = combined.First(a => a.Name == reference.Atom.Name);
-
-                        var r = new Reference(referenced);
-                        r.Address = reference.Address;
-                        r.IsAddressInLittleEndian = reference.IsAddressInLittleEndian;
-                        r.SizeOfAddress = reference.SizeOfAddress;
-
-                        if (!referenced.IsGlobal)
-                        {
-                            var a = GetDefiningObjectFile(referenced.Name, files);
-                            var b = GetDefiningObjectFile(proc.Name, files);
-
-                            if (a != null && b != null && a != b)
-                                throw new InvalidObjectFileException("'" + proc.Name + "' is referencing '" + referenced.Name + "' which is local to another object file.");
-                        }
-
-                        proc.References.Add(r);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
         /// Links the give object <paramref name="files"/> and writes 
         /// the binary code to the <paramref name="destination"/>.
         /// </summary>
@@ -162,6 +126,42 @@ namespace Topz.FileFormats.Atom
                 Link(atom);
 
             Resolve(file.OfType<Procedure>());
+        }
+
+        /// <summary>
+        /// Copies the references from the object <paramref name="files"/>.
+        /// </summary>
+        /// <param name="files">The object files to copy references from.</param>
+        /// <param name="combined">The object file that owns the copied references.</param>
+        private static void CopyReferences(IEnumerable<ObjectFile> files, ObjectFile combined)
+        {
+            foreach (var file in files)
+            {
+                foreach (var procedure in file.OfType<Procedure>().Where(p => p.IsDefined))
+                {
+                    foreach (var reference in procedure.References)
+                    {
+                        var proc = combined.OfType<Procedure>().First(p => p.Name == procedure.Name);
+                        var referenced = combined.First(a => a.Name == reference.Atom.Name);
+
+                        var r = new Reference(referenced);
+                        r.Address = reference.Address;
+                        r.IsAddressInLittleEndian = reference.IsAddressInLittleEndian;
+                        r.SizeOfAddress = reference.SizeOfAddress;
+
+                        if (!referenced.IsGlobal)
+                        {
+                            var a = GetDefiningObjectFile(referenced.Name, files);
+                            var b = GetDefiningObjectFile(proc.Name, files);
+
+                            if (a != null && b != null && a != b)
+                                throw new InvalidObjectFileException("'" + proc.Name + "' is referencing '" + referenced.Name + "' which is local to another object file.");
+                        }
+
+                        proc.References.Add(r);
+                    }
+                }
+            }
         }
 
         /// <summary>

@@ -16,7 +16,7 @@ namespace Topz.FileSystems.Scripting
         /// </exception>
         public SelectPartitionCommand(int index)
         {
-            if (1 > index || 4 < index)
+            if (index < 1 || index > 4)
                 throw new ArgumentOutOfRangeException(nameof(index), "Must be from 1 to 4.");
 
             Index = index;

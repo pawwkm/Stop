@@ -11,27 +11,53 @@ namespace Topz.FileSystems.Fat32
     /// </summary>
     public class Fat32FileSystem : FileSystem
     {
-        private class PathSegment
-        {
-            public string Name
-            {
-                get;
-                set;
-            }
-
-            public bool IsDirectory
-            {
-                get;
-                set;
-            }
-        }
-
         private BootSector boot;
 
         private FileSystemInfo info;
 
         private List<Fat32FileStream> openedFiles = new List<Fat32FileStream>();
-        
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Fat32FileSystem"/> class.
+        /// </summary>
+        /// <param name="stream">The stream containing the image of the file system.</param>
+        /// <param name="partition">The partition the file system is on.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="stream"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="stream"/> cannot be read or written or seeked.
+        /// </exception>
+        public Fat32FileSystem(Stream stream, Partition partition) : base(stream, partition)
+        {
+            boot = ReadStructure<BootSector>(Partition.Offset * 512);
+            info = ReadStructure<FileSystemInfo>((boot.FileSystemInfoSector * boot.BytesPerSector) + (Partition.Offset * 512));
+
+            if (!info.IsFileSystemInfo)
+                throw new ArgumentException("File System Info is corrupted.", nameof(stream));
+        }
+
+        /// <summary>
+        /// Finalizes an instance of the <see cref="Fat32FileSystem"/> class.
+        /// Writes crucial structures to disk.
+        /// </summary>
+        ~Fat32FileSystem()
+        {
+            WriteStructure(0, boot);
+            WriteStructure(boot.FileSystemInfoSector * boot.BytesPerSector, info);
+        }
+
+        /// <summary>
+        /// The first sector that files and directories are stored.
+        /// </summary>
+        private uint FirstDataSector
+        {
+            get
+            {
+                return boot.ReservedSectors + (boot.Fats * boot.FatSize);
+            }
+        }
+
         /// <summary>
         /// Gets or sets the cluster at a given index.
         /// </summary>
@@ -43,7 +69,7 @@ namespace Topz.FileSystems.Fat32
             {
                 if (index > boot.Clusters - 1)
                     throw new ArgumentOutOfRangeException(nameof(index));
-                
+
                 Source.Position = boot.ReservedSectors * boot.BytesPerSector + index * 4 + Partition.Offset * 512;
 
                 byte[] bytes = new byte[4];
@@ -55,7 +81,7 @@ namespace Topz.FileSystems.Fat32
             {
                 if (index > boot.Clusters - 1)
                     throw new ArgumentOutOfRangeException(nameof(index));
-                
+
                 Source.Position = boot.ReservedSectors * boot.BytesPerSector + index * 4 + Partition.Offset * 512;
 
                 byte[] bytes = BitConverter.GetBytes(value);
@@ -152,37 +178,6 @@ namespace Topz.FileSystems.Fat32
                 return false;
 
             return true;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Fat32FileSystem"/> class.
-        /// </summary>
-        /// <param name="stream">The stream containing the image of the file system.</param>
-        /// <param name="partition">The partition the file system is on.</param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="stream"/> is null.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="stream"/> cannot be read or written or seeked.
-        /// </exception>
-        public Fat32FileSystem(Stream stream, Partition partition) : base(stream, partition)
-        {
-            boot = ReadStructure<BootSector>(Partition.Offset * 512);
-            info = ReadStructure<FileSystemInfo>((boot.FileSystemInfoSector * boot.BytesPerSector) + (Partition.Offset * 512));
-
-            if (!info.IsFileSystemInfo)
-                throw new ArgumentException("File System Info is corrupted.", nameof(stream));
-        }
-
-        /// <summary>
-        /// The first sector that files and directories are stored.
-        /// </summary>
-        private uint FirstDataSector
-        {
-            get
-            {
-                return boot.ReservedSectors + (boot.Fats * boot.FatSize);
-            }
         }
 
         /// <summary>
@@ -527,7 +522,8 @@ namespace Topz.FileSystems.Fat32
         /// </summary>
         private void UpdateNextFreeCluster()
         {
-            for (uint i = 2; i < uint.MaxValue; i++) // Start looking at cluster 2. Cluster 0 and 1 are special.
+            // Start looking at cluster 2. Cluster 0 and 1 are special.
+            for (uint i = 2; i < uint.MaxValue; i++)
             {
                 if (this[i] == 0)
                 {
@@ -598,12 +594,27 @@ namespace Topz.FileSystems.Fat32
         }
 
         /// <summary>
-        /// Writes crucial structures to disk.
+        /// The segment of a path.
         /// </summary>
-        ~Fat32FileSystem()
+        private class PathSegment
         {
-            WriteStructure(0, boot);
-            WriteStructure(boot.FileSystemInfoSector * boot.BytesPerSector, info);
+            /// <summary>
+            /// The name of the segment.
+            /// </summary>
+            public string Name
+            {
+                get;
+                set;
+            }
+
+            /// <summary>
+            /// Is the segment a directory or a file.
+            /// </summary>
+            public bool IsDirectory
+            {
+                get;
+                set;
+            }
         }
     }
 }

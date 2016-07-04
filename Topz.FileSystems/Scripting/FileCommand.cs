@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Topz.FileSystems.Fat32;
 
 namespace Topz.FileSystems.Scripting
 {
     /// <summary>
-    /// Base class for commands that opererates on <see cref="FileSystem"/>.
+    /// Base class for commands that operates on <see cref="FileSystem"/>.
     /// </summary>
     internal abstract class FileCommand : Command
     {

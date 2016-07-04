@@ -15,7 +15,7 @@ namespace Topz.FileSystems.Scripting
         private Context context = new Context();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Script"/> with no commands.
+        /// Initializes a new instance of the <see cref="Script"/> class with no commands.
         /// </summary>
         public Script()
         {

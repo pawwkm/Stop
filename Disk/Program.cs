@@ -6,7 +6,7 @@ using Topz.FileSystems.Scripting;
 namespace Disk
 {
     /// <summary>
-    /// The manin class of the program. 
+    /// The main class of the program. 
     /// </summary>
     internal class Program
     {

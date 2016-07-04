@@ -12,7 +12,7 @@ namespace Topz.FileSystems
         /// Deserializes a piece of data from a stream. 
         /// </summary>
         /// <param name="stream">The stream to deserialize the data from.</param>
-        /// <returns></returns>
+        /// <returns>The deserialized data.</returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="stream"/> is null.
         /// </exception>
@@ -98,19 +98,6 @@ namespace Topz.FileSystems
             // Boot signature.
             stream.WriteByte(0x55);
             stream.WriteByte(0xAA);
-        }
-
-        private uint ChsToLba(byte[] chs)
-        {
-            ushort cylinderSector = BitConverter.ToUInt16(chs, 1);
-
-            byte heads = chs[0];
-            ushort sector = (ushort)(cylinderSector & 0x3F);
-            ushort cylinder = (ushort)(cylinderSector & 0xFFC0);
-
-            // The geometry is needed here.
-
-            return 0;
         }
     }
 }
