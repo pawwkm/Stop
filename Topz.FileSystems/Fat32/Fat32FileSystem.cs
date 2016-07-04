@@ -120,10 +120,6 @@ namespace Topz.FileSystems.Fat32
             bytes = BitConverter.GetBytes((ushort)0xAA55);
             stream.Position = 510 + offset;
             stream.Write(bytes, 0, bytes.Length);
-
-            // Reach the end of the disk to allocated it.
-            stream.Position = boot.Sectors * boot.BytesPerSector + offset;
-            stream.WriteByte(0);
         }
 
         /// <summary>

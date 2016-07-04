@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Topz.FileSystems.Scripting
 {
+    /// <summary>
+    /// Creates a partition on a disk.
+    /// </summary>
     internal class CreatePartitionCommand : Command
     {
         /// <summary>
@@ -54,8 +53,10 @@ namespace Topz.FileSystems.Scripting
                 MasterBootRecordSerializer serializer = new MasterBootRecordSerializer();
                 MasterBootRecord mbr = serializer.Deserialize(context.Disk);
 
-                mbr.Partitions[Index].Offset = Offset;
-                mbr.Partitions[Index].Sectors = Sectors;
+                mbr.Partitions[Index - 1].Offset = Offset;
+                mbr.Partitions[Index - 1].Sectors = Sectors;
+
+                serializer.Serialize(mbr, context.Disk);
             }
         }
     }

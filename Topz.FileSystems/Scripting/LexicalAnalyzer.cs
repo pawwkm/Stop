@@ -15,13 +15,6 @@ namespace Topz.FileSystems.Scripting
     /// </summary>
     internal class LexicalAnalyzer : LexicalAnalyzer<TokenType>
     {
-        private static readonly string[] Keywords =
-        {
-            "select", "disk",
-            "create", "mbr", "partition", "offset", "sectors",
-            "ask"
-        };
-
         /// <summary>
         /// Initializes a new instance of the <see cref="LexicalAnalyzer"/> class.
         /// </summary>
@@ -68,7 +61,7 @@ namespace Topz.FileSystems.Scripting
                 return new Token<TokenType>("", TokenType.EndOfInput, Position.DeepCopy());
 
             char c = (char)Source.Peek();
-            if (Source.MatchesAnyOf(Keywords))
+            if (Source.MatchesAnyOf(Keywords.All.ToArray()))
                 return Keyword();
             if (char.IsDigit(c))
                 return Integer();
@@ -86,22 +79,13 @@ namespace Topz.FileSystems.Scripting
         private Token<TokenType> Keyword()
         {
             InputPosition start = Position.DeepCopy();
-            string text = "";
-
-            char c;
-            while (!Source.EndOfStream)
+            foreach (string keyword in Keywords.All)
             {
-                c = (char)Source.Peek();
-                if (!char.IsLetter(c))
-                    break;
-
-                text += Advance();
+                if (Consume(keyword))
+                    return new Token<TokenType>(keyword, TokenType.Keyword, start);
             }
 
-            if (!text.ToLower().IsOneOf(Keywords))
-                return new Token<TokenType>(text, TokenType.Unknown, start);
-
-            return new Token<TokenType>(text, TokenType.Keyword, start);
+            return new Token<TokenType>(Advance(), TokenType.Unknown, start);
         }
 
         /// <summary>

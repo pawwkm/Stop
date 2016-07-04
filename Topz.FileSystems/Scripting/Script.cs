@@ -19,7 +19,6 @@ namespace Topz.FileSystems.Scripting
         /// </summary>
         public Script()
         {
-
         }
 
         /// <summary>

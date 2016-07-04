@@ -37,12 +37,17 @@ namespace Topz.FileSystems.Scripting
                 Token<TokenType> token = analyzer.LookAhead();
                 switch (token.Text.ToLower())
                 {
-                    case "select":
+                    case Keywords.Select:
                         Select();
                         break;
-                    case "create":
+                    case Keywords.Create:
                         Create();
                         break;
+                    case Keywords.Format:
+                        Format();
+                        break;
+                    default:
+                        throw new ParsingException(token.Position.ToString("Expected the '" + Keywords.Select + "', '" + Keywords.Create + "' or '" + Keywords.Format + "' keyword."));
                 }
             }
 
@@ -55,40 +60,39 @@ namespace Topz.FileSystems.Scripting
         private void Select()
         {
             Token<TokenType> select = source.Next();
-            if (select.Text.ToLower() != "select")
-                throw new ParsingException(select.Position.ToString("Expected the 'select' keyword."));
+            if (select.Text.ToLower() != Keywords.Select)
+                throw new ParsingException(select.Position.ToString("Expected the '" + Keywords.Select + "' keyword."));
 
             Token<TokenType> obj = source.Next();
 
             Token<TokenType> operand = source.Next();
             switch (obj.Text.ToLower())
             {
-                case "disk":
-                    if (operand.Text.ToLower() == "ask")
+                case Keywords.Disk:
+                    if (operand.Text.ToLower() == Keywords.Ask)
                         commands.Add(new SelectDiskCommand());
                     else if (operand.Type == TokenType.Integer)
                         commands.Add(new SelectDiskCommand(int.Parse(operand.Text)));
                     else if (operand.Type == TokenType.String)
                         commands.Add(new SelectDiskCommand(operand.Text));
                     else
-                        throw new ParsingException(operand.Position.ToString("Expected a string, integer or the 'ask' keyword."));
+                        throw new ParsingException(operand.Position.ToString("Expected a string, integer or the '" + Keywords.Ask + "' keyword."));
                     break;
-                case "partition":
-                    Token<TokenType> token = source.Next();
+                case Keywords.Partition:
                     int index = 0;
 
-                    if (token.Type != TokenType.Integer)
-                        throw new ParsingException(token.Position.ToString("Expected integer."));
+                    if (operand.Type != TokenType.Integer)
+                        throw new ParsingException(operand.Position.ToString("Expected integer."));
                     else
-                        index = int.Parse(token.Text);
+                        index = int.Parse(operand.Text);
 
                     if (1 > index || 4 < index)
-                        throw new ParsingException(token.Position.ToString("Must be from 1 to 4."));
+                        throw new ParsingException(operand.Position.ToString("Must be from 1 to 4."));
 
                     commands.Add(new SelectPartitionCommand(index));
                     break;
                 default:
-                    throw new ParsingException(obj.Position.ToString("Expected the 'disk' keyword."));
+                    throw new ParsingException(obj.Position.ToString("Expected the '" + Keywords.Disk + "' or 'partition' keyword."));
             }
         }
 
@@ -98,16 +102,16 @@ namespace Topz.FileSystems.Scripting
         private void Create()
         {
             Token<TokenType> create = source.Next();
-            if (create.Text.ToLower() != "create")
-                throw new ParsingException(create.Position.ToString("Expected the 'create' keyword."));
+            if (create.Text.ToLower() != Keywords.Create)
+                throw new ParsingException(create.Position.ToString("Expected the '" + Keywords.Create + "' keyword."));
 
             Token<TokenType> obj = source.Next();
             switch (obj.Text.ToLower())
             {
-                case "mbr":
+                case Keywords.Mbr:
                     commands.Add(new CreateMbrCommand());
                     break;
-                case "partition":
+                case Keywords.Partition:
                     CreatePartitionCommand command = new CreatePartitionCommand();
 
                     Token<TokenType> token = source.Next();
@@ -120,8 +124,8 @@ namespace Topz.FileSystems.Scripting
                         throw new ParsingException(token.Position.ToString("Must be from 1 to 4."));
 
                     token = source.Next();
-                    if (token.Text.ToLower() != "offset")
-                        throw new ParsingException(token.Position.ToString("Expected the 'offset' keyword."));
+                    if (token.Text.ToLower() != Keywords.Offset)
+                        throw new ParsingException(token.Position.ToString("Expected the '" + Keywords.Offset + "' keyword."));
 
                     token = source.Next();
                     if (token.Type != TokenType.Integer)
@@ -130,8 +134,8 @@ namespace Topz.FileSystems.Scripting
                         command.Offset = uint.Parse(token.Text);
 
                     token = source.Next();
-                    if (token.Text.ToLower() != "sectors")
-                        throw new ParsingException(token.Position.ToString("Expected the 'sectors' keyword."));
+                    if (token.Text.ToLower() != Keywords.Sectors)
+                        throw new ParsingException(token.Position.ToString("Expected the '" + Keywords.Sectors + "' keyword."));
 
                     token = source.Next();
                     if (token.Type != TokenType.Integer)
@@ -142,8 +146,21 @@ namespace Topz.FileSystems.Scripting
                     commands.Add(command);
                     break;
                 default:
-                    throw new ParsingException(obj.Position.ToString("Expected the 'mbr' or 'partition' keyword."));
+                    throw new ParsingException(obj.Position.ToString("Expected the '" + Keywords.Mbr +"' or '" + Keywords.Partition + "' keyword."));
             }
+        }
+
+        private void Format()
+        {
+            Token<TokenType> create = source.Next();
+            if (create.Text.ToLower() != Keywords.Format)
+                throw new ParsingException(create.Position.ToString("Expected the '" + Keywords.Format + "' keyword."));
+
+            Token<TokenType> system = source.Next();
+            if (system.Text.ToLower() == Keywords.Fat32)
+                commands.Add(new FormatFat32Command());
+            else
+                throw new ParsingException(system.Position.ToString("Expected the fat32 format."));
         }
     }
 }
