@@ -84,6 +84,29 @@ namespace Topz.FileSystems.Scripting
         }
 
         /// <summary>
+        /// Checks of a path is a path on the hosting file system.
+        /// </summary>
+        /// <param name="path">The path to check.</param>
+        /// <returns>True if the <paramref name="path"/> is a valid path on the hosting file system.</returns>
+        private static bool IsHostPathADirctory(string path)
+        {
+            try
+            {
+                FileAttributes attributes = File.GetAttributes(path);
+
+                return attributes.HasFlag(FileAttributes.Directory);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return true;
+            }
+            catch (FileNotFoundException)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Moves a set of files from the host file system to the virtual file system.
         /// </summary>
         /// <param name="files">The files to move.</param>
@@ -124,29 +147,6 @@ namespace Topz.FileSystems.Scripting
                         d.Flush();
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        /// Checks of a path is a path on the hosting file system.
-        /// </summary>
-        /// <param name="path">The path to check.</param>
-        /// <returns>True if the <paramref name="path"/> is a valid path on the hosting file system.</returns>
-        private bool IsHostPathADirctory(string path)
-        {
-            try
-            {
-                FileAttributes attributes = File.GetAttributes(path);
-
-                return attributes.HasFlag(FileAttributes.Directory);
-            }
-            catch (DirectoryNotFoundException)
-            {
-                return true;
-            }
-            catch (FileNotFoundException)
-            {
-                return false;
             }
         }
     }

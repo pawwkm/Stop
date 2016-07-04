@@ -17,8 +17,6 @@ namespace Topz.FileSystems.Fat32
 
         private const string Fat32 = "FAT32   ";
         
-        private byte[] jump = { 0xEB, 0x58, 0x90 };
-        
         private byte[] oemName = new byte[8];
 
         private ushort bytesPerSector = 512;
@@ -293,7 +291,7 @@ namespace Topz.FileSystems.Fat32
         ///            -- 1 means only one FAT is active; it is the one referenced in bits 0-3.
         /// Bits 8-15  -- Reserved.
         /// </summary>
-        public ushort Flags
+        public ushort SystemAttributes
         {
             get
             {

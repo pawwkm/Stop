@@ -66,7 +66,9 @@
     <Compile Include="Fat32\FileSystemInfoSerializer.cs" />
     <Compile Include="FileStream.cs" />
     <Compile Include="FileSystem.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="ISerializer.cs" />
+    <Compile Include="Justifications.cs" />
     <Compile Include="MasterBootRecord.cs" />
     <Compile Include="MasterBootRecordSerializer.cs" />
     <Compile Include="NativeMethods.cs">

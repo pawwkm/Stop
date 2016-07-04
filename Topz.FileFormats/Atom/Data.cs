@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Topz.FileFormats.Atom
 {
@@ -6,6 +7,7 @@ namespace Topz.FileFormats.Atom
     /// Data blocks can be any chunk of data that doesn't fit in as 
     /// one of the other <see cref="Atom"/> types.
     /// </summary>
+    [SuppressMessage("Microsoft.Naming", "CA1724:TypeNamesShouldNotMatchNamespaces", Justification = Justifications.AcceptableConflict)]
     public sealed class Data : Atom
     {
         private List<byte> content = new List<byte>();

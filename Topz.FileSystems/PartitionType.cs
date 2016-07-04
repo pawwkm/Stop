@@ -1,8 +1,11 @@
-﻿namespace Topz.FileSystems
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Topz.FileSystems
 {
     /// <summary>
     /// The type of partition.
     /// </summary>
+    [SuppressMessage("Microsoft.Design", "CA1028:EnumStorageShouldBeInt32", Justification = Justifications.UnderlyingTypeIsRequired)]
     public enum PartitionType : byte
     {
         /// <summary>

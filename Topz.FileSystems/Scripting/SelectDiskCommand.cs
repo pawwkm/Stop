@@ -106,7 +106,7 @@ namespace Topz.FileSystems.Scripting
         /// <summary>
         /// List the currently available physical disks.
         /// </summary>
-        private void ListDisks()
+        private static void ListDisks()
         {
             var prefix = "\\\\.\\PHYSICALDRIVE";
 
@@ -115,10 +115,10 @@ namespace Topz.FileSystems.Scripting
             var ms = new ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive");
             foreach (ManagementObject mo in ms.Get())
             {
-                var id = mo["DeviceID"].ToString();
-                if (id.StartsWith(prefix))
+                var deviceId = mo["DeviceID"].ToString();
+                if (deviceId.StartsWith(prefix))
                 {
-                    var number = id.Substring(prefix.Length);
+                    var number = deviceId.Substring(prefix.Length);
                     var raw = Convert.ToInt64(mo["Size"]);
 
                     Console.WriteLine("{0}\t\t{1}", number, ToSize(raw));

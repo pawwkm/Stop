@@ -50,7 +50,7 @@ namespace Topz.FileSystems.Scripting
                         Move();
                         break;
                     default:
-                        string error = string.Format("Expected the {0}, {1}, {2} or keyword.", Keywords.Select, Keywords.Create, Keywords.Format, Keywords.Move);
+                        string error = string.Format("Expected the {0}, {1}, {2}, {3} or keyword.", Keywords.Select, Keywords.Create, Keywords.Format, Keywords.Move);
 
                         throw new ParsingException(token.Position.ToString(error));
                 }

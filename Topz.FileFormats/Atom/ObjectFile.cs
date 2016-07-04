@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Topz.FileFormats.Atom
 {
     /// <summary>
     /// An Atom object file.
     /// </summary>
+    [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = Justifications.CollectionSuffixNotApplicable)]
     public sealed class ObjectFile : IEnumerable<Atom>
     {
         private List<Atom> atoms = new List<Atom>();

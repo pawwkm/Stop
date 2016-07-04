@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -28,6 +29,7 @@ namespace Topz.FileFormats.Atom
         /// <exception cref="InvalidObjectFileException">
         /// The combined object file is invalid.
         /// </exception>
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = Justifications.InstanceAccessMayBeNeededLater)]
         public ObjectFile Link(IEnumerable<ObjectFile> files)
         {
             if (files == null)

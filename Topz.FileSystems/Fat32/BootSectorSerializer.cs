@@ -63,7 +63,7 @@ namespace Topz.FileSystems.Fat32
 
             bytes = new byte[2];
             stream.Read(bytes, 0, bytes.Length);
-            boot.Flags = BitConverter.ToUInt16(bytes, 0);
+            boot.SystemAttributes = BitConverter.ToUInt16(bytes, 0);
 
             stream.Read(bytes, 0, bytes.Length);
             boot.Version = BitConverter.ToUInt16(bytes, 0);
@@ -155,7 +155,7 @@ namespace Topz.FileSystems.Fat32
             stream.Write(BitConverter.GetBytes(data.HiddenSectors), 0, 4);
             stream.Write(BitConverter.GetBytes(data.Sectors), 0, 4);
             stream.Write(BitConverter.GetBytes(data.FatSize), 0, 4);
-            stream.Write(BitConverter.GetBytes(data.Flags), 0, 2);
+            stream.Write(BitConverter.GetBytes(data.SystemAttributes), 0, 2);
             stream.Write(BitConverter.GetBytes(data.Version), 0, 2);
             stream.Write(BitConverter.GetBytes(data.RootCluster), 0, 4);
             stream.Write(BitConverter.GetBytes(data.FileSystemInfoSector), 0, 2);
