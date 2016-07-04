@@ -120,6 +120,38 @@ namespace Topz.FileSystems.Fat32
             bytes = BitConverter.GetBytes((ushort)0xAA55);
             stream.Position = 510 + offset;
             stream.Write(bytes, 0, bytes.Length);
+
+            // Reach the end of the disk to allocated it.
+            stream.Position = boot.Sectors * boot.BytesPerSector + offset;
+            stream.WriteByte(0);
+        }
+
+        /// <summary>
+        /// Checks of a <paramref name="partition"/> really contains a FAT32.
+        /// </summary>
+        /// <param name="stream">The stream the <paramref name="partition"/> is on.</param>
+        /// <param name="partition">The partition the file system is on.</param>
+        /// <returns>True if the <paramref name="partition"/> if formatted as FAT32; otherwise false.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="stream"/> or <paramref name="partition"/> is null.
+        /// </exception>
+        public static bool IsFat32FileSystem(Stream stream, Partition partition)
+        {
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
+            if (partition == null)
+                throw new ArgumentNullException(nameof(partition));
+
+            byte[] jump = { 0xEB, 0x58, 0x90 };
+            byte[] buffer = new byte[3];
+
+            stream.Position = partition.Offset * Partition.BytesPerSector;
+            stream.Read(buffer, 0, buffer.Length);
+
+            if (!jump.SequenceEqual(buffer))
+                return false;
+
+            return true;
         }
 
         /// <summary>

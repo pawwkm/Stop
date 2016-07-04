@@ -1,8 +1,7 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using System.Text;
+﻿using Pote;
+using System;
 using System.Linq;
-using Pote;
+using System.Text;
 
 namespace Topz.FileSystems.Fat32
 {

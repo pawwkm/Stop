@@ -58,6 +58,16 @@ namespace Topz.FileSystems.Scripting
         public const string Fat32 = "fat32";
 
         /// <summary>
+        /// The 'move' keyword.
+        /// </summary>
+        public const string Move = "move";
+
+        /// <summary>
+        /// The 'to' keyword.
+        /// </summary>
+        public const string To = "to";
+
+        /// <summary>
         /// All the keywords as a list.
         /// </summary>
         public static IEnumerable<string> All
@@ -75,7 +85,9 @@ namespace Topz.FileSystems.Scripting
                     Sectors,
                     Ask,
                     Format,
-                    Fat32
+                    Fat32,
+                    Move,
+                    To
                 };
             }
         }

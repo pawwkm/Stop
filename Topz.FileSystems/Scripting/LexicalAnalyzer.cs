@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Pote.Text;
+﻿using Pote.Text;
+using System;
 using System.Globalization;
-using Pote;
 using System.IO;
+using System.Linq;
 
 namespace Topz.FileSystems.Scripting
 {

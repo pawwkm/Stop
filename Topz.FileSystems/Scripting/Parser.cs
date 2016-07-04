@@ -46,8 +46,13 @@ namespace Topz.FileSystems.Scripting
                     case Keywords.Format:
                         Format();
                         break;
+                    case Keywords.Move:
+                        Move();
+                        break;
                     default:
-                        throw new ParsingException(token.Position.ToString("Expected the '" + Keywords.Select + "', '" + Keywords.Create + "' or '" + Keywords.Format + "' keyword."));
+                        string error = string.Format("Expected the {0}, {1}, {2} or keyword.", Keywords.Select, Keywords.Create, Keywords.Format, Keywords.Move);
+
+                        throw new ParsingException(token.Position.ToString(error));
                 }
             }
 
@@ -150,17 +155,44 @@ namespace Topz.FileSystems.Scripting
             }
         }
 
+        /// <summary>
+        /// Parses a format command.
+        /// </summary>
         private void Format()
         {
-            Token<TokenType> create = source.Next();
-            if (create.Text.ToLower() != Keywords.Format)
-                throw new ParsingException(create.Position.ToString("Expected the '" + Keywords.Format + "' keyword."));
+            Token<TokenType> format = source.Next();
+            if (format.Text.ToLower() != Keywords.Format)
+                throw new ParsingException(format.Position.ToString("Expected the '" + Keywords.Format + "' keyword."));
 
             Token<TokenType> system = source.Next();
             if (system.Text.ToLower() == Keywords.Fat32)
                 commands.Add(new FormatFat32Command());
             else
                 throw new ParsingException(system.Position.ToString("Expected the fat32 format."));
+        }
+
+        /// <summary>
+        /// Parses a move command.
+        /// </summary>
+        private void Move()
+        {
+            Token<TokenType> move = source.Next();
+            if (move.Text.ToLower() != Keywords.Move)
+                throw new ParsingException(move.Position.ToString("Expected the '" + Keywords.Move + "' keyword."));
+
+            Token<TokenType> s = source.Next();
+            if (s.Type != TokenType.String)
+                throw new ParsingException(s.Position.ToString("Expected a string."));
+
+            Token<TokenType> to = source.Next();
+            if (to.Text.ToLower() != Keywords.To)
+                throw new ParsingException(move.Position.ToString("Expected the '" + Keywords.To + "' keyword."));
+
+            Token<TokenType> destination = source.Next();
+            if (destination.Type != TokenType.String)
+                throw new ParsingException(s.Position.ToString("Expected a string."));
+
+            commands.Add(new MoveCommand(s.Text, destination.Text));
         }
     }
 }

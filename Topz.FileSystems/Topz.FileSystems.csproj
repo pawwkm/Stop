@@ -80,9 +80,11 @@
     <Compile Include="Scripting\Context.cs" />
     <Compile Include="Scripting\CreateMbrCommand.cs" />
     <Compile Include="Scripting\CreatePartitionCommand.cs" />
+    <Compile Include="Scripting\FileCommand.cs" />
     <Compile Include="Scripting\FormatFat32Command.cs" />
     <Compile Include="Scripting\Keywords.cs" />
     <Compile Include="Scripting\LexicalAnalyzer.cs" />
+    <Compile Include="Scripting\MoveCommand.cs" />
     <Compile Include="Scripting\Parser.cs" />
     <Compile Include="Scripting\Script.cs" />
     <Compile Include="Scripting\SelectDiskCommand.cs" />
