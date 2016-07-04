@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Topz.FileSystems.Scripting
 {
@@ -51,6 +48,13 @@ namespace Topz.FileSystems.Scripting
             private set;
         }
 
+        /// <summary>
+        /// Moves one or more files to and from a virtualized file system.
+        /// </summary>
+        /// <param name="context">The context to work on.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="context"/> is null.
+        /// </exception>
         public override void Execute(Context context)
         {
             base.Execute(context);
@@ -59,7 +63,10 @@ namespace Topz.FileSystems.Scripting
 
             if (Source.StartsWith("/"))
             {
-
+                if (Destination.StartsWith("/"))
+                    throw new NotImplementedException("Moving files inside of virtual file system not yet supported.");
+                else
+                    MoveFilesFromVirtualToHost(new[] { Source.Substring(1) });
             }
             else
             {
@@ -70,12 +77,16 @@ namespace Topz.FileSystems.Scripting
                     files = new[] { Source };
 
                 if (!Destination.StartsWith("/"))
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException("Can't move files from one place to another on the host.");
 
                 MoveFilesFromHostToVirtual(files);
             }
         }
 
+        /// <summary>
+        /// Moves a set of files from the host file system to the virtual file system.
+        /// </summary>
+        /// <param name="files">The files to move.</param>
         private void MoveFilesFromHostToVirtual(IEnumerable<string> files)
         {
             string destination = Destination.Substring(1);
@@ -97,6 +108,30 @@ namespace Topz.FileSystems.Scripting
             }
         }
 
+        /// <summary>
+        /// Moves a set of files from the virtual file system to the host file system.
+        /// </summary>
+        /// <param name="files">The files to move.</param>
+        private void MoveFilesFromVirtualToHost(IEnumerable<string> files)
+        {
+            foreach (string file in files)
+            {
+                using (Stream s = FileSystem.Open(file))
+                {
+                    using (Stream d = File.OpenWrite(Path.Combine(Destination, file)))
+                    {
+                        s.CopyTo(d);
+                        d.Flush();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Checks of a path is a path on the hosting file system.
+        /// </summary>
+        /// <param name="path">The path to check.</param>
+        /// <returns>True if the <paramref name="path"/> is a valid path on the hosting file system.</returns>
         private bool IsHostPathADirctory(string path)
         {
             try

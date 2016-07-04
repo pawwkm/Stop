@@ -31,6 +31,9 @@ namespace Topz.FileSystems.Scripting
         /// </exception>
         public override void Execute(Context context)
         {
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+
             if (Fat32FileSystem.IsFat32FileSystem(context.Disk, context.Partition))
                 FileSystem = new Fat32FileSystem(context.Disk, context.Partition);
             else
