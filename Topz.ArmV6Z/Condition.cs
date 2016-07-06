@@ -95,11 +95,6 @@
         /// Always execute the instruction.
         /// The mnemonic extension is 'AL'.
         /// </summary>
-        Always = 3758096384,
-
-        /// <summary>
-        /// Not implemented yet.
-        /// </summary>
-        Extension = 4026531840
+        Always = 3758096384
     }
 }
