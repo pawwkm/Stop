@@ -6,7 +6,7 @@ namespace Topz.ArmV6Z
     /// <summary>
     /// Represents a lable in a program.
     /// </summary>
-    internal class Label : Node
+    internal sealed class Label : Node
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Label"/> class.
@@ -19,7 +19,7 @@ namespace Topz.ArmV6Z
         /// <exception cref="ArgumentNullException">
         /// <paramref name="position"/> is null.
         /// </exception>
-        protected Label(InputPosition position, string name) : base(position)
+        public Label(InputPosition position, string name) : base(position)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -36,6 +36,16 @@ namespace Topz.ArmV6Z
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// The address of the label counting from the beginning of
+        /// the contaning <see cref="Procedure"/>.
+        /// </summary>
+        public uint Address
+        {
+            get;
+            set;
         }
     }
 }

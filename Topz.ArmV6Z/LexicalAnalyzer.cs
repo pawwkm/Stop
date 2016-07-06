@@ -9,7 +9,7 @@ namespace Topz.ArmV6Z
     /// <summary>
     /// Lexical analyzer for ArmV6Z assembly programs.
     /// </summary>
-    internal class LexicalAnalyzer : LexicalAnalyzer<TokenType>
+    internal sealed class LexicalAnalyzer : LexicalAnalyzer<TokenType>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="LexicalAnalyzer"/> class.

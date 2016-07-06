@@ -18,8 +18,6 @@ namespace Topz.ArmV6Z.Instructions
         {
             if (operand == null)
                 throw new ArgumentNullException(nameof(operand));
-
-
         }
 
         /// <summary>

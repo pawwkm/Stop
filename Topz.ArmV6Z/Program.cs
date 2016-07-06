@@ -53,5 +53,14 @@ namespace Topz.ArmV6Z
                 return data;
             }
         }
+
+        /// <summary>
+        /// The origin of the program.
+        /// </summary>
+        public uint Origin
+        {
+            get;
+            set;
+        }
     }
 }

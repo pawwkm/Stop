@@ -40,6 +40,9 @@ namespace Topz.ArmV6Z
         {
             if (procedure == null)
                 throw new ArgumentNullException(nameof(procedure));
+
+            foreach (dynamic instruction in procedure.Instructions)
+                Visit(instruction);
         }
 
         /// <summary>

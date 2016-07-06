@@ -12,16 +12,27 @@ namespace Topz.ArmV6Z
         /// Initializes a new instance of the <see cref="String"/> class.
         /// </summary>
         /// <param name="position">The position of the node in the program's source code.</param>
+        /// <param name="name">The name of the string.</param>
         /// <param name="content">The content of the string.</param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="position"/> or <paramref name="content"/> is null.
+        /// <paramref name="position"/>,  or <paramref name="content"/> is null.
         /// </exception>
-        public String(InputPosition position, string content) : base(position)
+        public String(InputPosition position, string name, string content) : base(position)
         {
             if (content == null)
                 throw new ArgumentNullException(nameof(content));
 
+            Name = name;
             Content = content;
+        }
+
+        /// <summary>
+        /// Name of the string.
+        /// </summary>
+        public string Name
+        {
+            get;
+            private set;
         }
 
         /// <summary>

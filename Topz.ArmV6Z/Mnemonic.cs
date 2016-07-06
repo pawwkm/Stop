@@ -9,7 +9,7 @@ namespace Topz.ArmV6Z
     /// <summary>
     /// Represents a mnemonic in a program.
     /// </summary>
-    internal class Mnemonic
+    internal sealed class Mnemonic
     {
         /// <summary>
         /// The 'b' mnemonic.

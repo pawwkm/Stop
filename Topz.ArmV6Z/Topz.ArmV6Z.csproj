@@ -51,14 +51,19 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assembler.cs" />
     <Compile Include="Condition.cs" />
     <Compile Include="Data.cs" />
+    <Compile Include="Directive.cs" />
     <Compile Include="Instruction.cs" />
+    <Compile Include="Instructions\BranchInstruction.cs" />
     <Compile Include="IPass.cs" />
     <Compile Include="Label.cs" />
     <Compile Include="LexicalAnalyzer.cs" />
     <Compile Include="Mnemonic.cs" />
     <Compile Include="Node.cs" />
+    <Compile Include="Parser.cs" />
+    <Compile Include="TargetOperand.cs" />
     <Compile Include="Pass.cs" />
     <Compile Include="Procedure.cs" />
     <Compile Include="Program.cs" />
@@ -67,8 +72,13 @@
     <Compile Include="TokenType.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Topz.FileFormats\Topz.FileFormats.csproj">
+      <Project>{60231fa6-15c6-4fa3-9dce-a4be20d7c36a}</Project>
+      <Name>Topz.FileFormats</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
