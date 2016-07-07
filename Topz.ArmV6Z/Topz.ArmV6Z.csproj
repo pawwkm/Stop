@@ -58,6 +58,7 @@
     <Compile Include="Instruction.cs" />
     <Compile Include="Instructions\BranchInstruction.cs" />
     <Compile Include="IPass.cs" />
+    <Compile Include="Keywords.cs" />
     <Compile Include="Label.cs" />
     <Compile Include="LexicalAnalyzer.cs" />
     <Compile Include="Mnemonic.cs" />

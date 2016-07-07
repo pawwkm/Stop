@@ -11,6 +11,11 @@
         EndOfInput,
 
         /// <summary>
+        /// The token is a keyword.
+        /// </summary>
+        Keyword,
+
+        /// <summary>
         /// The contents of the token could not be identified.
         /// </summary>
         Unknown,

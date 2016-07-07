@@ -57,13 +57,15 @@ namespace Topz.ArmV6Z
                 return new Token<TokenType>("", TokenType.EndOfInput, Position.DeepCopy());
 
             char c = (char)Source.Peek();
+            if (Source.MatchesAnyOf(Keywords.All.ToArray()))
+                return Keyword();
             if (c == ';')
             {
                 SingleLineComment();
 
                 return NextTokenFromSource();
             }
-            else if (Consume("/*"))
+            if (Consume("/*"))
             {
                 MultilineComment();
 
@@ -71,6 +73,22 @@ namespace Topz.ArmV6Z
             }
 
             return Unknown();
+        }
+
+        /// <summary>
+        /// Consumes the next keyword from the input.
+        /// </summary>
+        /// <returns>The consumed keyword from the input.</returns>
+        private Token<TokenType> Keyword()
+        {
+            InputPosition start = Position.DeepCopy();
+            foreach (string keyword in Keywords.All)
+            {
+                if (Consume(keyword))
+                    return new Token<TokenType>(keyword, TokenType.Keyword, start);
+            }
+
+            return new Token<TokenType>(Advance(), TokenType.Unknown, start);
         }
 
         /// <summary>
