@@ -56,7 +56,52 @@ namespace Topz.ArmV6Z
             if (Source.EndOfStream)
                 return new Token<TokenType>("", TokenType.EndOfInput, Position.DeepCopy());
 
+            char c = (char)Source.Peek();
+            if (c == ';')
+            {
+                SingleLineComment();
+
+                return NextTokenFromSource();
+            }
+            else if (Consume("/*"))
+            {
+                MultilineComment();
+
+                return NextTokenFromSource();
+            }
+
             return Unknown();
+        }
+
+        /// <summary>
+        /// Consumes the next single line comment.
+        /// </summary>
+        private void SingleLineComment()
+        {
+            // Consume the ';' character.
+            Advance();
+
+            int line = Position.Line;
+            while (!Source.EndOfStream)
+            {
+                Advance();
+                if (line != Position.Line)
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Consumes the next multi line comment.
+        /// </summary>
+        private void MultilineComment()
+        {
+            while (!Source.EndOfStream)
+            {
+                if (Consume("*/"))
+                    break;
+                else
+                    Advance();
+            }
         }
 
         /// <summary>
