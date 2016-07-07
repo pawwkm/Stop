@@ -37,6 +37,15 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// True if the this is the main procedure of the program.
+        /// </summary>
+        public bool IsMain
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// The instruction that the procedure is composed of in 
         /// the order they are to be executed.
         /// </summary>
