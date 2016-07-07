@@ -2,11 +2,18 @@
   <GlobalSettings>
     <StringProperty Name="MergeSettingsFiles">NoMerge</StringProperty>
     <CollectionProperty Name="RecognizedWords">
+      <Value>eq</Value>
+      <Value>ge</Value>
+      <Value>gt</Value>
+      <Value>hs</Value>
       <Value>Int</Value>
       <Value>lba</Value>
+      <Value>ls</Value>
       <Value>mbr</Value>
       <Value>Oem</Value>
       <Value>Topz</Value>
+      <Value>vc</Value>
+      <Value>vs</Value>
     </CollectionProperty>
   </GlobalSettings>
   <Parsers>
