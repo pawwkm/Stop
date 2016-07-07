@@ -59,6 +59,8 @@ namespace Topz.ArmV6Z
             char c = (char)Source.Peek();
             if (Source.MatchesAnyOf(Keywords.All.ToArray()))
                 return Keyword();
+            if (char.IsLetter(c) || c == '_')
+                return Identifier();
             if (c == ';')
             {
                 SingleLineComment();
@@ -73,6 +75,30 @@ namespace Topz.ArmV6Z
             }
 
             return Unknown();
+        }
+
+        /// <summary>
+        /// Gets the next identifier from the input.
+        /// </summary>
+        /// <returns>The next identifier from the source.</returns>
+        private Token<TokenType> Identifier()
+        {
+            InputPosition start = Position.DeepCopy();
+            string text = "";
+
+            while (!Source.EndOfStream)
+            {
+                char c = (char)Source.Peek();
+                if (!char.IsLetterOrDigit(c) && !char.IsDigit(c) && c != '_')
+                    break;
+
+                text += Advance();
+            }
+
+            if (text.Length == 0)
+                return Unknown();
+
+            return new Token<TokenType>(text, TokenType.Identifier, start);
         }
 
         /// <summary>

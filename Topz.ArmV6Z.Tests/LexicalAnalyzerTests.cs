@@ -65,5 +65,28 @@ namespace Topz.ArmV6Z.Tests
                 Assert.AreEqual(TokenType.Keyword, token.Type);
             }
         }
+
+        /// <summary>
+        /// Tests that <see cref="LexicalAnalyzer.NextTokenFromSource()"/> recognizes
+        /// all keywords in <see cref="Keywords.All"/> as <see cref="TokenType.Keyword"/>.
+        /// </summary>
+        [Test]
+        public void NextTokenFromSource_Identifiers_IdentifiersRecognized()
+        {
+            string[] valid = 
+            {
+                "A", "a", "Ab", "ab", "A1", "a1",
+                "_A", "_a", "_1"
+            };
+            
+            foreach (string identifier in valid)
+            {
+                LexicalAnalyzer analyzer = new LexicalAnalyzer(identifier.ToStreamReader());
+                Token<TokenType> token = analyzer.Next();
+
+                Assert.AreEqual(identifier, token.Text);
+                Assert.AreEqual(TokenType.Identifier, token.Type);
+            }
+        }
     }
 }

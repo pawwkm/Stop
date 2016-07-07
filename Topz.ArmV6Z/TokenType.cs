@@ -16,6 +16,11 @@
         Keyword,
 
         /// <summary>
+        /// The token is an indentifier.
+        /// </summary>
+        Identifier,
+
+        /// <summary>
         /// The contents of the token could not be identified.
         /// </summary>
         Unknown,
