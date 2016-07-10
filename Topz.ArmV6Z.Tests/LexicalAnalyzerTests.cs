@@ -68,6 +68,24 @@ namespace Topz.ArmV6Z.Tests
 
         /// <summary>
         /// Tests that <see cref="LexicalAnalyzer.NextTokenFromSource()"/> recognizes
+        /// all mnemonics in <see cref="Mnemonic.AllWithAndWithoutExtensions"/> as 
+        /// <see cref="TokenType.Mnemonic"/>.
+        /// </summary>
+        [Test]
+        public void NextTokenFromSource_Mnemonics_MnemonicsRecognized()
+        {
+            foreach (string keyword in Keywords.All)
+            {
+                LexicalAnalyzer analyzer = new LexicalAnalyzer(keyword.ToStreamReader());
+                Token<TokenType> token = analyzer.Next();
+
+                Assert.AreEqual(keyword, token.Text);
+                Assert.AreEqual(TokenType.Keyword, token.Type);
+            }
+        }
+
+        /// <summary>
+        /// Tests that <see cref="LexicalAnalyzer.NextTokenFromSource()"/> recognizes
         /// all keywords in <see cref="Keywords.All"/> as <see cref="TokenType.Keyword"/>.
         /// </summary>
         [Test]

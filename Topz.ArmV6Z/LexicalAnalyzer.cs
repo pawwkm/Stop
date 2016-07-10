@@ -59,15 +59,18 @@ namespace Topz.ArmV6Z
             char c = (char)Source.Peek();
             if (Source.MatchesAnyOf(Keywords.All.ToArray()))
                 return Keyword();
+            if (Source.MatchesAnyOf(Mnemonic.AllWithAndWithoutExtensions.ToArray()))
+                return LexMnemonic();
             if (char.IsLetter(c) || c == '_')
                 return Identifier();
+
             if (c == ';')
             {
                 SingleLineComment();
 
                 return NextTokenFromSource();
             }
-            if (Consume("/*"))
+            else if (Consume("/*"))
             {
                 MultilineComment();
 
@@ -78,9 +81,47 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
-        /// Gets the next identifier from the input.
+        /// Checks if a character is considered a whitespace.
         /// </summary>
-        /// <returns>The next identifier from the source.</returns>
+        /// <param name="c">The character to check.</param>
+        /// <returns>True if the character is considered a whitespace; otherwise false.</returns>
+        private static bool IsWhitespace(char c)
+        {
+            char[] characters =
+            {
+                '\u0009', '\u000B', '\u000C', '\u000D',
+                '\u000A', '\u0085', '\u2028', '\u2029'
+            };
+
+            UnicodeCategory category = char.GetUnicodeCategory(c);
+
+            return category == UnicodeCategory.SpaceSeparator || characters.Contains(c);
+        }
+
+        /// <summary>
+        /// Consumes the next mnemonic from the input.
+        /// </summary>
+        /// <returns>The consumed mnemonic from the input.</returns>
+        /// <remarks>
+        /// The 'weird' naming is to avoid a name collision between the 
+        /// <see cref="Mnemonic"/> class and this method.
+        /// </remarks>
+        private Token<TokenType> LexMnemonic()
+        {
+            InputPosition start = Position.DeepCopy();
+            foreach (string mnemonic in Mnemonic.AllWithAndWithoutExtensions)
+            {
+                if (Consume(mnemonic))
+                    return new Token<TokenType>(mnemonic, TokenType.Mnemonic, start);
+            }
+
+            return new Token<TokenType>(Advance(), TokenType.Unknown, start);
+        }
+
+        /// <summary>
+        /// Consumes the next identifier from the input.
+        /// </summary>
+        /// <returns>The consumed identifier from the input.</returns>
         private Token<TokenType> Identifier()
         {
             InputPosition start = Position.DeepCopy();
@@ -182,24 +223,6 @@ namespace Topz.ArmV6Z
 
                 Advance();
             }
-        }
-
-        /// <summary>
-        /// Checks if a character is considdered a whitespace.
-        /// </summary>
-        /// <param name="c">The character to check.</param>
-        /// <returns>True if the character is considdered a whitespace; otherwise false.</returns>
-        private static bool IsWhitespace(char c)
-        {
-            char[] characters =
-            {
-                '\u0009', '\u000B', '\u000C', '\u000D',
-                '\u000A', '\u0085', '\u2028', '\u2029'
-            };
-
-            UnicodeCategory category = char.GetUnicodeCategory(c);
-
-            return category == UnicodeCategory.SpaceSeparator || characters.Contains(c);
         }
     }
 }

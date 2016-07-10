@@ -21,6 +21,11 @@
         Identifier,
 
         /// <summary>
+        /// The token is an mnemonic.
+        /// </summary>
+        Mnemonic,
+
+        /// <summary>
         /// The contents of the token could not be identified.
         /// </summary>
         Unknown,
