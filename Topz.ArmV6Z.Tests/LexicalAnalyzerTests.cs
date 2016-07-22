@@ -85,6 +85,23 @@ namespace Topz.ArmV6Z.Tests
 
         /// <summary>
         /// Tests that <see cref="LexicalAnalyzer.NextTokenFromSource()"/> recognizes
+        /// all registers in <see cref="Symbols.All"/> as <see cref="TokenType.Symbol"/>.
+        /// </summary>
+        [Test]
+        public void NextTokenFromSource_Symbols_SymbolsRecognized()
+        {
+            foreach (string symbol in Symbols.All)
+            {
+                LexicalAnalyzer analyzer = new LexicalAnalyzer(symbol.ToStreamReader());
+                Token<TokenType> token = analyzer.Next();
+
+                Assert.AreEqual(symbol, token.Text);
+                Assert.AreEqual(TokenType.Symbol, token.Type);
+            }
+        }
+
+        /// <summary>
+        /// Tests that <see cref="LexicalAnalyzer.NextTokenFromSource()"/> recognizes
         /// all mnemonics in <see cref="Mnemonic.AllWithAndWithoutExtensions"/> as 
         /// <see cref="TokenType.Mnemonic"/>.
         /// </summary>

@@ -66,6 +66,7 @@
     <Compile Include="Node.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Registers.cs" />
+    <Compile Include="Symbols.cs" />
     <Compile Include="TargetOperand.cs" />
     <Compile Include="Pass.cs" />
     <Compile Include="Procedure.cs" />

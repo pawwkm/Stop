@@ -61,6 +61,8 @@ namespace Topz.ArmV6Z
                 return Keyword();
             if (Source.MatchesAnyOf(Registers.All))
                 return Register();
+            if (Source.MatchesAnyOf(Symbols.All))
+                return Symbol();
             if (Source.MatchesAnyOf(false, Mnemonic.AllWithAndWithoutExtensions))
                 return LexMnemonic();
             if (char.IsLetter(c) || c == '_')
@@ -175,6 +177,22 @@ namespace Topz.ArmV6Z
             {
                 if (Consume(register))
                     return new Token<TokenType>(register, TokenType.Register, start);
+            }
+
+            return new Token<TokenType>(Advance(), TokenType.Unknown, start);
+        }
+
+        /// <summary>
+        /// Consumes the next symbol from the input.
+        /// </summary>
+        /// <returns>The consumed symbol from the input.</returns>
+        private Token<TokenType> Symbol()
+        {
+            InputPosition start = Position.DeepCopy();
+            foreach (string symbol in Symbols.All)
+            {
+                if (Consume(symbol))
+                    return new Token<TokenType>(symbol, TokenType.Symbol, start);
             }
 
             return new Token<TokenType>(Advance(), TokenType.Unknown, start);

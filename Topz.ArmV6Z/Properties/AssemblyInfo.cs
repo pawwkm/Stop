@@ -38,3 +38,4 @@ using System.Runtime.InteropServices;
 
 [assembly: CLSCompliant(false)]
 [assembly: InternalsVisibleTo("Topz.ArmV6Z.Tests")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]

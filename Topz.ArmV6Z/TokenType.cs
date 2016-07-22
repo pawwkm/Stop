@@ -41,6 +41,11 @@
         String,
 
         /// <summary>
+        /// The token is a symbol.
+        /// </summary>
+        Symbol,
+
+        /// <summary>
         /// The contents of the token could not be identified.
         /// </summary>
         Unknown,

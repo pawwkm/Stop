@@ -10,6 +10,8 @@ namespace Topz.ArmV6Z
     {
         private LexicalAnalyzer<TokenType> analyzer;
 
+        private Program program;
+
         /// <summary>
         /// Parses a program into an ast.
         /// </summary>
@@ -28,7 +30,14 @@ namespace Topz.ArmV6Z
 
             analyzer = source;
 
-            throw new NotImplementedException();
+            program = new Program();
+            while (!analyzer.EndOfInput)
+            {
+                if (analyzer.NextIs(Keywords.Procedure))
+                    Procedure();
+            }
+
+            return program;
         }
 
         /// <summary>
@@ -36,6 +45,21 @@ namespace Topz.ArmV6Z
         /// </summary>
         private void Procedure()
         {
+            Token<TokenType> keyword = analyzer.Next();
+            if (keyword.Text != Keywords.Procedure)
+                throw new ParsingException(keyword.Position.ToString($"Expected the '{Keywords.Procedure}' keyword."));
+
+            Token<TokenType> identifier = analyzer.Next();
+            if (identifier.Type != TokenType.Identifier)
+                throw new ParsingException(identifier.Position.ToString("Expected an identifier."));
+
+            Token<TokenType> start = analyzer.Next();
+            if (start.Text != Symbols.StartOfBlock)
+                throw new ParsingException(start.Position.ToString($"Expected the '{Symbols.StartOfBlock}' symbol."));
+
+            Token<TokenType> end = analyzer.Next();
+            if (end.Text != Symbols.StartOfBlock)
+                throw new ParsingException(end.Position.ToString($"Expected the '{Symbols.EndOfBlock}' symbol."));
         }
 
         /// <summary>
