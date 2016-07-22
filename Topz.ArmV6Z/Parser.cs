@@ -57,9 +57,35 @@ namespace Topz.ArmV6Z
             if (start.Text != Symbols.StartOfBlock)
                 throw new ParsingException(start.Position.ToString($"Expected the '{Symbols.StartOfBlock}' symbol."));
 
+            Procedure procedure = new Procedure(identifier.Position, identifier.Text);
+            while (!analyzer.EndOfInput)
+            {
+                if (analyzer.NextIs(Symbols.EndOfBlock))
+                    break;
+
+                procedure.Instructions.Add(Instruction());
+            }
+
             Token<TokenType> end = analyzer.Next();
-            if (end.Text != Symbols.StartOfBlock)
+            if (end.Text != Symbols.EndOfBlock)
                 throw new ParsingException(end.Position.ToString($"Expected the '{Symbols.EndOfBlock}' symbol."));
+
+            try
+            {
+                program.Procedures.Add(procedure);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ParsingException(identifier.Position.ToString(ex.Message));
+            }
+        }
+
+        /// <summary>
+        /// Parses an instruction.
+        /// </summary>
+        private Instruction Instruction()
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
