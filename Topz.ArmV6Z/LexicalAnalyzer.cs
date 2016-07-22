@@ -57,9 +57,11 @@ namespace Topz.ArmV6Z
                 return new Token<TokenType>("", TokenType.EndOfInput, Position.DeepCopy());
 
             char c = (char)Source.Peek();
-            if (Source.MatchesAnyOf(Keywords.All.ToArray()))
+            if (Source.MatchesAnyOf(Keywords.All))
                 return Keyword();
-            if (Source.MatchesAnyOf(Mnemonic.AllWithAndWithoutExtensions.ToArray()))
+            if (Source.MatchesAnyOf(Registers.All))
+                return Register();
+            if (Source.MatchesAnyOf(false, Mnemonic.AllWithAndWithoutExtensions))
                 return LexMnemonic();
             if (char.IsLetter(c) || c == '_')
                 return Identifier();
@@ -67,7 +69,7 @@ namespace Topz.ArmV6Z
             if (c == ';')
             {
                 SingleLineComment();
-
+                
                 return NextTokenFromSource();
             }
             else if (Consume("/*"))
@@ -153,6 +155,22 @@ namespace Topz.ArmV6Z
             {
                 if (Consume(keyword))
                     return new Token<TokenType>(keyword, TokenType.Keyword, start);
+            }
+
+            return new Token<TokenType>(Advance(), TokenType.Unknown, start);
+        }
+
+        /// <summary>
+        /// Consumes the next register from the input.
+        /// </summary>
+        /// <returns>The consumed register from the input.</returns>
+        private Token<TokenType> Register()
+        {
+            InputPosition start = Position.DeepCopy();
+            foreach (string register in Registers.All)
+            {
+                if (Consume(register))
+                    return new Token<TokenType>(register, TokenType.Register, start);
             }
 
             return new Token<TokenType>(Advance(), TokenType.Unknown, start);

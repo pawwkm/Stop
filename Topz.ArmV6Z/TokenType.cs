@@ -26,6 +26,11 @@
         Mnemonic,
 
         /// <summary>
+        /// The token is a register.
+        /// </summary>
+        Register,
+
+        /// <summary>
         /// The contents of the token could not be identified.
         /// </summary>
         Unknown,

@@ -39,7 +39,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Pote, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Pote.1.0.1\lib\net45\Pote.dll</HintPath>
+      <HintPath>..\packages\Pote.1.0.4\lib\net45\Pote.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Pote.Text, Version=0.7.0.2, Culture=neutral, processorArchitecture=MSIL">
