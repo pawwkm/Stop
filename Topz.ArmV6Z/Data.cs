@@ -7,7 +7,7 @@ namespace Topz.ArmV6Z
     /// <summary>
     /// Represents a piece of data in a program.
     /// </summary>
-    internal sealed class Data : Node 
+    internal sealed class Data : Node, INamedNode
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Data"/> class.
