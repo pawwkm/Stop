@@ -23,9 +23,11 @@ namespace Topz.ArmV6Z
         /// </summary>
         public Program() : base(new InputPosition())
         {
-            procedures.CollectionChanged += CollectionChanged;
-            strings.CollectionChanged += CollectionChanged;
-            data.CollectionChanged += CollectionChanged;
+            procedures.CollectionChanged += CheckNameUniqueness;
+            procedures.CollectionChanged += CheckMainProcedure;
+
+            strings.CollectionChanged += CheckNameUniqueness;
+            data.CollectionChanged += CheckNameUniqueness;
         }
 
         /// <summary>
@@ -102,12 +104,29 @@ namespace Topz.ArmV6Z
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The parameters for the event.</param>
-        private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void CheckNameUniqueness(object sender, NotifyCollectionChangedEventArgs e)
         {
             foreach (INamedNode node in e.NewItems)
             {
                 if (AllNamedNodes.Any(x => x.Name == node.Name))
                     throw new ArgumentException("The node name is not unique.");
+            }
+        }
+
+        /// <summary>
+        /// Checks that there is only 0 or 1 main procedures.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The parameters for the event.</param>
+        private void CheckMainProcedure(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (!Procedures.Any(x => x.IsMain))
+                return;
+
+            foreach (Procedure procedure in e.NewItems)
+            {
+                if (procedure.IsMain)
+                    throw new ArgumentException("Cannot have multiple main procedures.");
             }
         }
     }
