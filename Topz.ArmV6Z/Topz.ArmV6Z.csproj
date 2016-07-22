@@ -55,6 +55,7 @@
     <Compile Include="Condition.cs" />
     <Compile Include="Data.cs" />
     <Compile Include="Directive.cs" />
+    <Compile Include="INamedNode.cs" />
     <Compile Include="Instruction.cs" />
     <Compile Include="Instructions\BranchInstruction.cs" />
     <Compile Include="IPass.cs" />
