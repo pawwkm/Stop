@@ -31,6 +31,11 @@
         Register,
 
         /// <summary>
+        /// The token is an integer.
+        /// </summary>
+        Integer,
+
+        /// <summary>
         /// The contents of the token could not be identified.
         /// </summary>
         Unknown,

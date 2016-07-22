@@ -65,6 +65,8 @@ namespace Topz.ArmV6Z
                 return LexMnemonic();
             if (char.IsLetter(c) || c == '_')
                 return Identifier();
+            if (c == '#')
+                return Integer();
 
             if (c == ';')
             {
@@ -174,6 +176,33 @@ namespace Topz.ArmV6Z
             }
 
             return new Token<TokenType>(Advance(), TokenType.Unknown, start);
+        }
+
+        /// <summary>
+        /// Consumes the next integer from the input.
+        /// </summary>
+        /// <returns>The consumed integer from the input.</returns>
+        private Token<TokenType> Integer()
+        {
+            InputPosition start = Position.DeepCopy();
+            string text = "#";
+
+            if (!Consume("#"))
+                return Unknown();
+
+            while (!Source.EndOfStream)
+            {
+                char c = (char)Source.Peek();
+                if (!char.IsDigit(c))
+                    break;
+
+                text += Advance();
+            }
+
+            if (text.Length == 1)
+                return Unknown();
+
+            return new Token<TokenType>(text, TokenType.Integer, start);
         }
 
         /// <summary>
