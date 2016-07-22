@@ -56,7 +56,220 @@ namespace Topz.ArmV6Z
             if (Source.EndOfStream)
                 return new Token<TokenType>("", TokenType.EndOfInput, Position.DeepCopy());
 
+            char c = (char)Source.Peek();
+            if (Source.MatchesAnyOf(Keywords.All))
+                return Keyword();
+            if (Source.MatchesAnyOf(Registers.All))
+                return Register();
+            if (Source.MatchesAnyOf(false, Mnemonic.AllWithAndWithoutExtensions))
+                return LexMnemonic();
+            if (char.IsLetter(c) || c == '_')
+                return Identifier();
+            if (c == '#')
+                return Integer();
+            if (c == '"')
+                return String();
+
+            if (c == ';')
+            {
+                SingleLineComment();
+                
+                return NextTokenFromSource();
+            }
+            else if (Consume("/*"))
+            {
+                MultilineComment();
+
+                return NextTokenFromSource();
+            }
+
             return Unknown();
+        }
+
+        /// <summary>
+        /// Checks if a character is considered a whitespace.
+        /// </summary>
+        /// <param name="c">The character to check.</param>
+        /// <returns>True if the character is considered a whitespace; otherwise false.</returns>
+        private static bool IsWhitespace(char c)
+        {
+            char[] characters =
+            {
+                '\u0009', '\u000B', '\u000C', '\u000D',
+                '\u000A', '\u0085', '\u2028', '\u2029'
+            };
+
+            UnicodeCategory category = char.GetUnicodeCategory(c);
+
+            return category == UnicodeCategory.SpaceSeparator || characters.Contains(c);
+        }
+
+        /// <summary>
+        /// Consumes the next mnemonic from the input.
+        /// </summary>
+        /// <returns>The consumed mnemonic from the input.</returns>
+        /// <remarks>
+        /// The 'weird' naming is to avoid a name collision between the 
+        /// <see cref="Mnemonic"/> class and this method.
+        /// </remarks>
+        private Token<TokenType> LexMnemonic()
+        {
+            InputPosition start = Position.DeepCopy();
+            foreach (string mnemonic in Mnemonic.AllWithAndWithoutExtensions)
+            {
+                if (Consume(mnemonic))
+                    return new Token<TokenType>(mnemonic, TokenType.Mnemonic, start);
+            }
+
+            return new Token<TokenType>(Advance(), TokenType.Unknown, start);
+        }
+
+        /// <summary>
+        /// Consumes the next identifier from the input.
+        /// </summary>
+        /// <returns>The consumed identifier from the input.</returns>
+        private Token<TokenType> Identifier()
+        {
+            InputPosition start = Position.DeepCopy();
+            string text = "";
+
+            while (!Source.EndOfStream)
+            {
+                char c = (char)Source.Peek();
+                if (!char.IsLetterOrDigit(c) && !char.IsDigit(c) && c != '_')
+                    break;
+
+                text += Advance();
+            }
+
+            if (text.Length == 0)
+                return Unknown();
+
+            return new Token<TokenType>(text, TokenType.Identifier, start);
+        }
+
+        /// <summary>
+        /// Consumes the next keyword from the input.
+        /// </summary>
+        /// <returns>The consumed keyword from the input.</returns>
+        private Token<TokenType> Keyword()
+        {
+            InputPosition start = Position.DeepCopy();
+            foreach (string keyword in Keywords.All)
+            {
+                if (Consume(keyword))
+                    return new Token<TokenType>(keyword, TokenType.Keyword, start);
+            }
+
+            return new Token<TokenType>(Advance(), TokenType.Unknown, start);
+        }
+
+        /// <summary>
+        /// Consumes the next register from the input.
+        /// </summary>
+        /// <returns>The consumed register from the input.</returns>
+        private Token<TokenType> Register()
+        {
+            InputPosition start = Position.DeepCopy();
+            foreach (string register in Registers.All)
+            {
+                if (Consume(register))
+                    return new Token<TokenType>(register, TokenType.Register, start);
+            }
+
+            return new Token<TokenType>(Advance(), TokenType.Unknown, start);
+        }
+
+        /// <summary>
+        /// Consumes the next integer from the input.
+        /// </summary>
+        /// <returns>The consumed integer from the input.</returns>
+        private Token<TokenType> Integer()
+        {
+            InputPosition start = Position.DeepCopy();
+            string text = "#";
+
+            if (!Consume("#"))
+                return Unknown();
+
+            while (!Source.EndOfStream)
+            {
+                char c = (char)Source.Peek();
+                if (!char.IsDigit(c))
+                    break;
+
+                text += Advance();
+            }
+
+            if (text.Length == 1)
+                return Unknown();
+
+            return new Token<TokenType>(text, TokenType.Integer, start);
+        }
+
+        /// <summary>
+        /// Consumes the next string from the input.
+        /// </summary>
+        /// <returns>The consumed string from the input.</returns>
+        private Token<TokenType> String()
+        {
+            InputPosition start = Position.DeepCopy();
+            string text = "";
+
+            // Skip the first double qoute.
+            Advance();
+
+            while (!Source.EndOfStream)
+            {
+                if (Consume("\\\""))
+                    text += '"';
+                else
+                {
+                    char c = (char)Source.Peek();
+                    if (c == '"')
+                    {
+                        // Skip the second double qoute.
+                        Advance();
+
+                        break;
+                    }
+
+                    text += Advance();
+                }
+            }
+
+            return new Token<TokenType>(text, TokenType.String, start);
+        }
+
+        /// <summary>
+        /// Consumes the next single line comment.
+        /// </summary>
+        private void SingleLineComment()
+        {
+            // Consume the ';' character.
+            Advance();
+
+            int line = Position.Line;
+            while (!Source.EndOfStream)
+            {
+                Advance();
+                if (line != Position.Line)
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Consumes the next multi line comment.
+        /// </summary>
+        private void MultilineComment()
+        {
+            while (!Source.EndOfStream)
+            {
+                if (Consume("*/"))
+                    break;
+                else
+                    Advance();
+            }
         }
 
         /// <summary>
@@ -93,24 +306,6 @@ namespace Topz.ArmV6Z
 
                 Advance();
             }
-        }
-
-        /// <summary>
-        /// Checks if a character is considdered a whitespace.
-        /// </summary>
-        /// <param name="c">The character to check.</param>
-        /// <returns>True if the character is considdered a whitespace; otherwise false.</returns>
-        private static bool IsWhitespace(char c)
-        {
-            char[] characters =
-            {
-                '\u0009', '\u000B', '\u000C', '\u000D',
-                '\u000A', '\u0085', '\u2028', '\u2029'
-            };
-
-            UnicodeCategory category = char.GetUnicodeCategory(c);
-
-            return category == UnicodeCategory.SpaceSeparator || characters.Contains(c);
         }
     }
 }

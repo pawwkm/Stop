@@ -148,9 +148,26 @@ namespace Topz.ArmV6Z
             {
                 foreach (string mnemonic in All)
                 {
+
                     foreach (string extension in CommonExtensions)
                         yield return mnemonic + extension;
                 }
+            }
+        }
+
+        /// <summary>
+        /// A list of all the mnemonics with and without their extensions.
+        /// Essentially a combo of <see cref="All"/> and <see cref="AllWithExtensions"/>.
+        /// </summary>
+        public static IEnumerable<string> AllWithAndWithoutExtensions
+        {
+            get
+            {
+                foreach (var mnemonic in All)
+                    yield return mnemonic;
+
+                foreach (var mnemonic in AllWithExtensions)
+                    yield return mnemonic;
             }
         }
 
