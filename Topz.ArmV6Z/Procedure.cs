@@ -7,7 +7,7 @@ namespace Topz.ArmV6Z
     /// <summary>
     /// A single procedure in a program.
     /// </summary>
-    internal sealed class Procedure : Node
+    internal sealed class Procedure : Node, INamedNode
     {
         private List<Instruction> instructions = new List<Instruction>();
 

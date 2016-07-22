@@ -6,7 +6,7 @@ namespace Topz.ArmV6Z
     /// <summary>
     /// Represents a string in a program.
     /// </summary>
-    internal sealed class String : Node
+    internal sealed class String : Node, INamedNode
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="String"/> class.
