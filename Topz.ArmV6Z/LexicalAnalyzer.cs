@@ -67,6 +67,8 @@ namespace Topz.ArmV6Z
                 return Identifier();
             if (c == '#')
                 return Integer();
+            if (c == '"')
+                return String();
 
             if (c == ';')
             {
@@ -203,6 +205,40 @@ namespace Topz.ArmV6Z
                 return Unknown();
 
             return new Token<TokenType>(text, TokenType.Integer, start);
+        }
+
+        /// <summary>
+        /// Consumes the next string from the input.
+        /// </summary>
+        /// <returns>The consumed string from the input.</returns>
+        private Token<TokenType> String()
+        {
+            InputPosition start = Position.DeepCopy();
+            string text = "";
+
+            // Skip the first double qoute.
+            Advance();
+
+            while (!Source.EndOfStream)
+            {
+                if (Consume("\\\""))
+                    text += '"';
+                else
+                {
+                    char c = (char)Source.Peek();
+                    if (c == '"')
+                    {
+                        // Skip the second double qoute.
+                        Advance();
+
+                        break;
+                    }
+
+                    text += Advance();
+                }
+            }
+
+            return new Token<TokenType>(text, TokenType.String, start);
         }
 
         /// <summary>

@@ -145,5 +145,25 @@ namespace Topz.ArmV6Z.Tests
                 Assert.AreEqual(TokenType.Integer, token.Type);
             }
         }
+
+        /// <summary>
+        /// Tests that <see cref="LexicalAnalyzer.NextTokenFromSource()"/> recognizes
+        /// strings as <see cref="TokenType.String"/>.
+        /// </summary>
+        [Test]
+        public void NextTokenFromSource_Strings_StringsRecognized()
+        {
+            string[] valid = { "", "Abc" };
+            foreach (string str in valid)
+            {
+                string qouted = '"' + str + '"';
+
+                LexicalAnalyzer analyzer = new LexicalAnalyzer(qouted.ToStreamReader());
+                Token<TokenType> token = analyzer.Next();
+
+                Assert.AreEqual(str, token.Text);
+                Assert.AreEqual(TokenType.String, token.Type);
+            }
+        }
     }
 }

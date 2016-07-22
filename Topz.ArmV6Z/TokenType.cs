@@ -36,6 +36,11 @@
         Integer,
 
         /// <summary>
+        /// The token is a string.
+        /// </summary>
+        String,
+
+        /// <summary>
         /// The contents of the token could not be identified.
         /// </summary>
         Unknown,
