@@ -18,6 +18,11 @@ namespace Topz.ArmV6Z
         public const string EndOfBlock = "}";
 
         /// <summary>
+        /// The end of lable symbol.
+        /// </summary>
+        public const string EndOfLable = ":";
+
+        /// <summary>
         /// All of the symbols.
         /// </summary>
         public static IEnumerable<string> All

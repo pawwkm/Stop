@@ -85,8 +85,19 @@ namespace Topz.ArmV6Z
         /// </summary>
         private Instruction Instruction()
         {
-            // Check for labels.
+            Label label = null;
+
             Token<TokenType> token = analyzer.Next();
+            if (token.Type == TokenType.Identifier)
+            {
+                Token<TokenType> symbol = analyzer.Next();
+                if (symbol.Text != Symbols.EndOfLable)
+                    throw new ParsingException(symbol.Position.ToString($"Expected the '{Symbols.EndOfLable}' symbol."));
+
+                label = new Label(token.Position, token.Text);
+                token = analyzer.Next();
+            }
+
             if (token.Type != TokenType.Mnemonic)
                 throw new ParsingException(token.Position.ToString("Mnemonic expected."));
 
@@ -99,7 +110,7 @@ namespace Topz.ArmV6Z
 
                 TargetOperand operand = new TargetOperand(integer.Position, int.Parse(integer.Text.Substring(1)));
 
-                return new BranchInstruction(token.Position, null, mnemonic, operand);
+                return new BranchInstruction(token.Position, label, mnemonic, operand);
             }
             else
                 throw new ParsingException(analyzer.Position.ToString("Unknown instruction"));
