@@ -8,11 +8,16 @@
         /// <summary>
         /// The instruction has no bits turned on.
         /// </summary>
-        None = 0,
+        None,
 
         /// <summary>
         /// The L bit is turned on.
         /// </summary>
-        L = 1
+        L,
+        
+        /// <summary>
+        /// The S bit is turned on.
+        /// </summary>
+        S
     }
 }

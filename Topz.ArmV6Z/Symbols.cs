@@ -23,6 +23,11 @@ namespace Topz.ArmV6Z
         public const string EndOfLable = ":";
 
         /// <summary>
+        /// The list item separator symbol.
+        /// </summary>
+        public const string ListItemSeparator = ",";
+
+        /// <summary>
         /// All of the symbols.
         /// </summary>
         public static IEnumerable<string> All
@@ -32,7 +37,9 @@ namespace Topz.ArmV6Z
                 return new[]
                 {
                     StartOfBlock,
-                    EndOfBlock
+                    EndOfBlock,
+                    EndOfLable,
+                    ListItemSeparator
                 };
             }
         }

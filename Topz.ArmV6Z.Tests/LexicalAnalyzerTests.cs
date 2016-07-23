@@ -1,7 +1,6 @@
 ﻿using NUnit.Framework;
 using Pote;
 using Pote.Text;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Topz.ArmV6Z.Tests
@@ -116,6 +115,24 @@ namespace Topz.ArmV6Z.Tests
 
                 Assert.AreEqual(mnemonic, token.Text);
                 Assert.AreEqual(TokenType.Mnemonic, token.Type);
+            }
+        }
+
+        /// <summary>
+        /// Tests that <see cref="LexicalAnalyzer.NextTokenFromSource()"/> recognizes
+        /// all register shifters in <see cref="Registers.Shifted"/> as 
+        /// <see cref="TokenType.RegisterShifter"/>.
+        /// </summary>
+        [Test]
+        public void NextTokenFromSource_RegisterShifters_RegisterShiftersRecognized()
+        {
+            foreach (string shifter in Registers.Shifted)
+            {
+                LexicalAnalyzer analyzer = new LexicalAnalyzer(shifter.ToStreamReader());
+                Token<TokenType> token = analyzer.Next();
+
+                Assert.AreEqual(shifter, token.Text);
+                Assert.AreEqual(TokenType.RegisterShifter, token.Type);
             }
         }
 

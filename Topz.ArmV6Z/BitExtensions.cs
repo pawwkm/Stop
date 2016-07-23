@@ -16,8 +16,12 @@
             {
                 case Bit.L:
                     return "l";
-                default:
+                case Bit.None:
                     return "";
+                case Bit.S:
+                    return "s";
+                default:
+                    throw new System.ArgumentException($"The value '{bit}' is unsupported.", nameof(bit));
             }
         }
     }

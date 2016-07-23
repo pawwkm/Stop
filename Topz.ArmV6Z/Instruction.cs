@@ -1,5 +1,4 @@
-﻿using Pote.Text;
-using System;
+﻿using System;
 
 namespace Topz.ArmV6Z
 {
@@ -11,14 +10,18 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// Initializes a new instance of the <see cref="Instruction"/> class.
         /// </summary>
-        /// <param name="position">The position of the instruction in the program's source code.</param>
         /// <param name="label">The label of the instruction, if any.</param>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="position"/> or <paramref name="mnemonic"/> is null.
+        /// <paramref name="mnemonic"/> is null.
         /// </exception>
-        protected Instruction(InputPosition position, Label label, Mnemonic mnemonic) : base(position)
+        protected Instruction(Label label, Mnemonic mnemonic) : base(mnemonic.Position)
         {
+            if (mnemonic == null)
+                throw new ArgumentNullException(nameof(mnemonic));
+
+            Label = label;
+            Mnemonic = mnemonic;
         }
 
         /// <summary>

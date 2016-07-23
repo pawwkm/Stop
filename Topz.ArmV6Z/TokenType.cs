@@ -31,6 +31,11 @@
         Register,
 
         /// <summary>
+        /// The token is a register shifter.
+        /// </summary>
+        RegisterShifter,
+
+        /// <summary>
         /// The token is an integer.
         /// </summary>
         Integer,

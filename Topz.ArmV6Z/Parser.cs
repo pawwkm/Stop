@@ -102,18 +102,101 @@ namespace Topz.ArmV6Z
                 throw new ParsingException(token.Position.ToString("Mnemonic expected."));
 
             Mnemonic mnemonic = new Mnemonic(token.Text, token.Position);
-            if (mnemonic.RawName == Mnemonic.B)
+            switch (mnemonic.RawName)
             {
-                Token<TokenType> integer = analyzer.Next();
-                if (integer.Type != TokenType.Integer)
-                    throw new ParsingException(integer.Position.ToString("Expected an integer."));
+                case Mnemonic.Adc:
+                    return AddWithCarryInstruction(label, mnemonic);
+                case Mnemonic.B:
+                    return BranchInstruction(label, mnemonic);
+                default:
+                    throw new ParsingException(analyzer.Position.ToString("Unknown instruction"));
+            }   
+        }
 
-                TargetOperand operand = new TargetOperand(integer.Position, int.Parse(integer.Text.Substring(1)));
+        /// <summary>
+        /// Parses a <see cref="AddWithCarryInstruction"/>.
+        /// </summary>
+        /// <param name="label">The label of the instruction, if any.</param>
+        /// <param name="mnemonic">The mnemonic of the instruction.</param>
+        /// <returns></returns>
+        private AddWithCarryInstruction AddWithCarryInstruction(Label label, Mnemonic mnemonic)
+        {
+            var instruction = new AddWithCarryInstruction(label, mnemonic);
+            instruction.Desitnation = RegisterOperand();
 
-                return new BranchInstruction(token.Position, label, mnemonic, operand);
+            Token<TokenType> separator = analyzer.Next();
+            if (separator.Text != Symbols.ListItemSeparator)
+                throw new ParsingException(separator.Position.ToString($"Expected a '{Symbols.ListItemSeparator}'."));
+
+            instruction.FirstOperand = RegisterOperand();
+
+            separator = analyzer.Next();
+            if (separator.Text != Symbols.ListItemSeparator)
+                throw new ParsingException(separator.Position.ToString($"Expected a '{Symbols.ListItemSeparator}'."));
+
+            instruction.ShifterOperand = ShifterOperand();
+
+            return instruction;
+        }
+
+        /// <summary>
+        /// Parses a <see cref="BranchInstruction"/>.
+        /// </summary>
+        /// <param name="label">The label of the instruction, if any.</param>
+        /// <param name="mnemonic">The mnemonic of the instruction.</param>
+        /// <returns></returns>
+        private BranchInstruction BranchInstruction(Label label, Mnemonic mnemonic)
+        {
+            Token<TokenType> integer = analyzer.Next();
+            if (integer.Type != TokenType.Integer)
+                throw new ParsingException(integer.Position.ToString("Expected an integer."));
+
+            TargetOperand operand = new TargetOperand(integer.Position, int.Parse(integer.Text.Substring(1)));
+
+            return new BranchInstruction(label, mnemonic, operand);
+        }
+
+        /// <summary>
+        /// Parses a register operand.
+        /// </summary>
+        /// <returns>The parsed operand.</returns>
+        private RegisterOperand RegisterOperand()
+        {
+            Token<TokenType> register = analyzer.Next();
+            if (register.Type != TokenType.Register)
+                throw new ParsingException(register.Position.ToString("Expected a register."));
+
+            return new RegisterOperand(register.Position, register.Text);
+        }
+
+        /// <summary>
+        /// Parses a shifter operand.
+        /// </summary>
+        /// <returns>The shifter operand.</returns>
+        private ShifterOperand ShifterOperand()
+        {
+            Token<TokenType> operand = analyzer.Next();
+            if (operand.Type == TokenType.Integer)
+                return new ShifterOperand(operand.Position, int.Parse(operand.Text.Substring(1)));
+            if (operand.Type == TokenType.Register)
+            {
+                if (analyzer.NextIs(TokenType.RegisterShifter))
+                {
+                    Token<TokenType> shifter = analyzer.Next();
+                    if (shifter.Type != TokenType.RegisterShifter)
+                        throw new ParsingException(shifter.Position.ToString("Expected a register shifter."));
+
+                    Token<TokenType> immediate = analyzer.Next();
+                    if (immediate.Type != TokenType.Integer)
+                        throw new ParsingException(immediate.Position.ToString("Expected an integer."));
+
+                    return new ShifterOperand(operand.Position, int.Parse(operand.Text.Substring(1)), shifter.Text);
+                }
+                else
+                    return new ShifterOperand(operand.Position, operand.Text);
             }
-            else
-                throw new ParsingException(analyzer.Position.ToString("Unknown instruction"));
+
+            throw new ParsingException(operand.Position.ToString("Expected a shifter operand."));
         }
 
         /// <summary>

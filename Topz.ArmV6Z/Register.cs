@@ -5,8 +5,33 @@ namespace Topz.ArmV6Z
     /// <summary>
     /// The registers available in ARMv6Z
     /// </summary>
-    internal static class Registers
+    internal class Registers
     {
+        /// <summary>
+        /// The 'asr' shifted register operand.
+        /// </summary>
+        public const string Asr = "asr";
+
+        /// <summary>
+        /// The 'lsl' shifted register operand.
+        /// </summary>
+        public const string Lsl = "lsl";
+
+        /// <summary>
+        /// The 'lsr' shifted register operand.
+        /// </summary>
+        public const string Lsr = "lsr";
+
+        /// <summary>
+        /// The 'ror' shifted register operand.
+        /// </summary>
+        public const string Ror = "ror";
+
+        /// <summary>
+        /// The 'rrx' shifted register operand.
+        /// </summary>
+        public const string Rrx = "rrx";
+
         /// <summary>
         /// The 'r0' register.
         /// </summary>
@@ -130,6 +155,24 @@ namespace Topz.ArmV6Z
                     StackPointer,
                     LinkRegister,
                     ProgramCounter
+                };
+            }
+        }
+
+        /// <summary>
+        /// All of the shifted register operands.
+        /// </summary>
+        public static IEnumerable<string> Shifted
+        {
+            get
+            {
+                return new[]
+                {
+                    Asr,
+                    Lsl,
+                    Lsr,
+                    Ror,
+                    Rrx
                 };
             }
         }

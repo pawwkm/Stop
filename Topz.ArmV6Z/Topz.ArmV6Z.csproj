@@ -51,6 +51,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddWithCarryInstruction.cs" />
     <Compile Include="Assembler.cs" />
     <Compile Include="Bit.cs" />
     <Compile Include="BitExtensions.cs" />
@@ -68,7 +69,10 @@
     <Compile Include="Mnemonic.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Parser.cs" />
-    <Compile Include="Registers.cs" />
+    <Compile Include="Register.cs" />
+    <Compile Include="RegisterOperand.cs" />
+    <Compile Include="ShifterOperand.cs" />
+    <Compile Include="ShifterOperandType.cs" />
     <Compile Include="StringExtensions.cs" />
     <Compile Include="Symbols.cs" />
     <Compile Include="TargetOperand.cs" />
@@ -87,6 +91,9 @@
       <Project>{60231fa6-15c6-4fa3-9dce-a4be20d7c36a}</Project>
       <Name>Topz.FileFormats</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="CustomDictionary.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

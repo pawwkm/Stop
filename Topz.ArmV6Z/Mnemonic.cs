@@ -13,21 +13,22 @@ namespace Topz.ArmV6Z
         private static readonly PreParsedMnemonic[] table;
 
         /// <summary>
+        /// The 'adc' mnemonic.
+        /// </summary>
+        public const string Adc = "adc";
+
+        /// <summary>
         /// The 'b' mnemonic.
         /// </summary>
         public const string B = "b";
-
-        /// <summary>
-        /// The L bit.
-        /// </summary>
-        public const string LBit = "l";
 
         /// <summary>
         /// Initializes the table of preparsed mnemonics.
         /// </summary>
         static Mnemonic()
         {
-            table = PreParse(B, Bit.L, true)
+            table = PreParse(Adc, Bit.S, true)
+                    .Concat(PreParse(B, Bit.L, true))
                     .OrderByDescending(x => x.Name.Length).ToArray();
         }
 

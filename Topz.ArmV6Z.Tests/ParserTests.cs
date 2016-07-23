@@ -38,6 +38,38 @@ namespace Topz.ArmV6Z.Tests
 
         /// <summary>
         /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse the Adc instruction.
+        /// </summary>
+        [Test]
+        public void Parse_AdcInstruction_ParsesInstruction()
+        {
+            var builder = new TokenBuilder();
+            var tokens = builder.Procedure().Identifier("main")
+                                .StartOfBlock()
+                                .Adc(Registers.R3, Registers.R3, 1)
+                                .EndOfBlock()
+                                .Build();
+
+            var parser = new Parser();
+            var program = parser.Parse(LexicalAnalyzer(tokens));
+
+            Assert.AreEqual(1, program.Procedures.Count);
+            Assert.AreEqual(0, program.Data.Count);
+            Assert.AreEqual(0, program.Strings.Count);
+
+            var main = program.Procedures[0];
+            Assert.AreEqual("main", main.Name);
+            Assert.AreEqual(1, main.Instructions.Count);
+
+            var instruction = main.Instructions[0] as AddWithCarryInstruction;
+            Assert.AreEqual(Registers.R3, instruction.FirstOperand.Register);
+            Assert.AreEqual(Registers.R3, instruction.Desitnation.Register);
+            Assert.AreEqual(1, instruction.ShifterOperand.Immediate);
+            Assert.AreEqual(ShifterOperandType.Immediate, instruction.ShifterOperand.OperandType);
+        }
+
+        /// <summary>
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
         /// can parse the B instruction.
         /// </summary>
         [Test]

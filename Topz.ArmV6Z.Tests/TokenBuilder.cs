@@ -45,14 +45,41 @@ namespace Topz.ArmV6Z.Tests
         }
 
         /// <summary>
+        /// Adds the Adc instruction and its operands to the builder.
+        /// </summary>
+        /// <param name="rd">The destination register.</param>
+        /// <param name="rn">The register containing the first operand.</param>
+        /// <param name="immediate">The value to shift by.</param>
+        /// <returns></returns>
+        public TokenBuilder Adc(string rd, string rn, int immediate)
+        {
+            return Token(Mnemonic.Adc, TokenType.Mnemonic)
+                  .Token(rd, TokenType.Register)
+                  .Token(Symbols.ListItemSeparator, TokenType.Symbol)
+                  .Token(rn, TokenType.Register)
+                  .Token(Symbols.ListItemSeparator, TokenType.Symbol)
+                  .Integer(immediate);
+        }
+
+        /// <summary>
         /// Adds the B instruction and its operand to the builder.
         /// </summary>
         /// <param name="target">The target of the branch.</param>
         /// <returns>This builder.</returns>
         public TokenBuilder B(int target)
         {
-            return Token(Mnemonic.B, TokenType.Mnemonic).
-                   Token("#" + target, TokenType.Integer);
+            return Token(Mnemonic.B, TokenType.Mnemonic)
+                  .Token("#" + target, TokenType.Integer);
+        }
+
+        /// <summary>
+        /// Adds an integer to the builder.
+        /// </summary>
+        /// <param name="value">The value of the integer.</param>
+        /// <returns>This builder.</returns>
+        public TokenBuilder Integer(int value)
+        {
+            return Token("#" + value, TokenType.Integer);
         }
     }
 }
