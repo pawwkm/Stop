@@ -63,7 +63,7 @@ namespace Topz.ArmV6Z
                 return Register();
             if (Source.MatchesAnyOf(Symbols.All))
                 return Symbol();
-            if (Source.MatchesAnyOf(false, Mnemonic.AllWithAndWithoutExtensions))
+            if (Source.MatchesAnyOf(false, Mnemonic.All))
                 return LexMnemonic();
             if (char.IsLetter(c) || c == '_')
                 return Identifier();
@@ -117,7 +117,7 @@ namespace Topz.ArmV6Z
         private Token<TokenType> LexMnemonic()
         {
             InputPosition start = Position.DeepCopy();
-            foreach (string mnemonic in Mnemonic.AllWithAndWithoutExtensions)
+            foreach (string mnemonic in Mnemonic.All)
             {
                 if (Consume(mnemonic))
                     return new Token<TokenType>(mnemonic, TokenType.Mnemonic, start);

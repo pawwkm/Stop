@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using Pote;
 using Pote.Text;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Topz.ArmV6Z.Tests
@@ -73,13 +74,13 @@ namespace Topz.ArmV6Z.Tests
         [Test]
         public void NextTokenFromSource_Registers_RegistersRecognized()
         {
-            foreach (string keyword in Keywords.All)
+            foreach (string register in Registers.All)
             {
-                LexicalAnalyzer analyzer = new LexicalAnalyzer(keyword.ToStreamReader());
+                LexicalAnalyzer analyzer = new LexicalAnalyzer(register.ToStreamReader());
                 Token<TokenType> token = analyzer.Next();
 
-                Assert.AreEqual(keyword, token.Text);
-                Assert.AreEqual(TokenType.Keyword, token.Type);
+                Assert.AreEqual(register, token.Text);
+                Assert.AreEqual(TokenType.Register, token.Type);
             }
         }
 
@@ -102,19 +103,19 @@ namespace Topz.ArmV6Z.Tests
 
         /// <summary>
         /// Tests that <see cref="LexicalAnalyzer.NextTokenFromSource()"/> recognizes
-        /// all mnemonics in <see cref="Mnemonic.AllWithAndWithoutExtensions"/> as 
+        /// all mnemonics in <see cref="Mnemonic.All"/> as 
         /// <see cref="TokenType.Mnemonic"/>.
         /// </summary>
         [Test]
         public void NextTokenFromSource_Mnemonics_MnemonicsRecognized()
         {
-            foreach (string keyword in Keywords.All)
+            foreach (string mnemonic in Mnemonic.All)
             {
-                LexicalAnalyzer analyzer = new LexicalAnalyzer(keyword.ToStreamReader());
+                LexicalAnalyzer analyzer = new LexicalAnalyzer(mnemonic.ToStreamReader());
                 Token<TokenType> token = analyzer.Next();
 
-                Assert.AreEqual(keyword, token.Text);
-                Assert.AreEqual(TokenType.Keyword, token.Type);
+                Assert.AreEqual(mnemonic, token.Text);
+                Assert.AreEqual(TokenType.Mnemonic, token.Type);
             }
         }
 

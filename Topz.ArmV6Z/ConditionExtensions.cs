@@ -15,33 +15,33 @@
             switch (condition)
             {
                 case Condition.Equal:
-                    return Mnemonic.EqualExtension;
+                    return "eq";
                 case Condition.NotEqual:
-                    return Mnemonic.NotEqualExtension;
+                    return "ne";
                 case Condition.CarrySet:
-                    return Mnemonic.CarrySetExtension;
+                    return "cs";
                 case Condition.CarryClear:
-                    return Mnemonic.CarryClearExtension;
+                    return "cc";
                 case Condition.Minus:
-                    return Mnemonic.MinusExtension;
+                    return "mi";
                 case Condition.Plus:
-                    return Mnemonic.PlusExtension;
+                    return "pl";
                 case Condition.Overflow:
-                    return Mnemonic.OverflowExtension;
+                    return "vs";
                 case Condition.NoOverflow:
-                    return Mnemonic.NoOverflowExtension;
+                    return "vc";
                 case Condition.UnsignedHigher:
-                    return Mnemonic.UnsignedHigherExtension;
+                    return "hi";
                 case Condition.UnsignedLowerOrSame:
-                    return Mnemonic.UnsignedLowerOrSameExtension;
+                    return "ls";
                 case Condition.SignedGreaterThanOrEqual:
-                    return Mnemonic.SignedGreaterThanOrEqualExtension;
+                    return "ge";
                 case Condition.SignedLessThan:
-                    return Mnemonic.SignedLessThanExtension;
+                    return "lt";
                 case Condition.SignedGreaterThan:
-                    return Mnemonic.SignedGreaterThanExtension;
+                    return "gt";
                 case Condition.LessThanOrEqual:
-                    return Mnemonic.LessThanOrEqualExtension;
+                    return "le";
                 default:
                     return "";
             }

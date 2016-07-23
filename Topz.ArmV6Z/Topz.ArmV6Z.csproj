@@ -52,6 +52,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assembler.cs" />
+    <Compile Include="Bit.cs" />
+    <Compile Include="BitExtensions.cs" />
     <Compile Include="Condition.cs" />
     <Compile Include="ConditionExtensions.cs" />
     <Compile Include="Data.cs" />

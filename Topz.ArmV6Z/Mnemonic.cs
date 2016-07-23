@@ -1,5 +1,4 @@
-﻿using Pote;
-using Pote.Text;
+﻿using Pote.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,95 +10,26 @@ namespace Topz.ArmV6Z
     /// </summary>
     internal sealed class Mnemonic
     {
+        private static readonly PreParsedMnemonic[] table;
+
         /// <summary>
         /// The 'b' mnemonic.
         /// </summary>
         public const string B = "b";
 
         /// <summary>
-        /// The 'eq' mnemonic extension.
+        /// The L bit.
         /// </summary>
-        public const string EqualExtension = "eq";
+        public const string LBit = "l";
 
         /// <summary>
-        /// The 'ne' mnemonic extension.
+        /// Initializes the table of preparsed mnemonics.
         /// </summary>
-        public const string NotEqualExtension = "ne";
-
-        /// <summary>
-        /// The 'cs' mnemonic extension.
-        /// </summary>
-        public const string CarrySetExtension = "cs";
-
-        /// <summary>
-        /// The 'hs' mnemonic extension.
-        /// </summary>
-        public const string UnsignedHigherOrSameExtension = "hs";
-
-        /// <summary>
-        /// The 'cc' mnemonic extension.
-        /// </summary>
-        public const string CarryClearExtension = "cc";
-
-        /// <summary>
-        /// The 'cl' mnemonic extension.
-        /// </summary>
-        public const string UnsignedLowerExtension = "lo";
-
-        /// <summary>
-        /// The 'mi' mnemonic extension.
-        /// </summary>
-        public const string MinusExtension = "mi";
-
-        /// <summary>
-        /// The 'pl' mnemonic extension.
-        /// </summary>
-        public const string PlusExtension = "pl";
-
-        /// <summary>
-        /// The 'vs' mnemonic extension.
-        /// </summary>
-        public const string OverflowExtension = "vs";
-
-        /// <summary>
-        /// The 'vc' mnemonic extension.
-        /// </summary>
-        public const string NoOverflowExtension = "vc";
-
-        /// <summary>
-        /// The 'hi' mnemonic extension.
-        /// </summary>
-        public const string UnsignedHigherExtension = "hi";
-
-        /// <summary>
-        /// The 'ls' mnemonic extension.
-        /// </summary>
-        public const string UnsignedLowerOrSameExtension = "ls";
-
-        /// <summary>
-        /// The 'ge' mnemonic extension.
-        /// </summary>
-        public const string SignedGreaterThanOrEqualExtension = "ge";
-
-        /// <summary>
-        /// The 'lt' mnemonic extension.
-        /// </summary>
-        public const string SignedLessThanExtension = "lt";
-
-        /// <summary>
-        /// The 'gt' mnemonic extension.
-        /// </summary>
-        public const string SignedGreaterThanExtension = "gt";
-
-        /// <summary>
-        /// The 'le' mnemonic extension.
-        /// </summary>
-        public const string LessThanOrEqualExtension = "le";
-
-        /// <summary>
-        /// The 'al' mnemonic extension.
-        /// </summary>
-        public const string AlwaysExtension = "al";
+        static Mnemonic()
+        {
+            table = PreParse(B, Bit.L, true)
+                    .OrderByDescending(x => x.Name.Length).ToArray();
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mnemonic"/> class.
@@ -119,64 +49,19 @@ namespace Topz.ArmV6Z
             if (position == null)
                 throw new ArgumentNullException(nameof(position));
 
-            switch (name.ToLower().LongestMatch(All))
-            {
-                case B:
-                    Condition = GetCondition(name, B.Length);
-                    RawName = B;
-                    break;
+            var preParsed = (from entry in table
+                             where entry.Name == name.ToLower()
+                             select entry).FirstOrDefault();
 
-                default:
-                case null:
-                    throw new ArgumentException("This is not a mnemonic.", nameof(name));
-            }
+            if (preParsed == null)
+                throw new ArgumentException("This is not a mnemonic.", nameof(name));
 
-            Name = name;
-        }
+            Position = position;
 
-        /// <summary>
-        /// Gets the condition from a mnemonic.
-        /// </summary>
-        /// <param name="mnemonic">The mnemonic to check.</param>
-        /// <param name="offset">The offset in the mnemonic to begin looking.</param>
-        /// <returns>The condition for the mnemonic.</returns>
-        private static Condition GetCondition(string mnemonic, int offset)
-        {
-            switch (mnemonic.Substring(offset).ToLower().LongestMatch(CommonExtensions))
-            {
-                case EqualExtension:
-                    return Condition.Equal;
-                case NotEqualExtension:
-                    return Condition.NotEqual;
-                case CarrySetExtension:
-                case UnsignedHigherOrSameExtension:
-                    return Condition.CarrySet;
-                case CarryClearExtension:
-                case UnsignedLowerExtension:
-                    return Condition.CarryClear;
-                case MinusExtension:
-                    return Condition.Minus;
-                case PlusExtension:
-                    return Condition.Plus;
-                case OverflowExtension:
-                    return Condition.Overflow;
-                case NoOverflowExtension:
-                    return Condition.NoOverflow;
-                case UnsignedHigherExtension:
-                    return Condition.UnsignedHigher;
-                case UnsignedLowerOrSameExtension:
-                    return Condition.UnsignedLowerOrSame;
-                case SignedGreaterThanOrEqualExtension:
-                    return Condition.SignedGreaterThanOrEqual;
-                case SignedLessThanExtension:
-                    return Condition.SignedLessThan;
-                case SignedGreaterThanExtension:
-                    return Condition.SignedGreaterThan;
-                case LessThanOrEqualExtension:
-                    return Condition.LessThanOrEqual;
-                default:
-                    return Condition.Always;
-            }
+            Name = preParsed.Name;
+            RawName = preParsed.RawName;
+            Condition = preParsed.Condition;
+            Bit = preParsed.Bit;
         }
 
         /// <summary>
@@ -186,72 +71,8 @@ namespace Topz.ArmV6Z
         {
             get
             {
-                return new[]
-                {
-                    B
-                };
-            }
-        }
-
-        /// <summary>
-        /// A list of all the mnemonics with their extensions.
-        /// </summary>
-        public static IEnumerable<string> AllWithExtensions
-        {
-            get
-            {
-                foreach (string mnemonic in All)
-                {
-
-                    foreach (string extension in CommonExtensions)
-                        yield return mnemonic + extension;
-                }
-            }
-        }
-
-        /// <summary>
-        /// A list of all the mnemonics with and without their extensions.
-        /// Essentially a combo of <see cref="All"/> and <see cref="AllWithExtensions"/>.
-        /// </summary>
-        public static IEnumerable<string> AllWithAndWithoutExtensions
-        {
-            get
-            {
-                foreach (var mnemonic in All)
-                    yield return mnemonic;
-
-                foreach (var mnemonic in AllWithExtensions)
-                    yield return mnemonic;
-            }
-        }
-
-        /// <summary>
-        /// All common extensions.
-        /// </summary>
-        public static IEnumerable<string> CommonExtensions
-        {
-            get
-            {
-                return new string[]
-                {
-                    EqualExtension,
-                    NotEqualExtension,
-                    CarrySetExtension,
-                    UnsignedHigherOrSameExtension,
-                    CarryClearExtension,
-                    UnsignedLowerExtension,
-                    MinusExtension,
-                    PlusExtension,
-                    OverflowExtension,
-                    NoOverflowExtension,
-                    UnsignedHigherExtension,
-                    UnsignedLowerOrSameExtension,
-                    SignedGreaterThanOrEqualExtension,
-                    SignedLessThanExtension,
-                    SignedGreaterThanExtension,
-                    LessThanOrEqualExtension,
-                    AlwaysExtension
-                };
+                return from entry in table
+                       select entry.Name;
             }
         }
 
@@ -286,12 +107,120 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// Specifies if a special bit has been flipped.
+        /// </summary>
+        public Bit Bit
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
         /// The position of the mnemonic in the program.
         /// </summary>
         public InputPosition Position
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// Creates a list of pre parsed mnemonics for a give mnemonic.
+        /// </summary>
+        /// <param name="rawName">The name of the mnemonic without conditionals, bits etc.</param>
+        /// <returns>
+        /// The list of pre parsed mnemonics. 
+        /// The list contains a mnemonic equal to <paramref name="rawName"/>
+        /// and one with all the conditionals added.
+        /// </returns>
+        private static IEnumerable<PreParsedMnemonic> PreParse(string rawName)
+        {
+            yield return new PreParsedMnemonic(rawName, rawName, Condition.Always);
+            foreach (Condition condition in typeof(Condition).GetEnumValues())
+                yield return new PreParsedMnemonic(rawName + condition.AsText(), rawName, condition);
+        }
+
+        /// <summary>
+        /// Creates a list of pre parsed mnemonics for a give mnemonic.
+        /// </summary>
+        /// <param name="rawName">The name of the mnemonic without conditionals, bits etc.</param>
+        /// <param name="bit">The bit the instruction optionally can have.</param>
+        /// <param name="bitIsBeforeCondition">If true the bit is before the condition; otherwise it is after the condition.</param>
+        /// <returns>
+        /// The list of pre parsed mnemonics. 
+        /// The list contains a mnemonic equal to <paramref name="rawName"/>, 
+        /// one with all the conditionals added, one with bit on and one with a condition and bit on.
+        /// </returns>
+        private static IEnumerable<PreParsedMnemonic> PreParse(string rawName, Bit bit, bool bitIsBeforeCondition)
+        {
+            foreach (var value in PreParse(rawName))
+                yield return value;
+
+            yield return new PreParsedMnemonic(rawName + bit.AsText(), rawName, Condition.Always, bit);
+            foreach (Condition condition in typeof(Condition).GetEnumValues())
+            {
+                if (bitIsBeforeCondition)
+                    yield return new PreParsedMnemonic(rawName + bit.AsText() + condition.AsText(), rawName, condition, bit);
+                else
+                    yield return new PreParsedMnemonic(rawName + condition.AsText() + bit.AsText(), rawName, condition, bit);
+            }
+        }
+
+        /// <summary>
+        /// Defines the parts of an pre parsed mnemonic.
+        /// </summary>
+        private class PreParsedMnemonic
+        {
+            public PreParsedMnemonic(string name, string rawName, Condition condition)
+            {
+                Name = name;
+                RawName = rawName;
+                Condition = condition;
+            }
+
+            public PreParsedMnemonic(string name, string rawName, Condition condition, Bit bit) : this(name, rawName, condition)
+            {
+                Bit = bit;
+            }
+
+            /// <summary>
+            /// The name of the mnemonic.
+            /// </summary>
+            public string Name
+            {
+                get;
+                private set;
+            }
+
+            /// <summary>
+            /// This is the mnemonic without condition, bits etc.
+            /// </summary>
+            public string RawName
+            {
+                get;
+                private set;
+            }
+
+            /// <summary>
+            /// The condition for this instruction.
+            /// </summary>
+            /// <exception cref="ArgumentException">
+            /// <paramref name="value"/> is not valid for this instruction.
+            /// </exception>
+            public Condition Condition
+            {
+                get;
+                private set;
+            }
+
+            /// <summary>
+            /// Specifies if a special bit has been flipped.
+            /// </summary>
+            public Bit Bit
+            {
+                get;
+                private set;
+            }
         }
     }
 }
