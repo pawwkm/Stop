@@ -31,15 +31,5 @@ namespace Topz.ArmV6Z
             get;
             private set;
         }
-
-        /// <summary>
-        /// If true the L bit (bit 24) in the instruction to be set to 1. The resulting instruction stores a 
-        /// return address in the link register (R14). If false, the instruction simply branches without 
-        /// storing a return address.
-        /// </summary>
-        public bool BranchAndLink
-        {
-            get;
-        }
     }
 }

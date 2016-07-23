@@ -62,7 +62,6 @@ namespace Topz.ArmV6Z.Tests
             Assert.AreEqual(1, main.Instructions.Count);
 
             var instruction = main.Instructions[0] as BranchInstruction;
-            Assert.False(instruction.BranchAndLink);
             Assert.AreEqual(40, instruction.Operand.Target);
         }
 
