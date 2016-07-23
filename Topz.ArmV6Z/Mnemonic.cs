@@ -160,6 +160,8 @@ namespace Topz.ArmV6Z
                     return Condition.Plus;
                 case OverflowExtension:
                     return Condition.Overflow;
+                case NoOverflowExtension:
+                    return Condition.NoOverflow;
                 case UnsignedHigherExtension:
                     return Condition.UnsignedHigher;
                 case UnsignedLowerOrSameExtension:

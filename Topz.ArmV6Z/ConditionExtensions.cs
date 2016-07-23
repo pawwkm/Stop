@@ -20,12 +20,16 @@
                     return Mnemonic.NotEqualExtension;
                 case Condition.CarrySet:
                     return Mnemonic.CarrySetExtension;
+                case Condition.CarryClear:
+                    return Mnemonic.CarryClearExtension;
                 case Condition.Minus:
                     return Mnemonic.MinusExtension;
                 case Condition.Plus:
                     return Mnemonic.PlusExtension;
                 case Condition.Overflow:
                     return Mnemonic.OverflowExtension;
+                case Condition.NoOverflow:
+                    return Mnemonic.NoOverflowExtension;
                 case Condition.UnsignedHigher:
                     return Mnemonic.UnsignedHigherExtension;
                 case Condition.UnsignedLowerOrSame:
