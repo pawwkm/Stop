@@ -68,6 +68,15 @@ namespace Topz.ArmV6Z
         /// <exception cref="ArgumentNullException">
         /// <paramref name="instruction"/> is null.
         /// </exception>
+        void Visit(AndInstruction instruction);
+
+        /// <summary>
+        /// Visits an instruction.
+        /// </summary>
+        /// <param name="instruction">The instruction to visit.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="instruction"/> is null.
+        /// </exception>
         void Visit(BranchInstruction instruction);
     }
 }

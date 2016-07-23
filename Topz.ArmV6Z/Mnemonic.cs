@@ -23,6 +23,11 @@ namespace Topz.ArmV6Z
         public const string Add = "add";
 
         /// <summary>
+        /// The 'and' mnemonic.
+        /// </summary>
+        public const string And = "and";
+
+        /// <summary>
         /// The 'b' mnemonic.
         /// </summary>
         public const string B = "b";
@@ -34,6 +39,7 @@ namespace Topz.ArmV6Z
         {
             table = PreParse(Adc, Bit.S, true)
                     .Concat(PreParse(Add, Bit.S, true))
+                    .Concat(PreParse(And, Bit.S, true))
                     .Concat(PreParse(B, Bit.L, true))
                     .OrderByDescending(x => x.Name.Length).ToArray();
         }

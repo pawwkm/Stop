@@ -79,6 +79,24 @@ namespace Topz.ArmV6Z.Tests
         }
 
         /// <summary>
+        /// Adds the tokens for a <see cref="ArmV6Z.Format1Instruction"/> to the builder.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic of the instruction.</param>
+        /// <param name="rd">The destination register.</param>
+        /// <param name="rn">The register containing the first operand.</param>
+        /// <param name="immediate">The value to shift by.</param>
+        /// <returns>This builder.</returns>
+        public TokenBuilder Format1Instruction(string mnemonic, string rd, string rn, int immediate)
+        {
+            return Token(mnemonic, TokenType.Mnemonic)
+                  .Token(rd, TokenType.Register)
+                  .Token(Symbols.ListItemSeparator, TokenType.Symbol)
+                  .Token(rn, TokenType.Register)
+                  .Token(Symbols.ListItemSeparator, TokenType.Symbol)
+                  .Integer(immediate);
+        }
+
+        /// <summary>
         /// Adds the B instruction and its operand to the builder.
         /// </summary>
         /// <param name="target">The target of the branch.</param>

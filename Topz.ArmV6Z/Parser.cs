@@ -108,6 +108,8 @@ namespace Topz.ArmV6Z
                     return Format1<AddWithCarryInstruction>(label, mnemonic);
                 case Mnemonic.Add:
                     return Format1<AddInstruction>(label, mnemonic);
+                case Mnemonic.And:
+                    return Format1<AndInstruction>(label, mnemonic);
                 case Mnemonic.B:
                     return BranchInstruction(label, mnemonic);
                 default:
