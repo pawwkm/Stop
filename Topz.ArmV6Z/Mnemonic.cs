@@ -33,6 +33,11 @@ namespace Topz.ArmV6Z
         public const string B = "b";
 
         /// <summary>
+        /// The 'bic' mnemonic.
+        /// </summary>
+        public const string Bic = "bic";
+
+        /// <summary>
         /// Initializes the table of preparsed mnemonics.
         /// </summary>
         static Mnemonic()
@@ -41,6 +46,7 @@ namespace Topz.ArmV6Z
                     .Concat(PreParse(Add, Bit.S, true))
                     .Concat(PreParse(And, Bit.S, true))
                     .Concat(PreParse(B, Bit.L, true))
+                    .Concat(PreParse(Bic, Bit.S, true))
                     .OrderByDescending(x => x.Name.Length).ToArray();
         }
 

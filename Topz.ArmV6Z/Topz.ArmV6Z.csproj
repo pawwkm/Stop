@@ -56,6 +56,7 @@
     <Compile Include="AndInstruction.cs" />
     <Compile Include="Assembler.cs" />
     <Compile Include="Bit.cs" />
+    <Compile Include="BitClearInstruction.cs" />
     <Compile Include="BitExtensions.cs" />
     <Compile Include="Condition.cs" />
     <Compile Include="ConditionExtensions.cs" />

@@ -112,6 +112,8 @@ namespace Topz.ArmV6Z
                     return Format1<AndInstruction>(label, mnemonic);
                 case Mnemonic.B:
                     return Format2<BranchInstruction>(label, mnemonic);
+                case Mnemonic.Bic:
+                    return Format1<BitClearInstruction>(label, mnemonic);
                 default:
                     throw new ParsingException(analyzer.Position.ToString("Unknown instruction"));
             }

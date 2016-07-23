@@ -45,6 +45,7 @@ namespace Topz.ArmV6Z.Tests
         [TestCase(Mnemonic.Adc)]
         [TestCase(Mnemonic.Add)]
         [TestCase(Mnemonic.And)]
+        [TestCase(Mnemonic.Bic)]
         public void Parse_Format1Instructions_ParsesInstructions(string mnemonic)
         {
             var builder = new TokenBuilder();
