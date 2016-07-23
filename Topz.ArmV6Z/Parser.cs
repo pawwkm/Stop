@@ -105,38 +105,14 @@ namespace Topz.ArmV6Z
             switch (mnemonic.RawName)
             {
                 case Mnemonic.Adc:
-                    return AddWithCarryInstruction(label, mnemonic);
+                    return Format1<AddWithCarryInstruction>(label, mnemonic);
+                case Mnemonic.Add:
+                    return Format1<AddInstruction>(label, mnemonic);
                 case Mnemonic.B:
                     return BranchInstruction(label, mnemonic);
                 default:
                     throw new ParsingException(analyzer.Position.ToString("Unknown instruction"));
-            }   
-        }
-
-        /// <summary>
-        /// Parses a <see cref="AddWithCarryInstruction"/>.
-        /// </summary>
-        /// <param name="label">The label of the instruction, if any.</param>
-        /// <param name="mnemonic">The mnemonic of the instruction.</param>
-        /// <returns></returns>
-        private AddWithCarryInstruction AddWithCarryInstruction(Label label, Mnemonic mnemonic)
-        {
-            var instruction = new AddWithCarryInstruction(label, mnemonic);
-            instruction.Desitnation = RegisterOperand();
-
-            Token<TokenType> separator = analyzer.Next();
-            if (separator.Text != Symbols.ListItemSeparator)
-                throw new ParsingException(separator.Position.ToString($"Expected a '{Symbols.ListItemSeparator}'."));
-
-            instruction.FirstOperand = RegisterOperand();
-
-            separator = analyzer.Next();
-            if (separator.Text != Symbols.ListItemSeparator)
-                throw new ParsingException(separator.Position.ToString($"Expected a '{Symbols.ListItemSeparator}'."));
-
-            instruction.ShifterOperand = ShifterOperand();
-
-            return instruction;
+            }
         }
 
         /// <summary>
@@ -154,6 +130,35 @@ namespace Topz.ArmV6Z
             TargetOperand operand = new TargetOperand(integer.Position, int.Parse(integer.Text.Substring(1)));
 
             return new BranchInstruction(label, mnemonic, operand);
+        }
+
+        /// <summary>
+        /// <para>Parses an instruction with the following format.</para>
+        /// <para>mnemonic, register, register, shifting operand</para>
+        /// </summary>
+        /// <typeparam name="T">The type of instruction.</typeparam>
+        /// <param name="label">The label of the instruction, if any.</param>
+        /// <param name="mnemonic">The mnemonic of the instruction.</param>
+        /// <returns>The parsed instruction.</returns>
+        public T Format1<T>(Label label, Mnemonic mnemonic) where T : Format1Instruction
+        {
+            var type = typeof(T);
+
+            var r1 = RegisterOperand();
+
+            var separator = analyzer.Next();
+            if (separator.Text != Symbols.ListItemSeparator)
+                throw new ParsingException(separator.Position.ToString($"Expected a '{Symbols.ListItemSeparator}'."));
+
+            var r2 = RegisterOperand();
+
+            separator = analyzer.Next();
+            if (separator.Text != Symbols.ListItemSeparator)
+                throw new ParsingException(separator.Position.ToString($"Expected a '{Symbols.ListItemSeparator}'."));
+
+            var shifter = ShifterOperand();
+
+            return (T)Activator.CreateInstance(type, label, mnemonic, r1, r2, shifter);
         }
 
         /// <summary>

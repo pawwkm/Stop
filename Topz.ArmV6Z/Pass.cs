@@ -91,6 +91,19 @@ namespace Topz.ArmV6Z
         /// <exception cref="ArgumentNullException">
         /// <paramref name="instruction"/> is null.
         /// </exception>
+        public virtual void Visit(AddInstruction instruction)
+        {
+            if (instruction == null)
+                throw new ArgumentNullException(nameof(instruction));
+        }
+
+        /// <summary>
+        /// Visits an instruction.
+        /// </summary>
+        /// <param name="instruction">The instruction to visit.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="instruction"/> is null.
+        /// </exception>
         public virtual void Visit(BranchInstruction instruction)
         {
             if (instruction == null)

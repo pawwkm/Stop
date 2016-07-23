@@ -62,6 +62,23 @@ namespace Topz.ArmV6Z.Tests
         }
 
         /// <summary>
+        /// Adds the Add instruction and its operands to the builder.
+        /// </summary>
+        /// <param name="rd">The destination register.</param>
+        /// <param name="rn">The register containing the first operand.</param>
+        /// <param name="immediate">The value to shift by.</param>
+        /// <returns></returns>
+        public TokenBuilder Add(string rd, string rn, int immediate)
+        {
+            return Token(Mnemonic.Add, TokenType.Mnemonic)
+                  .Token(rd, TokenType.Register)
+                  .Token(Symbols.ListItemSeparator, TokenType.Symbol)
+                  .Token(rn, TokenType.Register)
+                  .Token(Symbols.ListItemSeparator, TokenType.Symbol)
+                  .Integer(immediate);
+        }
+
+        /// <summary>
         /// Adds the B instruction and its operand to the builder.
         /// </summary>
         /// <param name="target">The target of the branch.</param>

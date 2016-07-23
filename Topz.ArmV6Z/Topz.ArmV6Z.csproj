@@ -51,6 +51,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddInstruction.cs" />
     <Compile Include="AddWithCarryInstruction.cs" />
     <Compile Include="Assembler.cs" />
     <Compile Include="Bit.cs" />
@@ -59,6 +60,7 @@
     <Compile Include="ConditionExtensions.cs" />
     <Compile Include="Data.cs" />
     <Compile Include="Directive.cs" />
+    <Compile Include="Format1Instruction.cs" />
     <Compile Include="INamedNode.cs" />
     <Compile Include="Instruction.cs" />
     <Compile Include="BranchInstruction.cs" />

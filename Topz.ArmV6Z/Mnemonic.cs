@@ -18,6 +18,11 @@ namespace Topz.ArmV6Z
         public const string Adc = "adc";
 
         /// <summary>
+        /// The 'add' mnemonic.
+        /// </summary>
+        public const string Add = "add";
+
+        /// <summary>
         /// The 'b' mnemonic.
         /// </summary>
         public const string B = "b";
@@ -28,6 +33,7 @@ namespace Topz.ArmV6Z
         static Mnemonic()
         {
             table = PreParse(Adc, Bit.S, true)
+                    .Concat(PreParse(Add, Bit.S, true))
                     .Concat(PreParse(B, Bit.L, true))
                     .OrderByDescending(x => x.Name.Length).ToArray();
         }
