@@ -38,35 +38,6 @@ namespace Topz.ArmV6Z.Tests
 
         /// <summary>
         /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
-        /// can parse the B instruction.
-        /// </summary>
-        [Test]
-        public void Parse_BInstruction_ParsesInstruction()
-        {
-            var builder = new TokenBuilder();
-            var tokens = builder.Procedure().Identifier("main")
-                                .StartOfBlock()
-                                .B(40)
-                                .EndOfBlock()
-                                .Build();
-
-            var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
-
-            Assert.AreEqual(1, program.Procedures.Count);
-            Assert.AreEqual(0, program.Data.Count);
-            Assert.AreEqual(0, program.Strings.Count);
-
-            var main = program.Procedures[0];
-            Assert.AreEqual("main", main.Name);
-            Assert.AreEqual(1, main.Instructions.Count);
-
-            var instruction = main.Instructions[0] as BranchInstruction;
-            Assert.AreEqual(40, instruction.Operand.Target);
-        }
-
-        /// <summary>
-        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
         /// can parse <see cref="Format1Instruction"/> related instructions.
         /// </summary>
         /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
@@ -100,6 +71,37 @@ namespace Topz.ArmV6Z.Tests
             Assert.AreEqual(Registers.R3, instruction.Destination.Register);
             Assert.AreEqual(1, instruction.ShifterOperand.Immediate);
             Assert.AreEqual(ShifterOperandType.Immediate, instruction.ShifterOperand.OperandType);
+        }
+
+        /// <summary>
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse <see cref="Format2Instruction"/> related instructions.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
+        [Test]
+        [TestCase(Mnemonic.B)]
+        public void Parse_Format2Instructions_ParsesInstructions(string mnemonic)
+        {
+            var builder = new TokenBuilder();
+            var tokens = builder.Procedure().Identifier("main")
+                                .StartOfBlock()
+                                .Format2Instruction(mnemonic, 40)
+                                .EndOfBlock()
+                                .Build();
+
+            var parser = new Parser();
+            var program = parser.Parse(LexicalAnalyzer(tokens));
+
+            Assert.AreEqual(1, program.Procedures.Count);
+            Assert.AreEqual(0, program.Data.Count);
+            Assert.AreEqual(0, program.Strings.Count);
+
+            var main = program.Procedures[0];
+            Assert.AreEqual("main", main.Name);
+            Assert.AreEqual(1, main.Instructions.Count);
+
+            var instruction = main.Instructions[0] as BranchInstruction;
+            Assert.AreEqual(40, instruction.Operand.Target);
         }
 
         /// <summary>

@@ -63,13 +63,14 @@ namespace Topz.ArmV6Z.Tests
         }
 
         /// <summary>
-        /// Adds the B instruction and its operand to the builder.
+        /// Adds the tokens for a <see cref="ArmV6Z.Format2Instruction"/> to the builder.
         /// </summary>
+        /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <param name="target">The target of the branch.</param>
         /// <returns>This builder.</returns>
-        public TokenBuilder B(int target)
+        public TokenBuilder Format2Instruction(string mnemonic, int target)
         {
-            return Token(Mnemonic.B, TokenType.Mnemonic)
+            return Token(mnemonic, TokenType.Mnemonic)
                   .Token("#" + target, TokenType.Integer);
         }
 

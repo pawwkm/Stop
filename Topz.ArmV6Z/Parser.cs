@@ -111,27 +111,10 @@ namespace Topz.ArmV6Z
                 case Mnemonic.And:
                     return Format1<AndInstruction>(label, mnemonic);
                 case Mnemonic.B:
-                    return BranchInstruction(label, mnemonic);
+                    return Format2<BranchInstruction>(label, mnemonic);
                 default:
                     throw new ParsingException(analyzer.Position.ToString("Unknown instruction"));
             }
-        }
-
-        /// <summary>
-        /// Parses a <see cref="BranchInstruction"/>.
-        /// </summary>
-        /// <param name="label">The label of the instruction, if any.</param>
-        /// <param name="mnemonic">The mnemonic of the instruction.</param>
-        /// <returns></returns>
-        private BranchInstruction BranchInstruction(Label label, Mnemonic mnemonic)
-        {
-            Token<TokenType> integer = analyzer.Next();
-            if (integer.Type != TokenType.Integer)
-                throw new ParsingException(integer.Position.ToString("Expected an integer."));
-
-            TargetOperand operand = new TargetOperand(integer.Position, int.Parse(integer.Text.Substring(1)));
-
-            return new BranchInstruction(label, mnemonic, operand);
         }
 
         /// <summary>
@@ -142,10 +125,8 @@ namespace Topz.ArmV6Z
         /// <param name="label">The label of the instruction, if any.</param>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <returns>The parsed instruction.</returns>
-        public T Format1<T>(Label label, Mnemonic mnemonic) where T : Format1Instruction
+        private T Format1<T>(Label label, Mnemonic mnemonic) where T : Format1Instruction
         {
-            var type = typeof(T);
-
             var r1 = RegisterOperand();
 
             var separator = analyzer.Next();
@@ -160,7 +141,18 @@ namespace Topz.ArmV6Z
 
             var shifter = ShifterOperand();
 
-            return (T)Activator.CreateInstance(type, label, mnemonic, r1, r2, shifter);
+            return (T)Activator.CreateInstance(typeof(T), label, mnemonic, r1, r2, shifter);
+        }
+
+        private T Format2<T>(Label label, Mnemonic mnemonic) where T : Format2Instruction
+        {
+            var integer = analyzer.Next();
+            if (integer.Type != TokenType.Integer)
+                throw new ParsingException(integer.Position.ToString("Expected an integer."));
+
+            var operand = new TargetOperand(integer.Position, int.Parse(integer.Text.Substring(1)));
+
+            return (T)Activator.CreateInstance(typeof(T), label, mnemonic, operand);
         }
 
         /// <summary>

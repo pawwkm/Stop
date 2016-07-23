@@ -6,29 +6,19 @@ namespace Topz.ArmV6Z
     /// A branch instruction.
     /// </summary>
     /// <remarks>See A.4.1.5 for more info.</remarks>
-    internal class BranchInstruction : Instruction
+    internal class BranchInstruction : Format2Instruction
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Instruction"/> class.
+        /// Initializes a new instance of the <see cref="BranchInstruction"/> class.
         /// </summary>
         /// <param name="label">The label of the instruction, if any.</param>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <param name="operand">The target operand of the instruction.</param>
-        public BranchInstruction(Label label, Mnemonic mnemonic, TargetOperand operand) : base(label, mnemonic)
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="mnemonic"/> or <paramref name="operand"/> is null.
+        /// </exception>
+        public BranchInstruction(Label label, Mnemonic mnemonic, TargetOperand operand) : base(label, mnemonic, operand)
         {
-            if (operand == null)
-                throw new ArgumentNullException(nameof(operand));
-
-            Operand = operand;
-        }
-
-        /// <summary>
-        /// The address to branch to.
-        /// </summary>
-        public TargetOperand Operand
-        {
-            get;
-            private set;
         }
     }
 }

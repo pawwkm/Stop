@@ -62,6 +62,7 @@
     <Compile Include="Data.cs" />
     <Compile Include="Directive.cs" />
     <Compile Include="Format1Instruction.cs" />
+    <Compile Include="Format2Instruction.cs" />
     <Compile Include="INamedNode.cs" />
     <Compile Include="Instruction.cs" />
     <Compile Include="BranchInstruction.cs" />
