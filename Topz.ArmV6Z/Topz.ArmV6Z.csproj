@@ -53,11 +53,12 @@
   <ItemGroup>
     <Compile Include="Assembler.cs" />
     <Compile Include="Condition.cs" />
+    <Compile Include="ConditionExtensions.cs" />
     <Compile Include="Data.cs" />
     <Compile Include="Directive.cs" />
     <Compile Include="INamedNode.cs" />
     <Compile Include="Instruction.cs" />
-    <Compile Include="Instructions\BranchInstruction.cs" />
+    <Compile Include="BranchInstruction.cs" />
     <Compile Include="IPass.cs" />
     <Compile Include="Keywords.cs" />
     <Compile Include="Label.cs" />
@@ -66,6 +67,7 @@
     <Compile Include="Node.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Registers.cs" />
+    <Compile Include="StringExtensions.cs" />
     <Compile Include="Symbols.cs" />
     <Compile Include="TargetOperand.cs" />
     <Compile Include="Pass.cs" />

@@ -44,7 +44,7 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// The 'cl' mnemonic extension.
         /// </summary>
-        public const string UnsignedLowerExtension = "cl";
+        public const string UnsignedLowerExtension = "lo";
 
         /// <summary>
         /// The 'mi' mnemonic extension.
@@ -119,10 +119,62 @@ namespace Topz.ArmV6Z
             if (position == null)
                 throw new ArgumentNullException(nameof(position));
 
-            if (!name.ToLower().IsOneOf(All.ToArray()))
-                throw new ArgumentException("This is not a mnemonic.", nameof(name));
+            switch (name.ToLower().LongestMatch(All))
+            {
+                case B:
+                    Condition = GetCondition(name, B.Length);
+                    RawName = B;
+                    break;
+
+                default:
+                case null:
+                    throw new ArgumentException("This is not a mnemonic.", nameof(name));
+            }
 
             Name = name;
+        }
+
+        /// <summary>
+        /// Gets the condition from a mnemonic.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic to check.</param>
+        /// <param name="offset">The offset in the mnemonic to begin looking.</param>
+        /// <returns>The condition for the mnemonic.</returns>
+        private static Condition GetCondition(string mnemonic, int offset)
+        {
+            switch (mnemonic.Substring(offset).ToLower().LongestMatch(CommonExtensions))
+            {
+                case EqualExtension:
+                    return Condition.Equal;
+                case NotEqualExtension:
+                    return Condition.NotEqual;
+                case CarrySetExtension:
+                case UnsignedHigherOrSameExtension:
+                    return Condition.CarrySet;
+                case CarryClearExtension:
+                case UnsignedLowerExtension:
+                    return Condition.CarryClear;
+                case MinusExtension:
+                    return Condition.Minus;
+                case PlusExtension:
+                    return Condition.Plus;
+                case OverflowExtension:
+                    return Condition.Overflow;
+                case UnsignedHigherExtension:
+                    return Condition.UnsignedHigher;
+                case UnsignedLowerOrSameExtension:
+                    return Condition.UnsignedLowerOrSame;
+                case SignedGreaterThanOrEqualExtension:
+                    return Condition.SignedGreaterThanOrEqual;
+                case SignedLessThanExtension:
+                    return Condition.SignedLessThan;
+                case SignedGreaterThanExtension:
+                    return Condition.SignedGreaterThan;
+                case LessThanOrEqualExtension:
+                    return Condition.LessThanOrEqual;
+                default:
+                    return Condition.Always;
+            }
         }
 
         /// <summary>
@@ -211,9 +263,9 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
-        /// The same as <see cref="Name"/>, but without the condition at the end.
+        /// This is the mnemonic without condition, bits etc.
         /// </summary>
-        public string NameWithoutCondtition
+        public string RawName
         {
             get;
             private set;

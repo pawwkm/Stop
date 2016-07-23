@@ -85,7 +85,24 @@ namespace Topz.ArmV6Z
         /// </summary>
         private Instruction Instruction()
         {
-            throw new NotImplementedException();
+            // Check for labels.
+            Token<TokenType> token = analyzer.Next();
+            if (token.Type != TokenType.Mnemonic)
+                throw new ParsingException(token.Position.ToString("Mnemonic expected."));
+
+            Mnemonic mnemonic = new Mnemonic(token.Text, token.Position);
+            if (mnemonic.RawName == Mnemonic.B)
+            {
+                Token<TokenType> integer = analyzer.Next();
+                if (integer.Type != TokenType.Integer)
+                    throw new ParsingException(integer.Position.ToString("Expected an integer."));
+
+                TargetOperand operand = new TargetOperand(integer.Position, int.Parse(integer.Text.Substring(1)));
+
+                return new BranchInstruction(token.Position, null, mnemonic, operand);
+            }
+            else
+                throw new ParsingException(analyzer.Position.ToString("Unknown instruction"));
         }
 
         /// <summary>

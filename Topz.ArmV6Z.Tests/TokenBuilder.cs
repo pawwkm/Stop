@@ -43,5 +43,16 @@ namespace Topz.ArmV6Z.Tests
         {
             return Token(Symbols.EndOfBlock, TokenType.Symbol);
         }
+
+        /// <summary>
+        /// Adds the B instruction and its operand to the builder.
+        /// </summary>
+        /// <param name="target">The target of the branch.</param>
+        /// <returns>This builder.</returns>
+        public TokenBuilder B(int target)
+        {
+            return Token(Mnemonic.B, TokenType.Mnemonic).
+                   Token("#" + target, TokenType.Integer);
+        }
     }
 }
