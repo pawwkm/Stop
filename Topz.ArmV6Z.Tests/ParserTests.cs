@@ -175,6 +175,7 @@ namespace Topz.ArmV6Z
         /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
         [Test]
         [TestCase(Mnemonic.Clz)]
+        [TestCase(Mnemonic.Cpy)]
         public void Parse_Format5Instructions_ParsesInstructions(string mnemonic)
         {
             var builder = new TokenBuilder();

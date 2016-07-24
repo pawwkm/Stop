@@ -68,6 +68,11 @@ namespace Topz.ArmV6Z
         public const string Cmp = "cmp";
 
         /// <summary>
+        /// The 'cpy' mnemonic.
+        /// </summary>
+        public const string Cpy = "cpy";
+
+        /// <summary>
         /// Initializes the table of preparsed mnemonics.
         /// </summary>
         static Mnemonic()
@@ -83,6 +88,7 @@ namespace Topz.ArmV6Z
                     .Concat(PreParse(Clz))
                     .Concat(PreParse(Cmn))
                     .Concat(PreParse(Cmp))
+                    .Concat(PreParse(Cpy))
                     .OrderByDescending(x => x.Name.Length).ToArray();
         }
 

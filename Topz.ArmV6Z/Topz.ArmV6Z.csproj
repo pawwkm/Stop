@@ -65,6 +65,7 @@
     <Compile Include="CompareNegativeInstruction.cs" />
     <Compile Include="Condition.cs" />
     <Compile Include="ConditionExtensions.cs" />
+    <Compile Include="CopyInstruction.cs" />
     <Compile Include="CountLeadingZeroesInstruction.cs" />
     <Compile Include="Data.cs" />
     <Compile Include="Directive.cs" />
@@ -99,6 +100,7 @@
     <Compile Include="TokenType.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
