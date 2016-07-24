@@ -169,6 +169,39 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse <see cref="Format1Instruction"/> related instructions.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
+        [Test]
+        [TestCase(Mnemonic.Clz)]
+        public void Parse_Format5Instructions_ParsesInstructions(string mnemonic)
+        {
+            var builder = new TokenBuilder();
+            var tokens = builder.Procedure().Identifier("main")
+                                .StartOfBlock()
+                                .Format5Instruction(mnemonic, Registers.R3, Registers.R4)
+                                .EndOfBlock()
+                                .Build();
+
+            var parser = new Parser();
+            var program = parser.Parse(LexicalAnalyzer(tokens));
+
+            Assert.AreEqual(1, program.Procedures.Count);
+            Assert.AreEqual(0, program.Data.Count);
+            Assert.AreEqual(0, program.Strings.Count);
+
+            var main = program.Procedures[0];
+            Assert.AreEqual("main", main.Name);
+            Assert.AreEqual(1, main.Instructions.Count);
+
+            var instruction = main.Instructions[0] as Format5Instruction;
+            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
+            Assert.AreEqual(Registers.R3, instruction.First.Register);
+            Assert.AreEqual(Registers.R4, instruction.Second.Register);
+        }
+
+        /// <summary>
         /// Creates a substitute for an <see cref="LexicalAnalyzer{TokenType}"/>.
         /// </summary>
         /// <param name="tokens">The tokens the analyzer will consume.</param>

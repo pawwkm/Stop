@@ -29,7 +29,8 @@ namespace Topz.ArmV6Z
                 { Mnemonic.Bic, Format1<BitClearInstruction> },
                 { Mnemonic.Bkpt, Format3<BreakPointInstruction> },
                 { Mnemonic.Bx, Format4<BranchAndExchangeInstruction> },
-                { Mnemonic.Bxj, Format4<BranchAndChangeToJazelleInstruction> }
+                { Mnemonic.Bxj, Format4<BranchAndChangeToJazelleInstruction> },
+                { Mnemonic.Clz, Format5<CountLeadingZeroesInstruction> }
             };
         }
 
@@ -230,6 +231,27 @@ namespace Topz.ArmV6Z
         private T Format4<T>(Label label, Mnemonic mnemonic) where T : Format4Instruction
         {
             return (T)Activator.CreateInstance(typeof(T), label, mnemonic, RegisterOperand());
+        }
+
+        /// <summary>
+        /// <para>Parses an instruction with the following format.</para>
+        /// <para>mnemonic, register, register</para>
+        /// </summary>
+        /// <typeparam name="T">The type of instruction.</typeparam>
+        /// <param name="label">The label of the instruction, if any.</param>
+        /// <param name="mnemonic">The mnemonic of the instruction.</param>
+        /// <returns>The parsed instruction.</returns>
+        private T Format5<T>(Label label, Mnemonic mnemonic) where T : Format5Instruction
+        {
+            var r1 = RegisterOperand();
+
+            var separator = analyzer.Next();
+            if (separator.Text != Symbols.ListItemSeparator)
+                throw new ParsingException(separator.Position.ToString($"Expected a '{Symbols.ListItemSeparator}'."));
+
+            var r2 = RegisterOperand();
+
+            return (T)Activator.CreateInstance(typeof(T), label, mnemonic, r1, r2);
         }
 
         /// <summary>

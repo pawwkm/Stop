@@ -114,5 +114,14 @@ namespace Topz.ArmV6Z
         /// <paramref name="instruction"/> is null.
         /// </exception>
         void Visit(BranchAndChangeToJazelleInstruction instruction);
+
+        /// <summary>
+        /// Visits an instruction.
+        /// </summary>
+        /// <param name="instruction">The instruction to visit.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="instruction"/> is null.
+        /// </exception>
+        void Visit(CountLeadingZeroesInstruction instruction);
     }
 }

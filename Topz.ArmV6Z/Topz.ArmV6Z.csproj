@@ -63,12 +63,14 @@
     <Compile Include="BreakPointInstruction.cs" />
     <Compile Include="Condition.cs" />
     <Compile Include="ConditionExtensions.cs" />
+    <Compile Include="CountLeadingZeroesInstruction.cs" />
     <Compile Include="Data.cs" />
     <Compile Include="Directive.cs" />
     <Compile Include="Format1Instruction.cs" />
     <Compile Include="Format2Instruction.cs" />
     <Compile Include="Format3Instruction.cs" />
     <Compile Include="Format4Instruction.cs" />
+    <Compile Include="Format5Instruction.cs" />
     <Compile Include="Immediate16Operand.cs" />
     <Compile Include="INamedNode.cs" />
     <Compile Include="Instruction.cs" />

@@ -99,6 +99,21 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// Adds the tokens for a <see cref="ArmV6Z.Format5Instruction"/> to the builder.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic of the instruction.</param>
+        /// <param name="first">The first register operand of the instruction.</param>
+        /// <param name="second">The second register operand of the instruction.</param>
+        /// <returns>This builder.</returns>
+        public TokenBuilder Format5Instruction(string mnemonic, string first, string second)
+        {
+            return Token(mnemonic, TokenType.Mnemonic)
+                  .Token(first, TokenType.Register)
+                  .Token(Symbols.ListItemSeparator, TokenType.Symbol)
+                  .Token(second, TokenType.Register);
+        }
+
+        /// <summary>
         /// Adds an integer to the builder.
         /// </summary>
         /// <param name="value">The value of the integer.</param>
