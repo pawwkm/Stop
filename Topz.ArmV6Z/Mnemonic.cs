@@ -43,6 +43,11 @@ namespace Topz.ArmV6Z
         public const string Bkpt = "bkpt";
 
         /// <summary>
+        /// The 'bx' mnemonic.
+        /// </summary>
+        public const string Bx = "bx";
+
+        /// <summary>
         /// Initializes the table of preparsed mnemonics.
         /// </summary>
         static Mnemonic()
@@ -53,6 +58,7 @@ namespace Topz.ArmV6Z
                     .Concat(PreParse(B, Bit.L, true))
                     .Concat(PreParse(Bic, Bit.S, true))
                     .Concat(PreParse(Bkpt, false))
+                    .Concat(PreParse(Bx))
                     .OrderByDescending(x => x.Name.Length).ToArray();
         }
 

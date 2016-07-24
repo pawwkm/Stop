@@ -27,7 +27,8 @@ namespace Topz.ArmV6Z
                 { Mnemonic.And, Format1<AndInstruction> },
                 { Mnemonic.B, Format2<BranchInstruction> },
                 { Mnemonic.Bic, Format1<BitClearInstruction> },
-                { Mnemonic.Bkpt, Format3<BreakPointInstruction> }
+                { Mnemonic.Bkpt, Format3<BreakPointInstruction> },
+                { Mnemonic.Bx, Format4<BranchAndExchangeInstruction> }
             };
         }
 
@@ -158,6 +159,14 @@ namespace Topz.ArmV6Z
             return (T)Activator.CreateInstance(typeof(T), label, mnemonic, r1, r2, shifter);
         }
 
+        /// <summary>
+        /// <para>Parses an instruction with the following format.</para>
+        /// <para>mnemonic, target address</para>
+        /// </summary>
+        /// <typeparam name="T">The type of instruction.</typeparam>
+        /// <param name="label">The label of the instruction, if any.</param>
+        /// <param name="mnemonic">The mnemonic of the instruction.</param>
+        /// <returns>The parsed instruction.</returns>
         private T Format2<T>(Label label, Mnemonic mnemonic) where T : Format2Instruction
         {
             var integer = analyzer.Next();
@@ -176,6 +185,14 @@ namespace Topz.ArmV6Z
             }
         }
 
+        /// <summary>
+        /// <para>Parses an instruction with the following format.</para>
+        /// <para>mnemonic, immediate 16</para>
+        /// </summary>
+        /// <typeparam name="T">The type of instruction.</typeparam>
+        /// <param name="label">The label of the instruction, if any.</param>
+        /// <param name="mnemonic">The mnemonic of the instruction.</param>
+        /// <returns>The parsed instruction.</returns>
         private T Format3<T>(Label label, Mnemonic mnemonic) where T : Format3Instruction
         {
             var integer = analyzer.Next();
@@ -192,6 +209,19 @@ namespace Topz.ArmV6Z
             {
                 throw new ParsingException(integer.Position.ToString("The integer can't fit within 16 bits."));
             }
+        }
+
+        /// <summary>
+        /// <para>Parses an instruction with the following format.</para>
+        /// <para>mnemonic, register</para>
+        /// </summary>
+        /// <typeparam name="T">The type of instruction.</typeparam>
+        /// <param name="label">The label of the instruction, if any.</param>
+        /// <param name="mnemonic">The mnemonic of the instruction.</param>
+        /// <returns>The parsed instruction.</returns>
+        private T Format4<T>(Label label, Mnemonic mnemonic) where T : Format4Instruction
+        {
+            return (T)Activator.CreateInstance(typeof(T), label, mnemonic, RegisterOperand());
         }
 
         /// <summary>

@@ -58,6 +58,7 @@
     <Compile Include="Bit.cs" />
     <Compile Include="BitClearInstruction.cs" />
     <Compile Include="BitExtensions.cs" />
+    <Compile Include="BranchAndExchangeInstruction.cs" />
     <Compile Include="BreakPointInstruction.cs" />
     <Compile Include="Condition.cs" />
     <Compile Include="ConditionExtensions.cs" />
@@ -66,6 +67,7 @@
     <Compile Include="Format1Instruction.cs" />
     <Compile Include="Format2Instruction.cs" />
     <Compile Include="Format3Instruction.cs" />
+    <Compile Include="Format4Instruction.cs" />
     <Compile Include="Immediate16Operand.cs" />
     <Compile Include="INamedNode.cs" />
     <Compile Include="Instruction.cs" />

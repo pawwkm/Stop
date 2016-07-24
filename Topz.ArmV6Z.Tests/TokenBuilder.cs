@@ -87,6 +87,18 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// Adds the tokens for a <see cref="ArmV6Z.Format4Instruction"/> to the builder.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic of the instruction.</param>
+        /// <param name="register">The target of the branch.</param>
+        /// <returns>This builder.</returns>
+        public TokenBuilder Format4Instruction(string mnemonic, string register)
+        {
+            return Token(mnemonic, TokenType.Mnemonic)
+                  .Token(register, TokenType.Register);
+        }
+
+        /// <summary>
         /// Adds an integer to the builder.
         /// </summary>
         /// <param name="value">The value of the integer.</param>
