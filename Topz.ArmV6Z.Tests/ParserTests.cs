@@ -202,6 +202,40 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse <see cref="Format1Instruction"/> related instructions.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
+        [Test]
+        [TestCase(Mnemonic.Cmn)]
+        public void Parse_Format6Instructions_ParsesInstructions(string mnemonic)
+        {
+            var builder = new TokenBuilder();
+            var tokens = builder.Procedure().Identifier("main")
+                                .StartOfBlock()
+                                .Format6Instruction(mnemonic, Registers.R3, 1)
+                                .EndOfBlock()
+                                .Build();
+
+            var parser = new Parser();
+            var program = parser.Parse(LexicalAnalyzer(tokens));
+
+            Assert.AreEqual(1, program.Procedures.Count);
+            Assert.AreEqual(0, program.Data.Count);
+            Assert.AreEqual(0, program.Strings.Count);
+
+            var main = program.Procedures[0];
+            Assert.AreEqual("main", main.Name);
+            Assert.AreEqual(1, main.Instructions.Count);
+
+            var instruction = main.Instructions[0] as Format6Instruction;
+            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
+            Assert.AreEqual(Registers.R3, instruction.First.Register);
+            Assert.AreEqual(1, instruction.Second.Immediate);
+            Assert.AreEqual(ShifterOperandType.Immediate, instruction.Second.OperandType);
+        }
+
+        /// <summary>
         /// Creates a substitute for an <see cref="LexicalAnalyzer{TokenType}"/>.
         /// </summary>
         /// <param name="tokens">The tokens the analyzer will consume.</param>

@@ -58,6 +58,11 @@ namespace Topz.ArmV6Z
         public const string Clz = "clz";
 
         /// <summary>
+        /// The 'cmn' mnemonic.
+        /// </summary>
+        public const string Cmn = "cmn";
+
+        /// <summary>
         /// Initializes the table of preparsed mnemonics.
         /// </summary>
         static Mnemonic()
@@ -71,6 +76,7 @@ namespace Topz.ArmV6Z
                     .Concat(PreParse(Bx))
                     .Concat(PreParse(Bxj))
                     .Concat(PreParse(Clz))
+                    .Concat(PreParse(Cmn))
                     .OrderByDescending(x => x.Name.Length).ToArray();
         }
 

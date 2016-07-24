@@ -114,6 +114,21 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// Adds the tokens for a <see cref="ArmV6Z.Format6Instruction"/> to the builder.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic of the instruction.</param>
+        /// <param name="register">The register operand.</param>
+        /// <param name="immediate">The value to shift by.</param>
+        /// <returns>This builder.</returns>
+        public TokenBuilder Format6Instruction(string mnemonic, string register, int immediate)
+        {
+            return Token(mnemonic, TokenType.Mnemonic)
+                  .Token(register, TokenType.Register)
+                  .Token(Symbols.ListItemSeparator, TokenType.Symbol)
+                  .Integer(immediate);
+        }
+
+        /// <summary>
         /// Adds an integer to the builder.
         /// </summary>
         /// <param name="value">The value of the integer.</param>
