@@ -28,7 +28,8 @@ namespace Topz.ArmV6Z
                 { Mnemonic.B, Format2<BranchInstruction> },
                 { Mnemonic.Bic, Format1<BitClearInstruction> },
                 { Mnemonic.Bkpt, Format3<BreakPointInstruction> },
-                { Mnemonic.Bx, Format4<BranchAndExchangeInstruction> }
+                { Mnemonic.Bx, Format4<BranchAndExchangeInstruction> },
+                { Mnemonic.Bxj, Format4<BranchAndChangeToJazelleInstruction> }
             };
         }
 

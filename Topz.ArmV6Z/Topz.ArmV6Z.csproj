@@ -58,6 +58,7 @@
     <Compile Include="Bit.cs" />
     <Compile Include="BitClearInstruction.cs" />
     <Compile Include="BitExtensions.cs" />
+    <Compile Include="BranchAndChangeToJazelleInstruction.cs" />
     <Compile Include="BranchAndExchangeInstruction.cs" />
     <Compile Include="BreakPointInstruction.cs" />
     <Compile Include="Condition.cs" />

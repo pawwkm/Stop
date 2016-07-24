@@ -143,6 +143,7 @@ namespace Topz.ArmV6Z
         /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
         [Test]
         [TestCase(Mnemonic.Bx)]
+        [TestCase(Mnemonic.Bxj)]
         public void Parse_Format4Instructions_ParsesInstructions(string mnemonic)
         {
             var builder = new TokenBuilder();

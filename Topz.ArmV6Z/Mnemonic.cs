@@ -48,6 +48,11 @@ namespace Topz.ArmV6Z
         public const string Bx = "bx";
 
         /// <summary>
+        /// The 'bxj' mnemonic.
+        /// </summary>
+        public const string Bxj = "bxj";
+
+        /// <summary>
         /// Initializes the table of preparsed mnemonics.
         /// </summary>
         static Mnemonic()
@@ -59,6 +64,7 @@ namespace Topz.ArmV6Z
                     .Concat(PreParse(Bic, Bit.S, true))
                     .Concat(PreParse(Bkpt, false))
                     .Concat(PreParse(Bx))
+                    .Concat(PreParse(Bxj))
                     .OrderByDescending(x => x.Name.Length).ToArray();
         }
 
