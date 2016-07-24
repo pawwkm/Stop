@@ -83,7 +83,14 @@ namespace Topz.ArmV6Z
                 if (analyzer.NextIs(Symbols.EndOfBlock))
                     break;
 
-                procedure.Instructions.Add(Instruction());
+                try
+                {
+                    procedure.Instructions.Add(Instruction());
+                }
+                catch (ArgumentException ex)
+                {
+                    throw new ParsingException(ex.Message);
+                }
             }
 
             Token<TokenType> end = analyzer.Next();
