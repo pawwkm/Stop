@@ -7,7 +7,7 @@
     <ProjectGuid>{BF3B0818-8B0F-4F25-98DF-3EBE6EB745C1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Topz.ArmV6Z.Tests</RootNamespace>
+    <RootNamespace>Topz.ArmV6Z</RootNamespace>
     <AssemblyName>Topz.ArmV6Z.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

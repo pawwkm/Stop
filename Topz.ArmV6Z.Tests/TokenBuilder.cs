@@ -1,6 +1,6 @@
 ﻿using Pote.Text;
 
-namespace Topz.ArmV6Z.Tests
+namespace Topz.ArmV6Z
 {
     /// <summary>
     /// Builds tokens for the parser.

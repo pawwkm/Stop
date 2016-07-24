@@ -3,7 +3,7 @@ using Pote;
 using Pote.Text;
 using System.Text;
 
-namespace Topz.ArmV6Z.Tests
+namespace Topz.ArmV6Z
 {
     /// <summary>
     /// Provides tests for the <see cref="LexicalAnalyzer"/> class.

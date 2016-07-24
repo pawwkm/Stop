@@ -3,7 +3,7 @@ using NUnit.Framework;
 using Pote.Text;
 using System.Collections.Generic;
 
-namespace Topz.ArmV6Z.Tests
+namespace Topz.ArmV6Z
 {
     /// <summary>
     /// Provides tests for the <see cref="Parser"/> class.
