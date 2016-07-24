@@ -101,8 +101,39 @@ namespace Topz.ArmV6Z.Tests
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
 
-            var instruction = main.Instructions[0] as BranchInstruction;
+            var instruction = main.Instructions[0] as Format2Instruction;
             Assert.AreEqual(40, instruction.Operand.Target);
+        }
+
+        /// <summary>
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse <see cref="Format3Instruction"/> related instructions.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
+        [Test]
+        [TestCase(Mnemonic.Bkpt)]
+        public void Parse_Format3Instructions_ParsesInstructions(string mnemonic)
+        {
+            var builder = new TokenBuilder();
+            var tokens = builder.Procedure().Identifier("main")
+                                .StartOfBlock()
+                                .Format3Instruction(mnemonic, 40)
+                                .EndOfBlock()
+                                .Build();
+
+            var parser = new Parser();
+            var program = parser.Parse(LexicalAnalyzer(tokens));
+
+            Assert.AreEqual(1, program.Procedures.Count);
+            Assert.AreEqual(0, program.Data.Count);
+            Assert.AreEqual(0, program.Strings.Count);
+
+            var main = program.Procedures[0];
+            Assert.AreEqual("main", main.Name);
+            Assert.AreEqual(1, main.Instructions.Count);
+
+            var instruction = main.Instructions[0] as Format3Instruction;
+            Assert.AreEqual(40, instruction.Operand.Value);
         }
 
         /// <summary>

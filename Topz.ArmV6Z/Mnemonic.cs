@@ -38,6 +38,11 @@ namespace Topz.ArmV6Z
         public const string Bic = "bic";
 
         /// <summary>
+        /// The 'bkpt' mnemonic.
+        /// </summary>
+        public const string Bkpt = "bkpt";
+
+        /// <summary>
         /// Initializes the table of preparsed mnemonics.
         /// </summary>
         static Mnemonic()
@@ -47,6 +52,7 @@ namespace Topz.ArmV6Z
                     .Concat(PreParse(And, Bit.S, true))
                     .Concat(PreParse(B, Bit.L, true))
                     .Concat(PreParse(Bic, Bit.S, true))
+                    .Concat(PreParse(Bkpt, false))
                     .OrderByDescending(x => x.Name.Length).ToArray();
         }
 
@@ -147,16 +153,22 @@ namespace Topz.ArmV6Z
         /// Creates a list of pre parsed mnemonics for a give mnemonic.
         /// </summary>
         /// <param name="rawName">The name of the mnemonic without conditionals, bits etc.</param>
+        /// <param name="includeConditions">
+        /// If true the conditions are included; otherwise they are not included.
+        /// </param>
         /// <returns>
         /// The list of pre parsed mnemonics. 
         /// The list contains a mnemonic equal to <paramref name="rawName"/>
         /// and one with all the conditionals added.
         /// </returns>
-        private static IEnumerable<PreParsedMnemonic> PreParse(string rawName)
+        private static IEnumerable<PreParsedMnemonic> PreParse(string rawName, bool includeConditions = true)
         {
             yield return new PreParsedMnemonic(rawName, rawName, Condition.Always);
-            foreach (Condition condition in typeof(Condition).GetEnumValues())
-                yield return new PreParsedMnemonic(rawName + condition.AsText(), rawName, condition);
+            if (includeConditions)
+            {
+                foreach (Condition condition in typeof(Condition).GetEnumValues())
+                    yield return new PreParsedMnemonic(rawName + condition.AsText(), rawName, condition);
+            }
         }
 
         /// <summary>

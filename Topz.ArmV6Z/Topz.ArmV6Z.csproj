@@ -58,12 +58,15 @@
     <Compile Include="Bit.cs" />
     <Compile Include="BitClearInstruction.cs" />
     <Compile Include="BitExtensions.cs" />
+    <Compile Include="BreakPointInstruction.cs" />
     <Compile Include="Condition.cs" />
     <Compile Include="ConditionExtensions.cs" />
     <Compile Include="Data.cs" />
     <Compile Include="Directive.cs" />
     <Compile Include="Format1Instruction.cs" />
     <Compile Include="Format2Instruction.cs" />
+    <Compile Include="Format3Instruction.cs" />
+    <Compile Include="Immediate16Operand.cs" />
     <Compile Include="INamedNode.cs" />
     <Compile Include="Instruction.cs" />
     <Compile Include="BranchInstruction.cs" />
@@ -78,7 +81,6 @@
     <Compile Include="RegisterOperand.cs" />
     <Compile Include="ShifterOperand.cs" />
     <Compile Include="ShifterOperandType.cs" />
-    <Compile Include="StringExtensions.cs" />
     <Compile Include="Symbols.cs" />
     <Compile Include="TargetOperand.cs" />
     <Compile Include="Pass.cs" />

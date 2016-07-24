@@ -75,6 +75,18 @@ namespace Topz.ArmV6Z.Tests
         }
 
         /// <summary>
+        /// Adds the tokens for a <see cref="ArmV6Z.Format3Instruction"/> to the builder.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic of the instruction.</param>
+        /// <param name="target">The target of the branch.</param>
+        /// <returns>This builder.</returns>
+        public TokenBuilder Format3Instruction(string mnemonic, ushort target)
+        {
+            return Token(mnemonic, TokenType.Mnemonic)
+                  .Token("#" + target, TokenType.Integer);
+        }
+
+        /// <summary>
         /// Adds an integer to the builder.
         /// </summary>
         /// <param name="value">The value of the integer.</param>

@@ -1,5 +1,6 @@
 ﻿using Pote.Text;
 using System;
+using System.Collections.Generic;
 
 namespace Topz.ArmV6Z
 {
@@ -8,9 +9,27 @@ namespace Topz.ArmV6Z
     /// </summary>
     internal sealed class Parser
     {
+        private Dictionary<string, Func<Label, Mnemonic, Instruction>> table;
+
         private LexicalAnalyzer<TokenType> analyzer;
 
         private Program program;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Parser"/> class.
+        /// </summary>
+        public Parser()
+        {
+            table = new Dictionary<string, Func<Label, Mnemonic, Instruction>>()
+            {
+                { Mnemonic.Adc, Format1<AddWithCarryInstruction> },
+                { Mnemonic.Add, Format1<AddInstruction> },
+                { Mnemonic.And, Format1<AndInstruction> },
+                { Mnemonic.B, Format2<BranchInstruction> },
+                { Mnemonic.Bic, Format1<BitClearInstruction> },
+                { Mnemonic.Bkpt, Format3<BreakPointInstruction> }
+            };
+        }
 
         /// <summary>
         /// Parses a program into an ast.
@@ -101,21 +120,14 @@ namespace Topz.ArmV6Z
             if (token.Type != TokenType.Mnemonic)
                 throw new ParsingException(token.Position.ToString("Mnemonic expected."));
 
-            Mnemonic mnemonic = new Mnemonic(token.Text, token.Position);
-            switch (mnemonic.RawName)
+            try
             {
-                case Mnemonic.Adc:
-                    return Format1<AddWithCarryInstruction>(label, mnemonic);
-                case Mnemonic.Add:
-                    return Format1<AddInstruction>(label, mnemonic);
-                case Mnemonic.And:
-                    return Format1<AndInstruction>(label, mnemonic);
-                case Mnemonic.B:
-                    return Format2<BranchInstruction>(label, mnemonic);
-                case Mnemonic.Bic:
-                    return Format1<BitClearInstruction>(label, mnemonic);
-                default:
-                    throw new ParsingException(analyzer.Position.ToString("Unknown instruction"));
+                Mnemonic mnemonic = new Mnemonic(token.Text, token.Position);
+                return table[mnemonic.RawName](label, mnemonic);
+            }
+            catch (KeyNotFoundException)
+            {
+                throw new ParsingException(analyzer.Position.ToString("Unknown instruction"));
             }
         }
 
@@ -152,9 +164,34 @@ namespace Topz.ArmV6Z
             if (integer.Type != TokenType.Integer)
                 throw new ParsingException(integer.Position.ToString("Expected an integer."));
 
-            var operand = new TargetOperand(integer.Position, int.Parse(integer.Text.Substring(1)));
+            try
+            {
+                var operand = new TargetOperand(integer.Position, int.Parse(integer.Text.Substring(1)));
 
-            return (T)Activator.CreateInstance(typeof(T), label, mnemonic, operand);
+                return (T)Activator.CreateInstance(typeof(T), label, mnemonic, operand);
+            }
+            catch (OverflowException)
+            {
+                throw new ParsingException(integer.Position.ToString("The integer can't fit within 32 bits."));
+            }
+        }
+
+        private T Format3<T>(Label label, Mnemonic mnemonic) where T : Format3Instruction
+        {
+            var integer = analyzer.Next();
+            if (integer.Type != TokenType.Integer)
+                throw new ParsingException(integer.Position.ToString("Expected an integer."));
+
+            try
+            {
+                var operand = new Immediate16Operand(integer.Position, ushort.Parse(integer.Text.Substring(1)));
+
+                return (T)Activator.CreateInstance(typeof(T), label, mnemonic, operand);
+            }
+            catch (OverflowException)
+            {
+                throw new ParsingException(integer.Position.ToString("The integer can't fit within 16 bits."));
+            }
         }
 
         /// <summary>
