@@ -189,6 +189,19 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// Visits an instruction.
+        /// </summary>
+        /// <param name="instruction">The instruction to visit.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="instruction"/> is null.
+        /// </exception>
+        public virtual void Visit(CompareInstruction instruction)
+        {
+            if (instruction == null)
+                throw new ArgumentNullException(nameof(instruction));
+        }
+
+        /// <summary>
         /// Visits an un supported node type.
         /// </summary>
         /// <param name="node">The node to visit.</param>

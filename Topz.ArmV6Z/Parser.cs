@@ -31,7 +31,8 @@ namespace Topz.ArmV6Z
                 { Mnemonic.Bx, Format4<BranchAndExchangeInstruction> },
                 { Mnemonic.Bxj, Format4<BranchAndChangeToJazelleInstruction> },
                 { Mnemonic.Clz, Format5<CountLeadingZeroesInstruction> },
-                { Mnemonic.Cmn, Format6<CompareNegativeInstruction> }
+                { Mnemonic.Cmn, Format6<CompareNegativeInstruction> },
+                { Mnemonic.Cmp, Format6<CompareInstruction> }
             };
         }
 

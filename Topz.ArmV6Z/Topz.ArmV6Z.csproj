@@ -61,6 +61,7 @@
     <Compile Include="BranchAndChangeToJazelleInstruction.cs" />
     <Compile Include="BranchAndExchangeInstruction.cs" />
     <Compile Include="BreakPointInstruction.cs" />
+    <Compile Include="CompareInstruction.cs" />
     <Compile Include="CompareNegativeInstruction.cs" />
     <Compile Include="Condition.cs" />
     <Compile Include="ConditionExtensions.cs" />
