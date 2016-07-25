@@ -33,7 +33,8 @@ namespace Topz.ArmV6Z
                 { Mnemonic.Clz, Format5<CountLeadingZeroesInstruction> },
                 { Mnemonic.Cmn, Format6<CompareNegativeInstruction> },
                 { Mnemonic.Cmp, Format6<CompareInstruction> },
-                { Mnemonic.Cpy, Format5<CopyInstruction> }
+                { Mnemonic.Cpy, Format5<CopyInstruction> },
+                { Mnemonic.Eor, Format1<ExclusiveOrInstruction> }
             };
         }
 

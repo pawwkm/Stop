@@ -69,6 +69,7 @@
     <Compile Include="CountLeadingZeroesInstruction.cs" />
     <Compile Include="Data.cs" />
     <Compile Include="Directive.cs" />
+    <Compile Include="ExclusiveOrInstruction.cs" />
     <Compile Include="Format1Instruction.cs" />
     <Compile Include="Format2Instruction.cs" />
     <Compile Include="Format3Instruction.cs" />
@@ -100,7 +101,6 @@
     <Compile Include="TokenType.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

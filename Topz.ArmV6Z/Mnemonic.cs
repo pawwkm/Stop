@@ -10,7 +10,20 @@ namespace Topz.ArmV6Z
     /// </summary>
     internal sealed class Mnemonic
     {
-        private static readonly PreParsedMnemonic[] table;
+        private static readonly PreParsedMnemonic[] table = PreParse(Adc, Bit.S, true).
+                                                            Concat(PreParse(Add, Bit.S, true)).
+                                                            Concat(PreParse(And, Bit.S, true)).
+                                                            Concat(PreParse(B, Bit.L, true)).
+                                                            Concat(PreParse(Bic, Bit.S, true)).
+                                                            Concat(PreParse(Bkpt, false)).
+                                                            Concat(PreParse(Bx)).
+                                                            Concat(PreParse(Bxj)).
+                                                            Concat(PreParse(Clz)).
+                                                            Concat(PreParse(Cmn)).
+                                                            Concat(PreParse(Cmp)).
+                                                            Concat(PreParse(Cpy)).
+                                                            Concat(PreParse(Eor, Bit.S, true)).
+                                                            OrderByDescending(x => x.Name.Length).ToArray();
 
         /// <summary>
         /// The 'adc' mnemonic.
@@ -73,24 +86,9 @@ namespace Topz.ArmV6Z
         public const string Cpy = "cpy";
 
         /// <summary>
-        /// Initializes the table of preparsed mnemonics.
+        /// The 'eor' mnemonic.
         /// </summary>
-        static Mnemonic()
-        {
-            table = PreParse(Adc, Bit.S, true)
-                    .Concat(PreParse(Add, Bit.S, true))
-                    .Concat(PreParse(And, Bit.S, true))
-                    .Concat(PreParse(B, Bit.L, true))
-                    .Concat(PreParse(Bic, Bit.S, true))
-                    .Concat(PreParse(Bkpt, false))
-                    .Concat(PreParse(Bx))
-                    .Concat(PreParse(Bxj))
-                    .Concat(PreParse(Clz))
-                    .Concat(PreParse(Cmn))
-                    .Concat(PreParse(Cmp))
-                    .Concat(PreParse(Cpy))
-                    .OrderByDescending(x => x.Name.Length).ToArray();
-        }
+        public const string Eor = "eor";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mnemonic"/> class.
