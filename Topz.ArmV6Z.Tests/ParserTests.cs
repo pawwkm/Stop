@@ -47,7 +47,7 @@ namespace Topz.ArmV6Z
         [TestCase(Mnemonic.And)]
         [TestCase(Mnemonic.Bic)]
         [TestCase(Mnemonic.Eor)]
-        public void Parse_Format1Instructions_ParsesInstructions(string mnemonic)
+        public void Parse_Format1Instruction_ParsesInstruction(string mnemonic)
         {
             var builder = new TokenBuilder();
             var tokens = builder.Procedure().Identifier("main")
@@ -82,7 +82,7 @@ namespace Topz.ArmV6Z
         /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
         [Test]
         [TestCase(Mnemonic.B)]
-        public void Parse_Format2Instructions_ParsesInstructions(string mnemonic)
+        public void Parse_Format2Instruction_ParsesInstruction(string mnemonic)
         {
             var builder = new TokenBuilder();
             var tokens = builder.Procedure().Identifier("main")
@@ -113,7 +113,7 @@ namespace Topz.ArmV6Z
         /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
         [Test]
         [TestCase(Mnemonic.Bkpt)]
-        public void Parse_Format3Instructions_ParsesInstructions(string mnemonic)
+        public void Parse_Format3Instruction_ParsesInstruction(string mnemonic)
         {
             var builder = new TokenBuilder();
             var tokens = builder.Procedure().Identifier("main")
@@ -145,7 +145,7 @@ namespace Topz.ArmV6Z
         [Test]
         [TestCase(Mnemonic.Bx)]
         [TestCase(Mnemonic.Bxj)]
-        public void Parse_Format4Instructions_ParsesInstructions(string mnemonic)
+        public void Parse_Format4Instruction_ParsesInstruction(string mnemonic)
         {
             var builder = new TokenBuilder();
             var tokens = builder.Procedure().Identifier("main")
@@ -177,7 +177,7 @@ namespace Topz.ArmV6Z
         [Test]
         [TestCase(Mnemonic.Clz)]
         [TestCase(Mnemonic.Cpy)]
-        public void Parse_Format5Instructions_ParsesInstructions(string mnemonic)
+        public void Parse_Format5Instruction_ParsesInstruction(string mnemonic)
         {
             var builder = new TokenBuilder();
             var tokens = builder.Procedure().Identifier("main")
@@ -211,7 +211,7 @@ namespace Topz.ArmV6Z
         [Test]
         [TestCase(Mnemonic.Cmn)]
         [TestCase(Mnemonic.Cmp)]
-        public void Parse_Format6Instructions_ParsesInstructions(string mnemonic)
+        public void Parse_Format6Instruction_ParsesInstruction(string mnemonic)
         {
             var builder = new TokenBuilder();
             var tokens = builder.Procedure().Identifier("main")
@@ -248,6 +248,7 @@ namespace Topz.ArmV6Z
         public void Parse_Format7InstructionWithImmediateOffset_ParsesInstruction(string mnemonic)
         {
             ParseFormat7InstructionWithImmediateOffset(mnemonic);
+            ParseFormat7InstructionWithRegisterOffset(mnemonic);
         }
 
         /// <summary>
@@ -280,8 +281,43 @@ namespace Topz.ArmV6Z
 
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
             Assert.AreEqual(Registers.R0, instruction.First.Register);
-            Assert.AreEqual(Registers.R10, instruction.Second.BaseRegister);
+            Assert.AreEqual(Registers.R10, instruction.Second.BaseAddress.Register);
             Assert.AreEqual(4, ((ImmediateOffsetOperand)instruction.Second).Offset);
+        }
+
+        /// <summary>
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse <see cref="Format7Instruction"/> that uses the register offset addressing mode.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
+        private void ParseFormat7InstructionWithRegisterOffset(string mnemonic)
+        {
+            var builder = new TokenBuilder();
+            var tokens = builder.Procedure().Identifier("main")
+                                .StartOfBlock()
+                                .Mnemonic(mnemonic).Register(Registers.R0)
+                                .ListItemSeparator().RegisterOffsetAddressingMode(Registers.R10, true, Registers.R1)
+                                .EndOfBlock()
+                                .Build();
+
+            var parser = new Parser();
+            var program = parser.Parse(LexicalAnalyzer(tokens));
+
+            Assert.AreEqual(1, program.Procedures.Count);
+            Assert.AreEqual(0, program.Data.Count);
+            Assert.AreEqual(0, program.Strings.Count);
+
+            var main = program.Procedures[0];
+            Assert.AreEqual("main", main.Name);
+            Assert.AreEqual(1, main.Instructions.Count);
+
+            var instruction = main.Instructions[0] as Format7Instruction;
+
+            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
+            Assert.AreEqual(Registers.R0, instruction.First.Register);
+            Assert.AreEqual(Registers.R10, instruction.Second.BaseAddress.Register);
+            Assert.AreEqual(Registers.R1, ((RegisterOffsetOperand)instruction.Second).Offset.Register);
+            Assert.True(((RegisterOffsetOperand)instruction.Second).AddToBase);
         }
 
         /// <summary>

@@ -38,21 +38,30 @@ namespace Topz.ArmV6Z
         public const string RightSquareBracket = "]";
 
         /// <summary>
+        /// The plus symbol.
+        /// </summary>
+        public const string Plus = "+";
+
+        /// <summary>
+        /// The minus symbol.
+        /// </summary>
+        public const string Minus = "-";
+
+        /// <summary>
         /// All of the symbols.
         /// </summary>
         public static IEnumerable<string> All
         {
             get
             {
-                return new[]
-                {
-                    StartOfBlock,
-                    EndOfBlock,
-                    EndOfLable,
-                    ListItemSeparator,
-                    LeftSquareBracket,
-                    RightSquareBracket
-                };
+                yield return StartOfBlock;
+                yield return EndOfBlock;
+                yield return EndOfLable;
+                yield return ListItemSeparator;
+                yield return LeftSquareBracket;
+                yield return RightSquareBracket;
+                yield return Plus;
+                yield return Minus;
             }
         }
     }

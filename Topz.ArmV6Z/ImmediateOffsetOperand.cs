@@ -20,13 +20,10 @@ namespace Topz.ArmV6Z
         /// <exception cref="ArgumentNullException">
         /// <paramref name="register"/> is null.
         /// </exception>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="register"/> is not one of <see cref="Registers.All"/>.
-        /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// The <paramref name="offset"/> doesn't fit within 12 bits.
         /// </exception>
-        public ImmediateOffsetOperand(string register, int offset) : base(register)
+        public ImmediateOffsetOperand(RegisterOperand register, int offset) : base(register)
         {
             if (offset > 2047 || offset < -2048)
                 throw new ArgumentOutOfRangeException(nameof(offset), "This doesn't fit within 12 bits.");
@@ -36,7 +33,7 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// Specifies the immediate offset used with the value of 
-        /// <see cref="AddressingModeOperand.BaseRegister"/> to form the address.
+        /// <see cref="AddressingModeOperand.BaseAddress"/> to form the address.
         /// </summary>
         public int Offset
         {

@@ -323,14 +323,27 @@ namespace Topz.ArmV6Z
         private AddressingModeOperand AddressingModeOperand()
         {
             Symbol(Symbols.LeftSquareBracket);
-            var register = Register();
+            var register = new RegisterOperand(Register());
 
             Symbol(Symbols.ListItemSeparator);
-            var offset = Integer();
+            if (analyzer.NextIs(TokenType.Integer))
+            {
+                var offset = Integer();
+                Symbol(Symbols.RightSquareBracket);
 
-            Symbol(Symbols.RightSquareBracket);
+                return new ImmediateOffsetOperand(register, int.Parse(offset.Text));
+            }
+            else if (analyzer.NextIs(Symbols.Plus) || analyzer.NextIs(Symbols.Minus))
+            {
+                var sign = analyzer.Next();
+                var offset = new RegisterOperand(Register());
 
-            return new ImmediateOffsetOperand(register.Text, int.Parse(offset.Text));
+                Symbol(Symbols.RightSquareBracket);
+
+                return new RegisterOffsetOperand(register, sign.Text == Symbols.Plus, offset);
+            }
+
+            throw new ParsingException(analyzer.Next().Position.ToString("Expected an addressing mode."));
         }
 
         /// <summary>

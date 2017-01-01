@@ -29,6 +29,19 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// Add one of <see cref="Symbols.All"/> to the builder.
+        /// </summary>
+        /// <param name="symbol">The symbol to add.</param>
+        /// <returns>This builder.</returns>
+        public TokenBuilder Symbol(string symbol)
+        {
+            if (!Symbols.All.Contains(symbol))
+                throw new ArgumentException(nameof(symbol));
+
+            return Token(symbol, TokenType.Symbol);
+        }
+
+        /// <summary>
         /// Adds the end of block symbol to the builder.
         /// </summary>
         /// <returns>This builder.</returns>
@@ -201,13 +214,30 @@ namespace Topz.ArmV6Z
         /// </summary>
         /// <param name="register">The register containing the base address.</param>
         /// <param name="offset">The offset from the base address.</param>
-        /// <returns></returns>
+        /// <returns>This builder.</returns>
         public TokenBuilder ImmediateOffsetAddressingMode(string register, int offset)
         {
             return LeftSquareBracket().
                    Register(register).
                    ListItemSeparator().
                    Integer(offset).
+                   RightSquareBracket();
+        }
+
+        /// <summary>
+        /// Adds the tokens to form the immediate offset addressing mode.
+        /// </summary>
+        /// <param name="baseRegister">The register containing the base address.</param>
+        /// <param name="addToBase">If true the offset is added to the base: otherwise it is subtracted.</param>
+        /// <param name="offset">The offset from the base address.</param>
+        /// <returns></returns>
+        public TokenBuilder RegisterOffsetAddressingMode(string baseRegister, bool addToBase, string offset)
+        {
+            return LeftSquareBracket().
+                   Register(baseRegister).
+                   ListItemSeparator().
+                   Symbol(addToBase ? Symbols.Plus : Symbols.Minus).
+                   Register(offset).
                    RightSquareBracket();
         }
     }

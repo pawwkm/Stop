@@ -92,6 +92,7 @@
     <Compile Include="Node.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Register.cs" />
+    <Compile Include="RegisterOffsetOperand.cs" />
     <Compile Include="RegisterOperand.cs" />
     <Compile Include="ShifterOperand.cs" />
     <Compile Include="ShifterOperandType.cs" />
