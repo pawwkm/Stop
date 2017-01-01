@@ -27,10 +27,10 @@ namespace Disk
         /// </summary>
         private static void InteractiveMode()
         {
-            Script script = new Script();
+            var script = new Script();
             while (true)
             {
-                string code = Console.ReadLine();
+                var code = Console.ReadLine();
                 if (code.ToLower() == "exit")
                     break;
 
@@ -53,9 +53,9 @@ namespace Disk
         {
             try
             {
-                using (Stream stream = File.OpenRead(path))
+                using (var stream = File.OpenRead(path))
                 {
-                    Script script = new Script(stream);
+                    var script = new Script(stream);
                     script.Run();
                 }
             }

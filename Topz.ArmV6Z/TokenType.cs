@@ -1,7 +1,7 @@
 ﻿namespace Topz.ArmV6Z
 {
     /// <summary>
-    /// The type of tokens in a script.
+    /// The type of tokens in a program.
     /// </summary>
     internal enum TokenType
     {

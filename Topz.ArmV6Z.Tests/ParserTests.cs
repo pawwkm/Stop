@@ -171,7 +171,7 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
-        /// can parse <see cref="Format1Instruction"/> related instructions.
+        /// can parse <see cref="Format5Instruction"/> related instructions.
         /// </summary>
         /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
         [Test]
@@ -205,7 +205,7 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
-        /// can parse <see cref="Format1Instruction"/> related instructions.
+        /// can parse <see cref="Format6Instruction"/> related instructions.
         /// </summary>
         /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
         [Test]
@@ -239,15 +239,61 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse <see cref="Format7Instruction"/> related instructions.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
+        [Test]
+        [TestCase(Mnemonic.Ldr)]
+        public void Parse_Format7InstructionWithImmediateOffset_ParsesInstruction(string mnemonic)
+        {
+            ParseFormat7InstructionWithImmediateOffset(mnemonic);
+        }
+
+        /// <summary>
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse <see cref="Format7Instruction"/> that uses the immediate offset addressing mode.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
+        private void ParseFormat7InstructionWithImmediateOffset(string mnemonic)
+        {
+            var builder = new TokenBuilder();
+            var tokens = builder.Procedure().Identifier("main")
+                                .StartOfBlock()
+                                .Mnemonic(mnemonic).Register(Registers.R0)
+                                .ListItemSeparator().ImmediateOffsetAddressingMode(Registers.R10, 4)
+                                .EndOfBlock()
+                                .Build();
+
+            var parser = new Parser();
+            var program = parser.Parse(LexicalAnalyzer(tokens));
+
+            Assert.AreEqual(1, program.Procedures.Count);
+            Assert.AreEqual(0, program.Data.Count);
+            Assert.AreEqual(0, program.Strings.Count);
+
+            var main = program.Procedures[0];
+            Assert.AreEqual("main", main.Name);
+            Assert.AreEqual(1, main.Instructions.Count);
+
+            var instruction = main.Instructions[0] as Format7Instruction;
+
+            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
+            Assert.AreEqual(Registers.R0, instruction.First.Register);
+            Assert.AreEqual(Registers.R10, instruction.Second.BaseRegister);
+            Assert.AreEqual(4, ((ImmediateOffsetOperand)instruction.Second).Offset);
+        }
+
+        /// <summary>
         /// Creates a substitute for an <see cref="LexicalAnalyzer{TokenType}"/>.
         /// </summary>
         /// <param name="tokens">The tokens the analyzer will consume.</param>
         /// <returns>The substitute analyzer.</returns>
         private static LexicalAnalyzer<TokenType> LexicalAnalyzer(IList<Token<TokenType>> tokens)
         {
-            LexicalAnalyzer<TokenType> analyzer = Substitute.For<LexicalAnalyzer<TokenType>>();
+            var analyzer = Substitute.For<LexicalAnalyzer<TokenType>>();
 
-            int current = 0;
+            var current = 0;
             analyzer.Next().Returns(x =>
             {
                 if (analyzer.EndOfInput)

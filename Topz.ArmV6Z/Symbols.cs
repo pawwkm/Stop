@@ -28,6 +28,16 @@ namespace Topz.ArmV6Z
         public const string ListItemSeparator = ",";
 
         /// <summary>
+        /// The left square bracket symbol.
+        /// </summary>
+        public const string LeftSquareBracket = "[";
+
+        /// <summary>
+        /// The right square bracket symbol.
+        /// </summary>
+        public const string RightSquareBracket = "]";
+
+        /// <summary>
         /// All of the symbols.
         /// </summary>
         public static IEnumerable<string> All
@@ -39,7 +49,9 @@ namespace Topz.ArmV6Z
                     StartOfBlock,
                     EndOfBlock,
                     EndOfLable,
-                    ListItemSeparator
+                    ListItemSeparator,
+                    LeftSquareBracket,
+                    RightSquareBracket
                 };
             }
         }

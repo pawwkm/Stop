@@ -1,4 +1,6 @@
 ﻿using Pote.Text;
+using System;
+using System.Linq;
 
 namespace Topz.ArmV6Z
 {
@@ -45,6 +47,62 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// Adds the <see cref="Symbols.LeftSquareBracket"/> 
+        /// symbol to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder LeftSquareBracket()
+        {
+            return Token(Symbols.LeftSquareBracket, TokenType.Symbol);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Symbols.RightSquareBracket"/> 
+        /// symbol to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder RightSquareBracket()
+        {
+            return Token(Symbols.RightSquareBracket, TokenType.Symbol);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Symbols.ListItemSeparator"/> 
+        /// symbol to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder ListItemSeparator()
+        {
+            return Token(Symbols.ListItemSeparator, TokenType.Symbol);
+        }
+
+        /// <summary>
+        /// Add one of <see cref="Registers.All"/> to the builder.
+        /// </summary>
+        /// <param name="register">The register to add.</param>
+        /// <returns>This builder.</returns>
+        public TokenBuilder Register(string register)
+        {
+            if (!Registers.All.Contains(register))
+                throw new ArgumentException(nameof(register));
+
+            return Token(register, TokenType.Register);
+        }
+
+        /// <summary>
+        /// Add one of <see cref="Mnemonic.All"/> to the builder.
+        /// </summary>
+        /// <param name="mnemonic">The register to add.</param>
+        /// <returns>This builder.</returns>
+        public TokenBuilder Mnemonic(string mnemonic)
+        {
+            if (!ArmV6Z.Mnemonic.All.Contains(mnemonic))
+                throw new ArgumentException(nameof(mnemonic));
+
+            return Token(mnemonic, TokenType.Mnemonic);
+        }
+
+        /// <summary>
         /// Adds the tokens for a <see cref="ArmV6Z.Format1Instruction"/> to the builder.
         /// </summary>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
@@ -54,11 +112,11 @@ namespace Topz.ArmV6Z
         /// <returns>This builder.</returns>
         public TokenBuilder Format1Instruction(string mnemonic, string rd, string rn, int immediate)
         {
-            return Token(mnemonic, TokenType.Mnemonic)
-                  .Token(rd, TokenType.Register)
-                  .Token(Symbols.ListItemSeparator, TokenType.Symbol)
-                  .Token(rn, TokenType.Register)
-                  .Token(Symbols.ListItemSeparator, TokenType.Symbol)
+            return Mnemonic(mnemonic)
+                  .Register(rd)
+                  .ListItemSeparator()
+                  .Register(rn)
+                  .ListItemSeparator()
                   .Integer(immediate);
         }
 
@@ -70,8 +128,8 @@ namespace Topz.ArmV6Z
         /// <returns>This builder.</returns>
         public TokenBuilder Format2Instruction(string mnemonic, int target)
         {
-            return Token(mnemonic, TokenType.Mnemonic)
-                  .Token("#" + target, TokenType.Integer);
+            return Mnemonic(mnemonic)
+                  .Integer(target);
         }
 
         /// <summary>
@@ -82,8 +140,8 @@ namespace Topz.ArmV6Z
         /// <returns>This builder.</returns>
         public TokenBuilder Format3Instruction(string mnemonic, ushort target)
         {
-            return Token(mnemonic, TokenType.Mnemonic)
-                  .Token("#" + target, TokenType.Integer);
+            return Mnemonic(mnemonic)
+                  .Integer(target);
         }
 
         /// <summary>
@@ -94,8 +152,8 @@ namespace Topz.ArmV6Z
         /// <returns>This builder.</returns>
         public TokenBuilder Format4Instruction(string mnemonic, string register)
         {
-            return Token(mnemonic, TokenType.Mnemonic)
-                  .Token(register, TokenType.Register);
+            return Mnemonic(mnemonic)
+                  .Register(register);
         }
 
         /// <summary>
@@ -107,10 +165,10 @@ namespace Topz.ArmV6Z
         /// <returns>This builder.</returns>
         public TokenBuilder Format5Instruction(string mnemonic, string first, string second)
         {
-            return Token(mnemonic, TokenType.Mnemonic)
-                  .Token(first, TokenType.Register)
-                  .Token(Symbols.ListItemSeparator, TokenType.Symbol)
-                  .Token(second, TokenType.Register);
+            return Mnemonic(mnemonic)
+                  .Register(first)
+                  .ListItemSeparator()
+                  .Register(second);
         }
 
         /// <summary>
@@ -122,9 +180,9 @@ namespace Topz.ArmV6Z
         /// <returns>This builder.</returns>
         public TokenBuilder Format6Instruction(string mnemonic, string register, int immediate)
         {
-            return Token(mnemonic, TokenType.Mnemonic)
-                  .Token(register, TokenType.Register)
-                  .Token(Symbols.ListItemSeparator, TokenType.Symbol)
+            return Mnemonic(mnemonic)
+                  .Register(register)
+                  .ListItemSeparator()
                   .Integer(immediate);
         }
 
@@ -135,7 +193,22 @@ namespace Topz.ArmV6Z
         /// <returns>This builder.</returns>
         public TokenBuilder Integer(int value)
         {
-            return Token("#" + value, TokenType.Integer);
+            return Token($"{value}", TokenType.Integer);
+        }
+
+        /// <summary>
+        /// Adds the tokens to form the immediate offset addressing mode.
+        /// </summary>
+        /// <param name="register">The register containing the base address.</param>
+        /// <param name="offset">The offset from the base address.</param>
+        /// <returns></returns>
+        public TokenBuilder ImmediateOffsetAddressingMode(string register, int offset)
+        {
+            return LeftSquareBracket().
+                   Register(register).
+                   ListItemSeparator().
+                   Integer(offset).
+                   RightSquareBracket();
         }
     }
 }

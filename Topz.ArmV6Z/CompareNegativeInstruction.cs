@@ -4,8 +4,8 @@ namespace Topz.ArmV6Z
 {
     /// <summary>
     /// Compares one value with the twos complement of a second value. The first value 
-    /// comes from a register.The second value can be either an immediate value or a value from a register, and can
-    /// be shifted before the comparison.
+    /// comes from a register. The second value can be either an immediate value or a value 
+    /// from a register, and can be shifted before the comparison.
     /// </summary>
     internal sealed class CompareNegativeInstruction : Format6Instruction
     {

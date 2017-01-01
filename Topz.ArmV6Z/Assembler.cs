@@ -34,14 +34,13 @@ namespace Topz.ArmV6Z
             if (destination == null)
                 throw new ArgumentNullException(nameof(destination));
 
-            using (StreamReader reader = new StreamReader(source))
+            using (var reader = new StreamReader(source))
             {
-                LexicalAnalyzer analyzer = new LexicalAnalyzer(reader, source);
-                Parser parser = new Parser();
+                var analyzer = new LexicalAnalyzer(reader, source);
+                var parser = new Parser();
 
-                Program program = parser.Parse(analyzer);
-
-                foreach (IPass pass in GetPasses())
+                var program = parser.Parse(analyzer);
+                foreach (var pass in GetPasses())
                     pass.Visit(program);
             }
         }

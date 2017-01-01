@@ -34,7 +34,8 @@ namespace Topz.ArmV6Z
                 { Mnemonic.Cmn, Format6<CompareNegativeInstruction> },
                 { Mnemonic.Cmp, Format6<CompareInstruction> },
                 { Mnemonic.Cpy, Format5<CopyInstruction> },
-                { Mnemonic.Eor, Format1<ExclusiveOrInstruction> }
+                { Mnemonic.Eor, Format1<ExclusiveOrInstruction> },
+                { Mnemonic.Ldr, Format7<LoadRegisterInstruction> }
             };
         }
 
@@ -71,19 +72,12 @@ namespace Topz.ArmV6Z
         /// </summary>
         private void Procedure()
         {
-            Token<TokenType> keyword = analyzer.Next();
-            if (keyword.Text != Keywords.Procedure)
-                throw new ParsingException(keyword.Position.ToString($"Expected the '{Keywords.Procedure}' keyword."));
+            Keyword(Keywords.Procedure);
+            var identifier = Identifier();
 
-            Token<TokenType> identifier = analyzer.Next();
-            if (identifier.Type != TokenType.Identifier)
-                throw new ParsingException(identifier.Position.ToString("Expected an identifier."));
+            Symbol(Symbols.StartOfBlock);
 
-            Token<TokenType> start = analyzer.Next();
-            if (start.Text != Symbols.StartOfBlock)
-                throw new ParsingException(start.Position.ToString($"Expected the '{Symbols.StartOfBlock}' symbol."));
-
-            Procedure procedure = new Procedure(identifier.Position, identifier.Text);
+            var procedure = new Procedure(identifier.Position, identifier.Text);
             while (!analyzer.EndOfInput)
             {
                 if (analyzer.NextIs(Symbols.EndOfBlock))
@@ -99,7 +93,7 @@ namespace Topz.ArmV6Z
                 }
             }
 
-            Token<TokenType> end = analyzer.Next();
+            var end = analyzer.Next();
             if (end.Text != Symbols.EndOfBlock)
                 throw new ParsingException(end.Position.ToString($"Expected the '{Symbols.EndOfBlock}' symbol."));
 
@@ -118,14 +112,12 @@ namespace Topz.ArmV6Z
         /// </summary>
         private Instruction Instruction()
         {
-            Label label = null;
+            var label = (Label)null;
 
-            Token<TokenType> token = analyzer.Next();
+            var token = analyzer.Next();
             if (token.Type == TokenType.Identifier)
             {
-                Token<TokenType> symbol = analyzer.Next();
-                if (symbol.Text != Symbols.EndOfLable)
-                    throw new ParsingException(symbol.Position.ToString($"Expected the '{Symbols.EndOfLable}' symbol."));
+                Symbol(Symbols.EndOfLable);
 
                 label = new Label(token.Position, token.Text);
                 token = analyzer.Next();
@@ -136,7 +128,7 @@ namespace Topz.ArmV6Z
 
             try
             {
-                Mnemonic mnemonic = new Mnemonic(token.Text, token.Position);
+                var mnemonic = new Mnemonic(token.Text, token.Position);
                 return table[mnemonic.RawName](label, mnemonic);
             }
             catch (KeyNotFoundException)
@@ -156,16 +148,10 @@ namespace Topz.ArmV6Z
         private T Format1<T>(Label label, Mnemonic mnemonic) where T : Format1Instruction
         {
             var r1 = RegisterOperand();
-
-            var separator = analyzer.Next();
-            if (separator.Text != Symbols.ListItemSeparator)
-                throw new ParsingException(separator.Position.ToString($"Expected a '{Symbols.ListItemSeparator}'."));
+            Symbol(Symbols.ListItemSeparator);
 
             var r2 = RegisterOperand();
-
-            separator = analyzer.Next();
-            if (separator.Text != Symbols.ListItemSeparator)
-                throw new ParsingException(separator.Position.ToString($"Expected a '{Symbols.ListItemSeparator}'."));
+            Symbol(Symbols.ListItemSeparator);
 
             var shifter = ShifterOperand();
 
@@ -182,13 +168,11 @@ namespace Topz.ArmV6Z
         /// <returns>The parsed instruction.</returns>
         private T Format2<T>(Label label, Mnemonic mnemonic) where T : Format2Instruction
         {
-            var integer = analyzer.Next();
-            if (integer.Type != TokenType.Integer)
-                throw new ParsingException(integer.Position.ToString("Expected an integer."));
+            var integer = Integer();
 
             try
             {
-                var operand = new TargetOperand(integer.Position, int.Parse(integer.Text.Substring(1)));
+                var operand = new TargetOperand(integer.Position, int.Parse(integer.Text));
 
                 return (T)Activator.CreateInstance(typeof(T), label, mnemonic, operand);
             }
@@ -208,13 +192,11 @@ namespace Topz.ArmV6Z
         /// <returns>The parsed instruction.</returns>
         private T Format3<T>(Label label, Mnemonic mnemonic) where T : Format3Instruction
         {
-            var integer = analyzer.Next();
-            if (integer.Type != TokenType.Integer)
-                throw new ParsingException(integer.Position.ToString("Expected an integer."));
+            var integer = Integer();
 
             try
             {
-                var operand = new Immediate16Operand(integer.Position, ushort.Parse(integer.Text.Substring(1)));
+                var operand = new Immediate16Operand(integer.Position, ushort.Parse(integer.Text));
 
                 return (T)Activator.CreateInstance(typeof(T), label, mnemonic, operand);
             }
@@ -248,10 +230,7 @@ namespace Topz.ArmV6Z
         private T Format5<T>(Label label, Mnemonic mnemonic) where T : Format5Instruction
         {
             var r1 = RegisterOperand();
-
-            var separator = analyzer.Next();
-            if (separator.Text != Symbols.ListItemSeparator)
-                throw new ParsingException(separator.Position.ToString($"Expected a '{Symbols.ListItemSeparator}'."));
+            Symbol(Symbols.ListItemSeparator);
 
             var r2 = RegisterOperand();
 
@@ -269,14 +248,29 @@ namespace Topz.ArmV6Z
         private T Format6<T>(Label label, Mnemonic mnemonic) where T : Format6Instruction
         {
             var register = RegisterOperand();
-
-            var separator = analyzer.Next();
-            if (separator.Text != Symbols.ListItemSeparator)
-                throw new ParsingException(separator.Position.ToString($"Expected a '{Symbols.ListItemSeparator}'."));
+            Symbol(Symbols.ListItemSeparator);
 
             var shifter = ShifterOperand();
 
             return (T)Activator.CreateInstance(typeof(T), label, mnemonic, register, shifter);
+        }
+
+        /// <summary>
+        /// <para>Parses an instruction with the following format.</para>
+        /// <para>mnemonic, register, addressing mode</para>
+        /// </summary>
+        /// <typeparam name="T">The type of instruction.</typeparam>
+        /// <param name="label">The label of the instruction, if any.</param>
+        /// <param name="mnemonic">The mnemonic of the instruction.</param>
+        /// <returns>The parsed instruction.</returns>
+        private T Format7<T>(Label label, Mnemonic mnemonic) where T : Format7Instruction
+        {
+            var register = RegisterOperand();
+            Symbol(Symbols.ListItemSeparator);
+
+            var addressingMode = AddressingModeOperand();
+
+            return (T)Activator.CreateInstance(typeof(T), label, mnemonic, register, addressingMode);
         }
 
         /// <summary>
@@ -285,7 +279,7 @@ namespace Topz.ArmV6Z
         /// <returns>The parsed operand.</returns>
         private RegisterOperand RegisterOperand()
         {
-            Token<TokenType> register = analyzer.Next();
+            var register = analyzer.Next();
             if (register.Type != TokenType.Register)
                 throw new ParsingException(register.Position.ToString("Expected a register."));
 
@@ -298,28 +292,45 @@ namespace Topz.ArmV6Z
         /// <returns>The shifter operand.</returns>
         private ShifterOperand ShifterOperand()
         {
-            Token<TokenType> operand = analyzer.Next();
+            var operand = analyzer.Next();
             if (operand.Type == TokenType.Integer)
-                return new ShifterOperand(operand.Position, int.Parse(operand.Text.Substring(1)));
+                return new ShifterOperand(operand.Position, int.Parse(operand.Text));
             if (operand.Type == TokenType.Register)
             {
                 if (analyzer.NextIs(TokenType.RegisterShifter))
                 {
-                    Token<TokenType> shifter = analyzer.Next();
+                    var shifter = analyzer.Next();
                     if (shifter.Type != TokenType.RegisterShifter)
                         throw new ParsingException(shifter.Position.ToString("Expected a register shifter."));
 
-                    Token<TokenType> immediate = analyzer.Next();
+                    var immediate = analyzer.Next();
                     if (immediate.Type != TokenType.Integer)
                         throw new ParsingException(immediate.Position.ToString("Expected an integer."));
 
-                    return new ShifterOperand(operand.Position, int.Parse(operand.Text.Substring(1)), shifter.Text);
+                    return new ShifterOperand(operand.Position, int.Parse(operand.Text), shifter.Text);
                 }
                 else
                     return new ShifterOperand(operand.Position, operand.Text);
             }
 
             throw new ParsingException(operand.Position.ToString("Expected a shifter operand."));
+        }
+
+        /// <summary>
+        /// Parses an adressing mode.
+        /// </summary>
+        /// <returns>The parsed addressing mode.</returns>
+        private AddressingModeOperand AddressingModeOperand()
+        {
+            Symbol(Symbols.LeftSquareBracket);
+            var register = Register();
+
+            Symbol(Symbols.ListItemSeparator);
+            var offset = Integer();
+
+            Symbol(Symbols.RightSquareBracket);
+
+            return new ImmediateOffsetOperand(register.Text, int.Parse(offset.Text));
         }
 
         /// <summary>
@@ -334,6 +345,87 @@ namespace Topz.ArmV6Z
         /// </summary>
         private void String()
         {
+        }
+
+        /// <summary>
+        /// Checks if the next token is an integer
+        /// or throws an exception.
+        /// </summary>
+        /// <returns>The parsed integer.</returns>
+        /// <exception cref="ParsingException">
+        /// The next token was not an integer.
+        /// </exception>
+        private Token<TokenType> Integer()
+        {
+            var integer = analyzer.Next();
+            if (integer.Type != TokenType.Integer)
+                throw new ParsingException(integer.Position.ToString("Expected an integer."));
+
+            return integer;
+        }
+
+        /// <summary>
+        /// Checks if the next token is a given symbol
+        /// or throws an exception.
+        /// </summary>
+        /// <param name="symbol">The symbol to check for.</param>
+        /// <exception cref="ParsingException">
+        /// The next token was not the expected symbol.
+        /// </exception>
+        private void Symbol(string symbol)
+        {
+            var token = analyzer.Next();
+            if (token.Text != symbol)
+                throw new ParsingException(token.Position.ToString($"Expected a '{symbol}'."));
+        }
+
+        /// <summary>
+        /// Checks if the next token is a given keyword
+        /// or throws an exception.
+        /// </summary>
+        /// <param name="keyword">The keyword to check for.</param>
+        /// <exception cref="ParsingException">
+        /// The next token was not the expected keyword.
+        /// </exception>
+        private void Keyword(string keyword)
+        {
+            var token = analyzer.Next();
+            if (token.Text != keyword)
+                throw new ParsingException(token.Position.ToString($"Expected the '{keyword}' keyword."));
+        }
+
+        /// <summary>
+        /// Checks if the next token is an identifier
+        /// or throws an exception.
+        /// </summary>
+        /// <returns>The parsed identifier.</returns>
+        /// <exception cref="ParsingException">
+        /// The next token was not an identifier.
+        /// </exception>
+        private Token<TokenType> Identifier()
+        {
+            var identifier = analyzer.Next();
+            if (identifier.Type != TokenType.Identifier)
+                throw new ParsingException(identifier.Position.ToString("Expected an identifier."));
+
+            return identifier;
+        }
+
+        /// <summary>
+        /// Checks if the next token is a register
+        /// or throws an exception.
+        /// </summary>
+        /// <returns>The parsed register.</returns>
+        /// <exception cref="ParsingException">
+        /// The next token was not an register.
+        /// </exception>
+        private Token<TokenType> Register()
+        {
+            var register = analyzer.Next();
+            if (register.Type != TokenType.Register)
+                throw new ParsingException(register.Position.ToString("Expected a register."));
+
+            return register;
         }
     }
 }

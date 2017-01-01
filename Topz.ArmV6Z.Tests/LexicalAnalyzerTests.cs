@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using Pote;
-using Pote.Text;
 using System.Text;
 
 namespace Topz.ArmV6Z
@@ -18,10 +17,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void NextTokenFromSource_SingleLineComment_SkipsComment()
         {
-            string code = "; This is a comment";
+            var code = "; This is a comment";
 
-            LexicalAnalyzer analyzer = new LexicalAnalyzer(code.ToStreamReader());
-            Token<TokenType> token = analyzer.Next();
+            var analyzer = new LexicalAnalyzer(code.ToStreamReader());
+            var token = analyzer.Next();
 
             Assert.AreEqual("", token.Text);
             Assert.AreEqual(TokenType.EndOfInput, token.Type);
@@ -35,13 +34,13 @@ namespace Topz.ArmV6Z
         [Test]
         public void NextTokenFromSource_MultiLineComment_SkipsComment()
         {
-            StringBuilder code = new StringBuilder();
+            var code = new StringBuilder();
             code.AppendLine("/*");
             code.AppendLine("This is a multi line comment.");
             code.AppendLine("*/");
 
-            LexicalAnalyzer analyzer = new LexicalAnalyzer(code.ToStreamReader());
-            Token<TokenType> token = analyzer.Next();
+            var analyzer = new LexicalAnalyzer(code.ToStreamReader());
+            var token = analyzer.Next();
 
             Assert.AreEqual("", token.Text);
             Assert.AreEqual(TokenType.EndOfInput, token.Type);
@@ -56,10 +55,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void NextTokenFromSource_Keywords_KeywordsRecognized()
         {
-            foreach (string keyword in Keywords.All)
+            foreach (var keyword in Keywords.All)
             {
-                LexicalAnalyzer analyzer = new LexicalAnalyzer(keyword.ToStreamReader());
-                Token<TokenType> token = analyzer.Next();
+                var analyzer = new LexicalAnalyzer(keyword.ToStreamReader());
+                var token = analyzer.Next();
 
                 Assert.AreEqual(keyword, token.Text);
                 Assert.AreEqual(TokenType.Keyword, token.Type);
@@ -73,10 +72,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void NextTokenFromSource_Registers_RegistersRecognized()
         {
-            foreach (string register in Registers.All)
+            foreach (var register in Registers.All)
             {
-                LexicalAnalyzer analyzer = new LexicalAnalyzer(register.ToStreamReader());
-                Token<TokenType> token = analyzer.Next();
+                var analyzer = new LexicalAnalyzer(register.ToStreamReader());
+                var token = analyzer.Next();
 
                 Assert.AreEqual(register, token.Text);
                 Assert.AreEqual(TokenType.Register, token.Type);
@@ -90,10 +89,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void NextTokenFromSource_Symbols_SymbolsRecognized()
         {
-            foreach (string symbol in Symbols.All)
+            foreach (var symbol in Symbols.All)
             {
-                LexicalAnalyzer analyzer = new LexicalAnalyzer(symbol.ToStreamReader());
-                Token<TokenType> token = analyzer.Next();
+                var analyzer = new LexicalAnalyzer(symbol.ToStreamReader());
+                var token = analyzer.Next();
 
                 Assert.AreEqual(symbol, token.Text);
                 Assert.AreEqual(TokenType.Symbol, token.Type);
@@ -108,10 +107,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void NextTokenFromSource_Mnemonics_MnemonicsRecognized()
         {
-            foreach (string mnemonic in Mnemonic.All)
+            foreach (var mnemonic in Mnemonic.All)
             {
-                LexicalAnalyzer analyzer = new LexicalAnalyzer(mnemonic.ToStreamReader());
-                Token<TokenType> token = analyzer.Next();
+                var analyzer = new LexicalAnalyzer(mnemonic.ToStreamReader());
+                var token = analyzer.Next();
 
                 Assert.AreEqual(mnemonic, token.Text);
                 Assert.AreEqual(TokenType.Mnemonic, token.Type);
@@ -126,10 +125,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void NextTokenFromSource_RegisterShifters_RegisterShiftersRecognized()
         {
-            foreach (string shifter in Registers.Shifted)
+            foreach (var shifter in Registers.Shifted)
             {
-                LexicalAnalyzer analyzer = new LexicalAnalyzer(shifter.ToStreamReader());
-                Token<TokenType> token = analyzer.Next();
+                var analyzer = new LexicalAnalyzer(shifter.ToStreamReader());
+                var token = analyzer.Next();
 
                 Assert.AreEqual(shifter, token.Text);
                 Assert.AreEqual(TokenType.RegisterShifter, token.Type);
@@ -143,16 +142,16 @@ namespace Topz.ArmV6Z
         [Test]
         public void NextTokenFromSource_Identifiers_IdentifiersRecognized()
         {
-            string[] valid = 
+            var valid = new[]
             {
                 "A", "a", "Ab", "ab", "A1", "a1",
                 "_A", "_a", "_1"
             };
             
-            foreach (string identifier in valid)
+            foreach (var identifier in valid)
             {
-                LexicalAnalyzer analyzer = new LexicalAnalyzer(identifier.ToStreamReader());
-                Token<TokenType> token = analyzer.Next();
+                var analyzer = new LexicalAnalyzer(identifier.ToStreamReader());
+                var token = analyzer.Next();
 
                 Assert.AreEqual(identifier, token.Text);
                 Assert.AreEqual(TokenType.Identifier, token.Type);
@@ -166,17 +165,17 @@ namespace Topz.ArmV6Z
         [Test]
         public void NextTokenFromSource_Integers_IntegersRecognized()
         {
-            string[] valid =
+            var valid = new[]
             {
-                "#0", "#" + uint.MaxValue / 2, "#" + uint.MaxValue
+                "#0",  $"#{uint.MaxValue / 2}", $"#{uint.MaxValue}"
             };
 
-            foreach (string integer in valid)
+            foreach (var integer in valid)
             {
-                LexicalAnalyzer analyzer = new LexicalAnalyzer(integer.ToStreamReader());
-                Token<TokenType> token = analyzer.Next();
+                var analyzer = new LexicalAnalyzer(integer.ToStreamReader());
+                var token = analyzer.Next();
 
-                Assert.AreEqual(integer, token.Text);
+                Assert.AreEqual(integer.Substring(1), token.Text);
                 Assert.AreEqual(TokenType.Integer, token.Type);
             }
         }
@@ -188,13 +187,13 @@ namespace Topz.ArmV6Z
         [Test]
         public void NextTokenFromSource_Strings_StringsRecognized()
         {
-            string[] valid = { "", "Abc" };
-            foreach (string str in valid)
+            var valid = new[] { "", "Abc" };
+            foreach (var str in valid)
             {
-                string qouted = '"' + str + '"';
+                var qouted = '"' + str + '"';
 
-                LexicalAnalyzer analyzer = new LexicalAnalyzer(qouted.ToStreamReader());
-                Token<TokenType> token = analyzer.Next();
+                var analyzer = new LexicalAnalyzer(qouted.ToStreamReader());
+                var token = analyzer.Next();
 
                 Assert.AreEqual(str, token.Text);
                 Assert.AreEqual(TokenType.String, token.Type);

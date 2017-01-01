@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="AddInstruction.cs" />
     <Compile Include="AddWithCarryInstruction.cs" />
+    <Compile Include="AddressingModeOperand.cs" />
     <Compile Include="AndInstruction.cs" />
     <Compile Include="Assembler.cs" />
     <Compile Include="Bit.cs" />
@@ -76,7 +77,9 @@
     <Compile Include="Format4Instruction.cs" />
     <Compile Include="Format5Instruction.cs" />
     <Compile Include="Format6Instruction.cs" />
+    <Compile Include="Format7Instruction.cs" />
     <Compile Include="Immediate16Operand.cs" />
+    <Compile Include="ImmediateOffsetOperand.cs" />
     <Compile Include="INamedNode.cs" />
     <Compile Include="Instruction.cs" />
     <Compile Include="BranchInstruction.cs" />
@@ -84,6 +87,7 @@
     <Compile Include="Keywords.cs" />
     <Compile Include="Label.cs" />
     <Compile Include="LexicalAnalyzer.cs" />
+    <Compile Include="LoadRegisterInstruction.cs" />
     <Compile Include="Mnemonic.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Parser.cs" />

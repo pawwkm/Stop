@@ -23,6 +23,7 @@ namespace Topz.ArmV6Z
                                                             Concat(PreParse(Cmp)).
                                                             Concat(PreParse(Cpy)).
                                                             Concat(PreParse(Eor, Bit.S, true)).
+                                                            Concat(PreParse(Ldr)).
                                                             OrderByDescending(x => x.Name.Length).ToArray();
 
         /// <summary>
@@ -89,6 +90,11 @@ namespace Topz.ArmV6Z
         /// The 'eor' mnemonic.
         /// </summary>
         public const string Eor = "eor";
+
+        /// <summary>
+        /// The 'ldr' mnemonic.
+        /// </summary>
+        public const string Ldr = "ldr";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mnemonic"/> class.

@@ -3,6 +3,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Pote;
 
 namespace Topz.ArmV6Z
 {
@@ -103,7 +104,7 @@ namespace Topz.ArmV6Z
                 '\u000A', '\u0085', '\u2028', '\u2029'
             };
 
-            UnicodeCategory category = char.GetUnicodeCategory(c);
+            var category = char.GetUnicodeCategory(c);
 
             return category == UnicodeCategory.SpaceSeparator || characters.Contains(c);
         }
@@ -118,7 +119,7 @@ namespace Topz.ArmV6Z
         /// </remarks>
         private Token<TokenType> LexMnemonic()
         {
-            InputPosition start = Position.DeepCopy();
+            var start = Position.DeepCopy();
             foreach (string mnemonic in Mnemonic.All)
             {
                 if (Consume(mnemonic))
@@ -134,8 +135,8 @@ namespace Topz.ArmV6Z
         /// <returns>The consumed identifier from the input.</returns>
         private Token<TokenType> Identifier()
         {
-            InputPosition start = Position.DeepCopy();
-            string text = "";
+            var start = Position.DeepCopy();
+            var text = "";
 
             while (!Source.EndOfStream)
             {
@@ -158,7 +159,7 @@ namespace Topz.ArmV6Z
         /// <returns>The consumed keyword from the input.</returns>
         private Token<TokenType> Keyword()
         {
-            InputPosition start = Position.DeepCopy();
+            var start = Position.DeepCopy();
             foreach (string keyword in Keywords.All)
             {
                 if (Consume(keyword))
@@ -174,7 +175,7 @@ namespace Topz.ArmV6Z
         /// <returns>The consumed register from the input.</returns>
         private Token<TokenType> Register()
         {
-            InputPosition start = Position.DeepCopy();
+            var start = Position.DeepCopy();
             foreach (string register in Registers.All)
             {
                 if (Consume(register))
@@ -190,7 +191,7 @@ namespace Topz.ArmV6Z
         /// <returns>The consumed register shifter from the input.</returns>
         private Token<TokenType> Shifted()
         {
-            InputPosition start = Position.DeepCopy();
+            var start = Position.DeepCopy();
             foreach (string shifter in Registers.Shifted)
             {
                 if (Consume(shifter))
@@ -206,7 +207,7 @@ namespace Topz.ArmV6Z
         /// <returns>The consumed symbol from the input.</returns>
         private Token<TokenType> Symbol()
         {
-            InputPosition start = Position.DeepCopy();
+            var start = Position.DeepCopy();
             foreach (string symbol in Symbols.All)
             {
                 if (Consume(symbol))
@@ -222,11 +223,14 @@ namespace Topz.ArmV6Z
         /// <returns>The consumed integer from the input.</returns>
         private Token<TokenType> Integer()
         {
-            InputPosition start = Position.DeepCopy();
-            string text = "#";
+            var start = Position.DeepCopy();
+            var text = "";
 
             if (!Consume("#"))
                 return Unknown();
+
+            if (Source.Peek().IsOneOf('-', '+'))
+                text += Advance();
 
             while (!Source.EndOfStream)
             {
@@ -237,7 +241,7 @@ namespace Topz.ArmV6Z
                 text += Advance();
             }
 
-            if (text.Length == 1)
+            if (!char.IsDigit(text.Last()))
                 return Unknown();
 
             return new Token<TokenType>(text, TokenType.Integer, start);
@@ -249,8 +253,8 @@ namespace Topz.ArmV6Z
         /// <returns>The consumed string from the input.</returns>
         private Token<TokenType> String()
         {
-            InputPosition start = Position.DeepCopy();
-            string text = "";
+            var start = Position.DeepCopy();
+            var text = "";
 
             // Skip the first double qoute.
             Advance();
@@ -285,7 +289,7 @@ namespace Topz.ArmV6Z
             // Consume the ';' character.
             Advance();
 
-            int line = Position.Line;
+            var line = Position.Line;
             while (!Source.EndOfStream)
             {
                 Advance();
@@ -314,8 +318,8 @@ namespace Topz.ArmV6Z
         /// <returns>The consumed unknown from the input.</returns>
         private Token<TokenType> Unknown()
         {
-            InputPosition start = Position.DeepCopy();
-            string text = "";
+            var start = Position.DeepCopy();
+            var text = "";
 
             while (!Source.EndOfStream)
             {
