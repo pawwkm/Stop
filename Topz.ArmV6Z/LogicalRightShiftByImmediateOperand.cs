@@ -54,7 +54,7 @@ namespace Topz.ArmV6Z
         /// <returns>A string that represents the current operand.</returns>
         public override string ToString()
         {
-            return $"{Register}{Symbols.ListItemSeparator} {Register.Lsr} #{Shift}";
+            return $"{Register}{Symbols.Comma} {Register.Lsr} #{Shift}";
         }
     }
 }

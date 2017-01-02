@@ -38,7 +38,7 @@ namespace Topz.ArmV6Z
         /// <returns>A string that represents the current operand.</returns>
         public override string ToString()
         {
-            return $"{Register}{Symbols.ListItemSeparator} {Register.Rrx}";
+            return $"{Register}{Symbols.Comma} {Register.Rrx}";
         }
     }
 }

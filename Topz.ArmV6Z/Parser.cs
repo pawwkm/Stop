@@ -144,10 +144,10 @@ namespace Topz.ArmV6Z
         private T Format1<T>(Mnemonic mnemonic) where T : Format1Instruction
         {
             var r1 = Register();
-            Symbol(Symbols.ListItemSeparator);
+            Symbol(Symbols.Comma);
 
             var r2 = Register();
-            Symbol(Symbols.ListItemSeparator);
+            Symbol(Symbols.Comma);
 
             return (T)Activator.CreateInstance(typeof(T), mnemonic, r1, r2, AddressingMode1());
         }
@@ -220,7 +220,7 @@ namespace Topz.ArmV6Z
         private T Format5<T>(Mnemonic mnemonic) where T : Format5Instruction
         {
             var r1 = Register();
-            Symbol(Symbols.ListItemSeparator);
+            Symbol(Symbols.Comma);
 
             return (T)Activator.CreateInstance(typeof(T), mnemonic, r1, Register());
         }
@@ -235,7 +235,7 @@ namespace Topz.ArmV6Z
         private T Format6<T>(Mnemonic mnemonic) where T : Format6Instruction
         {
             var register = Register();
-            Symbol(Symbols.ListItemSeparator);
+            Symbol(Symbols.Comma);
 
             return (T)Activator.CreateInstance(typeof(T), mnemonic, register, AddressingMode1());
         }
@@ -250,7 +250,7 @@ namespace Topz.ArmV6Z
         private T Format7<T>(Mnemonic mnemonic) where T : Format7Instruction
         {
             var register = RegisterOperand();
-            Symbol(Symbols.ListItemSeparator);
+            Symbol(Symbols.Comma);
 
             return (T)Activator.CreateInstance(typeof(T), mnemonic, register, AddressingMode2());
         }
@@ -276,7 +276,7 @@ namespace Topz.ArmV6Z
                 return new ImmediateOperand(ushort.Parse(token.Text), token.Position);
             if (token.Type == TokenType.Register)
             {
-                if (analyzer.NextIs(Symbols.ListItemSeparator))
+                if (analyzer.NextIs(Symbols.Comma))
                 {
                     analyzer.Next();
                     if (analyzer.NextIs(ArmV6Z.Register.Lsl))
@@ -334,7 +334,7 @@ namespace Topz.ArmV6Z
             Symbol(Symbols.LeftSquareBracket);
             var register = RegisterOperand();
 
-            Symbol(Symbols.ListItemSeparator);
+            Symbol(Symbols.Comma);
             if (analyzer.NextIs(TokenType.Integer))
             {
                 var offset = Integer();

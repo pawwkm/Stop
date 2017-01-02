@@ -62,13 +62,13 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
-        /// Adds the <see cref="Symbols.ListItemSeparator"/> 
+        /// Adds the <see cref="Symbols.Comma"/> 
         /// symbol to the builder.
         /// </summary>
         /// <returns>This builder.</returns>
-        public TokenBuilder ListItemSeparator()
+        public TokenBuilder Comma()
         {
-            return Token(Symbols.ListItemSeparator, TokenType.Symbol);
+            return Token(Symbols.Comma, TokenType.Symbol);
         }
 
         /// <summary>

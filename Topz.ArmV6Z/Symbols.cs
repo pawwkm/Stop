@@ -13,9 +13,9 @@ namespace Topz.ArmV6Z
         public const string EndOfLabel = ":";
 
         /// <summary>
-        /// The list item separator symbol.
+        /// The comma symbol.
         /// </summary>
-        public const string ListItemSeparator = ",";
+        public const string Comma = ",";
 
         /// <summary>
         /// The left square bracket symbol.
@@ -45,7 +45,7 @@ namespace Topz.ArmV6Z
             get
             {
                 yield return EndOfLabel;
-                yield return ListItemSeparator;
+                yield return Comma;
                 yield return LeftSquareBracket;
                 yield return RightSquareBracket;
                 yield return Plus;

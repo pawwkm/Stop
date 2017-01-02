@@ -32,5 +32,14 @@ namespace Topz.ArmV6Z
             get;
             private set;
         }
+
+        /// <summary>
+        /// Returns a string that represents the current instruction.
+        /// </summary>
+        /// <returns>A string that represents the current instruction.</returns>
+        public override string ToString()
+        {
+            return $"{base.ToString()} {Operand}";
+        }
     }
 }

@@ -65,7 +65,7 @@ namespace Topz.ArmV6Z
         /// <returns>A string that represents the current instruction.</returns>
         public override string ToString()
         {
-            return $"{base.ToString()} {Destination}, {FirstOperand}, {ShifterOperand}";
+            return $"{base.ToString()} {Destination}{Symbols.Comma} {FirstOperand}{Symbols.Comma} {ShifterOperand}";
         }
     }
 }
