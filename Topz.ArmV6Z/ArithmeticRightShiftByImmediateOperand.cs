@@ -47,5 +47,14 @@ namespace Topz.ArmV6Z
             get;
             private set;
         }
+
+        /// <summary>
+        /// Returns a string that represents the current operand.
+        /// </summary>
+        /// <returns>A string that represents the current operand.</returns>
+        public override string ToString()
+        {
+            return $"{Register}{Symbols.ListItemSeparator} {Register.Asr} #{Shift}";
+        }
     }
 }

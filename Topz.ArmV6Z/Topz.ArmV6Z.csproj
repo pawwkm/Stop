@@ -60,7 +60,7 @@
     <Compile Include="AddressingMode2.cs" />
     <Compile Include="AndInstruction.cs" />
     <Compile Include="ArithmeticRightShiftByImmediateOperand.cs" />
-    <Compile Include="ArithmeticRightShiftByRegister.cs" />
+    <Compile Include="ArithmeticRightShiftByRegisterOperand.cs" />
     <Compile Include="Assembler.cs" />
     <Compile Include="Bit.cs" />
     <Compile Include="BitClearInstruction.cs" />
