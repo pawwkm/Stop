@@ -4,7 +4,7 @@ namespace Topz.ArmV6Z
 {
     /// <summary>
     /// <para>An instruction with the following syntax.</para>
-    /// <para>mnemonic, target address</para>
+    /// <para>mnemonic target address</para>
     /// </summary>
     internal abstract class Format2Instruction : Instruction
     {

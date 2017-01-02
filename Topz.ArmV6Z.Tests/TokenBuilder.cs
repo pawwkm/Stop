@@ -72,16 +72,192 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
-        /// Add one of <see cref="Register.All"/> to the builder.
+        /// Adds the <see cref="Register.R0"/> to the builder.
         /// </summary>
-        /// <param name="register">The register to add.</param>
         /// <returns>This builder.</returns>
-        public TokenBuilder Register(string register)
+        public TokenBuilder R0()
         {
-            if (!ArmV6Z.Register.All.Contains(register))
-                throw new ArgumentException(nameof(register));
+            return Token(Register.R0, TokenType.Register);
+        }
 
-            return Token(register, TokenType.Register);
+        /// <summary>
+        /// Adds the <see cref="Register.R1"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder R1()
+        {
+            return Token(Register.R1, TokenType.Register);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Register.R2"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder R2()
+        {
+            return Token(Register.R2, TokenType.Register);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Register.R3"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder R3()
+        {
+            return Token(Register.R3, TokenType.Register);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Register.R4"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder R4()
+        {
+            return Token(Register.R4, TokenType.Register);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Register.R5"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder R5()
+        {
+            return Token(Register.R5, TokenType.Register);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Register.R6"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder R6()
+        {
+            return Token(Register.R6, TokenType.Register);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Register.R7"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder R7()
+        {
+            return Token(Register.R7, TokenType.Register);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Register.R8"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder R8()
+        {
+            return Token(Register.R8, TokenType.Register);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Register.R9"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder R9()
+        {
+            return Token(Register.R9, TokenType.Register);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Register.R10"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder R10()
+        {
+            return Token(Register.R10, TokenType.Register);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Register.R11"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder R11()
+        {
+            return Token(Register.R11, TokenType.Register);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Register.R12"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder R12()
+        {
+            return Token(Register.R12, TokenType.Register);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Register.R13"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder R13()
+        {
+            return Token(Register.R13, TokenType.Register);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Register.R14"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder R14()
+        {
+            return Token(Register.R14, TokenType.Register);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Register.R15"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder R15()
+        {
+            return Token(Register.R15, TokenType.Register);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Register.Asr"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder Asr()
+        {
+            return Token(Register.Asr, TokenType.RegisterShifter);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Register.Lsl"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder Lsl()
+        {
+            return Token(Register.Lsl, TokenType.RegisterShifter);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Register.Lsr"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder Lsr()
+        {
+            return Token(Register.Lsr, TokenType.RegisterShifter);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Register.Ror"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder Ror()
+        {
+            return Token(Register.Ror, TokenType.RegisterShifter);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Register.Rrx"/> to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder Rrx()
+        {
+            return Token(Register.Rrx, TokenType.RegisterShifter);
         }
 
         /// <summary>
@@ -98,90 +274,6 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
-        /// Adds the tokens for a <see cref="ArmV6Z.Format1Instruction"/> to the builder.
-        /// </summary>
-        /// <param name="mnemonic">The mnemonic of the instruction.</param>
-        /// <param name="rd">The destination register.</param>
-        /// <param name="rn">The register containing the first operand.</param>
-        /// <param name="immediate">The value to shift by.</param>
-        /// <returns>This builder.</returns>
-        public TokenBuilder Format1Instruction(string mnemonic, string rd, string rn, int immediate)
-        {
-            return Mnemonic(mnemonic)
-                  .Register(rd)
-                  .ListItemSeparator()
-                  .Register(rn)
-                  .ListItemSeparator()
-                  .Integer(immediate);
-        }
-
-        /// <summary>
-        /// Adds the tokens for a <see cref="ArmV6Z.Format2Instruction"/> to the builder.
-        /// </summary>
-        /// <param name="mnemonic">The mnemonic of the instruction.</param>
-        /// <param name="target">The target of the branch.</param>
-        /// <returns>This builder.</returns>
-        public TokenBuilder Format2Instruction(string mnemonic, int target)
-        {
-            return Mnemonic(mnemonic)
-                  .Integer(target);
-        }
-
-        /// <summary>
-        /// Adds the tokens for a <see cref="ArmV6Z.Format3Instruction"/> to the builder.
-        /// </summary>
-        /// <param name="mnemonic">The mnemonic of the instruction.</param>
-        /// <param name="target">The target of the branch.</param>
-        /// <returns>This builder.</returns>
-        public TokenBuilder Format3Instruction(string mnemonic, ushort target)
-        {
-            return Mnemonic(mnemonic)
-                  .Integer(target);
-        }
-
-        /// <summary>
-        /// Adds the tokens for a <see cref="ArmV6Z.Format4Instruction"/> to the builder.
-        /// </summary>
-        /// <param name="mnemonic">The mnemonic of the instruction.</param>
-        /// <param name="register">The target of the branch.</param>
-        /// <returns>This builder.</returns>
-        public TokenBuilder Format4Instruction(string mnemonic, string register)
-        {
-            return Mnemonic(mnemonic)
-                  .Register(register);
-        }
-
-        /// <summary>
-        /// Adds the tokens for a <see cref="ArmV6Z.Format5Instruction"/> to the builder.
-        /// </summary>
-        /// <param name="mnemonic">The mnemonic of the instruction.</param>
-        /// <param name="first">The first register operand of the instruction.</param>
-        /// <param name="second">The second register operand of the instruction.</param>
-        /// <returns>This builder.</returns>
-        public TokenBuilder Format5Instruction(string mnemonic, string first, string second)
-        {
-            return Mnemonic(mnemonic)
-                  .Register(first)
-                  .ListItemSeparator()
-                  .Register(second);
-        }
-
-        /// <summary>
-        /// Adds the tokens for a <see cref="ArmV6Z.Format6Instruction"/> to the builder.
-        /// </summary>
-        /// <param name="mnemonic">The mnemonic of the instruction.</param>
-        /// <param name="register">The register operand.</param>
-        /// <param name="immediate">The value to shift by.</param>
-        /// <returns>This builder.</returns>
-        public TokenBuilder Format6Instruction(string mnemonic, string register, int immediate)
-        {
-            return Mnemonic(mnemonic)
-                  .Register(register)
-                  .ListItemSeparator()
-                  .Integer(immediate);
-        }
-
-        /// <summary>
         /// Adds an integer to the builder.
         /// </summary>
         /// <param name="value">The value of the integer.</param>
@@ -189,38 +281,6 @@ namespace Topz.ArmV6Z
         public TokenBuilder Integer(int value)
         {
             return Token($"{value}", TokenType.Integer);
-        }
-
-        /// <summary>
-        /// Adds the tokens to form the immediate offset addressing mode.
-        /// </summary>
-        /// <param name="register">The register containing the base address.</param>
-        /// <param name="offset">The offset from the base address.</param>
-        /// <returns>This builder.</returns>
-        public TokenBuilder ImmediateOffsetAddressingMode(string register, int offset)
-        {
-            return LeftSquareBracket().
-                   Register(register).
-                   ListItemSeparator().
-                   Integer(offset).
-                   RightSquareBracket();
-        }
-
-        /// <summary>
-        /// Adds the tokens to form the immediate offset addressing mode.
-        /// </summary>
-        /// <param name="baseRegister">The register containing the base address.</param>
-        /// <param name="addToBase">If true the offset is added to the base: otherwise it is subtracted.</param>
-        /// <param name="offset">The offset from the base address.</param>
-        /// <returns></returns>
-        public TokenBuilder RegisterOffsetAddressingMode(string baseRegister, bool addToBase, string offset)
-        {
-            return LeftSquareBracket().
-                   Register(baseRegister).
-                   ListItemSeparator().
-                   Symbol(addToBase ? Symbols.Plus : Symbols.Minus).
-                   Register(offset).
-                   RightSquareBracket();
         }
     }
 }

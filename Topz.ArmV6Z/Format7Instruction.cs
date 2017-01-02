@@ -4,7 +4,7 @@ namespace Topz.ArmV6Z
 {
     /// <summary>
     /// <para>An instruction with the following syntax.</para>
-    /// <para>mnemonic, register, addressing mode</para>
+    /// <para>mnemonic register, addressing mode</para>
     /// </summary>
     /// <remarks>
     /// See section A5.2

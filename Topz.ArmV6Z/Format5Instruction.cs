@@ -4,7 +4,7 @@ namespace Topz.ArmV6Z
 {
     /// <summary>
     /// <para>An instruction with the following syntax.</para>
-    /// <para>mnemonic, register, register</para>
+    /// <para>mnemonic register, register</para>
     /// </summary>
     internal abstract class Format5Instruction : Instruction
     {

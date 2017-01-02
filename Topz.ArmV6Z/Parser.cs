@@ -136,7 +136,7 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// <para>Parses an instruction with the following format.</para>
-        /// <para>mnemonic, register, register, shifting operand</para>
+        /// <para>mnemonic register, register, shifting operand</para>
         /// </summary>
         /// <typeparam name="T">The type of instruction.</typeparam>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
@@ -154,7 +154,7 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// <para>Parses an instruction with the following format.</para>
-        /// <para>mnemonic, target address</para>
+        /// <para>mnemonic target address</para>
         /// </summary>
         /// <typeparam name="T">The type of instruction.</typeparam>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
@@ -177,7 +177,7 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// <para>Parses an instruction with the following format.</para>
-        /// <para>mnemonic, immediate 16</para>
+        /// <para>mnemonic immediate 16</para>
         /// </summary>
         /// <typeparam name="T">The type of instruction.</typeparam>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
@@ -200,7 +200,7 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// <para>Parses an instruction with the following format.</para>
-        /// <para>mnemonic, register</para>
+        /// <para>mnemonic register</para>
         /// </summary>
         /// <typeparam name="T">The type of instruction.</typeparam>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
@@ -212,7 +212,7 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// <para>Parses an instruction with the following format.</para>
-        /// <para>mnemonic, register, register</para>
+        /// <para>mnemonic register, register</para>
         /// </summary>
         /// <typeparam name="T">The type of instruction.</typeparam>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
@@ -227,7 +227,7 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// <para>Parses an instruction with the following format.</para>
-        /// <para>mnemonic, register, shifting operand</para>
+        /// <para>mnemonic register, shifting operand</para>
         /// </summary>
         /// <typeparam name="T">The type of instruction.</typeparam>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
@@ -242,7 +242,7 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// <para>Parses an instruction with the following format.</para>
-        /// <para>mnemonic, register, addressing mode</para>
+        /// <para>mnemonic register, addressing mode</para>
         /// </summary>
         /// <typeparam name="T">The type of instruction.</typeparam>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
@@ -295,8 +295,9 @@ namespace Topz.ArmV6Z
                         if (analyzer.NextIs(TokenType.Register))
                             return new LogicalRightShiftByRegisterOperand(new Register(token), new Register(analyzer.Next()));
                     }
-                    else if (analyzer.NextIs(ArmV6Z.Register.Lsr))
+                    else if (analyzer.NextIs(ArmV6Z.Register.Asr))
                     {
+                        analyzer.Next();
                         if (analyzer.NextIs(TokenType.Integer))
                             return new ArithmeticRightShiftByImmediateOperand(new Register(token), int.Parse(Integer().Text));
                         if (analyzer.NextIs(TokenType.Register))
@@ -304,13 +305,18 @@ namespace Topz.ArmV6Z
                     }
                     else if (analyzer.NextIs(ArmV6Z.Register.Ror))
                     {
+                        analyzer.Next();
                         if (analyzer.NextIs(TokenType.Integer))
                             return new RotateRightByImmediateOperand(new Register(token), int.Parse(Integer().Text));
                         if (analyzer.NextIs(TokenType.Register))
                             return new RotateRightByRegisterOperand(new Register(token), new Register(analyzer.Next()));
                     }
                     else if (analyzer.NextIs(ArmV6Z.Register.Rrx))
+                    {
+                        analyzer.Next();
+
                         return new RotateRightWithExtendOperand(new Register(token));
+                    }
                 }
                 else
                     return new RegisterOperand(token);
