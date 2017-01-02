@@ -61,6 +61,40 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse <see cref="Format2Instruction"/> related instructions.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
+        [Test]
+        [TestCase(Mnemonic.B)]
+        public void Parse_Format2Instruction_ParsesInstruction(string mnemonic)
+        {
+            var builder = new TokenBuilder();
+            var tokens = builder.Procedure()
+                                .Identifier("main")
+                                .Mnemonic(mnemonic)
+                                .Integer(43)
+                                .Build();
+
+            var parser = new Parser();
+            var program = parser.Parse(LexicalAnalyzer(tokens));
+
+            Assert.AreEqual(1, program.Procedures.Count);
+            Assert.AreEqual(0, program.Data.Count);
+            Assert.AreEqual(0, program.Strings.Count);
+
+            var main = program.Procedures[0];
+            Assert.AreEqual("main", main.Name);
+            Assert.AreEqual(1, main.Instructions.Count);
+
+            var instruction = main.Instructions[0] as Format2Instruction;
+            var operand = instruction.Operand as TargetOperand;
+
+            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
+            Assert.AreEqual(43, operand.Target);
+        }
+
+        /// <summary>
         /// Tests a given instruction using the <see cref="Format1Instruction"/>
         /// with the <see cref="ImmediateOperand"/>.
         /// </summary>
