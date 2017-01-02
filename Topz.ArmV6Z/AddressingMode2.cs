@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 
 namespace Topz.ArmV6Z
 {
@@ -7,16 +6,16 @@ namespace Topz.ArmV6Z
     /// Addressing Mode 2 - Load and Store Word or Unsigned Byte.
     /// </summary>
     /// <remarks>See section A5.2</remarks>
-    internal abstract class AddressingModeOperand
+    internal abstract class AddressingMode2
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AddressingModeOperand"/> class.
+        /// Initializes a new instance of the <see cref="AddressingMode2"/> class.
         /// </summary>
         /// <param name="baseAddress">Specifies the register containing the base address.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="baseAddress"/> is null.
         /// </exception>
-        protected AddressingModeOperand(RegisterOperand baseAddress)
+        protected AddressingMode2(RegisterOperand baseAddress)
         {
             if (baseAddress == null)
                 throw new ArgumentNullException(nameof(baseAddress));

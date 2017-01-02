@@ -190,6 +190,15 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// Returns a string that represents the current mnemonic.
+        /// </summary>
+        /// <returns>A string that represents the current mnemonic.</returns>
+        public override string ToString()
+        {
+            return $"{Name}{Condition.AsText()}{Bit.AsText()}";
+        }
+
+        /// <summary>
         /// Creates a list of pre parsed mnemonics for a give mnemonic.
         /// </summary>
         /// <param name="rawName">The name of the mnemonic without conditionals, bits etc.</param>

@@ -6,7 +6,7 @@ namespace Topz.ArmV6Z
     /// <summary>
     /// Defines a 16 bit immediate integer operand.
     /// </summary>
-    internal class Immediate16Operand
+    internal sealed class Immediate16Operand
     {
         /// <summary>
         /// Initailizes a new instance of the <see cref="Immediate16Operand"/> class.

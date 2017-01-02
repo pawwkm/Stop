@@ -11,14 +11,13 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// Initializes a new instance of the <see cref="Format4Instruction"/> class.
         /// </summary>
-        /// <param name="label">The label of the instruction, if any.</param>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <param name="first">The first register operand of the instruction.</param>
         /// <param name="second">The second register operand of the instruction.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="mnemonic"/>, <paramref name="first"/> or <paramref name="second"/> is null.
         /// </exception>
-        protected Format5Instruction(Label label, Mnemonic mnemonic, RegisterOperand first, RegisterOperand second) : base(label, mnemonic)
+        protected Format5Instruction(Mnemonic mnemonic, Register first, Register second) : base( mnemonic)
         {
             if (first == null)
                 throw new ArgumentNullException(nameof(first));
@@ -32,7 +31,7 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// The first register operand of the instruction.
         /// </summary>
-        public RegisterOperand First
+        public Register First
         {
             get;
             private set;
@@ -41,7 +40,7 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// The second register operand of the instruction.
         /// </summary>
-        public RegisterOperand Second
+        public Register Second
         {
             get;
             private set;

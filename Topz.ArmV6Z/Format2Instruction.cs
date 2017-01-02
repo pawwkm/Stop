@@ -11,13 +11,12 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// Initializes a new instance of the <see cref="Format2Instruction"/> class.
         /// </summary>
-        /// <param name="label">The label of the instruction, if any.</param>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <param name="operand">The target operand of the instruction.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="mnemonic"/> or <paramref name="operand"/> is null.
         /// </exception>
-        public Format2Instruction(Label label, Mnemonic mnemonic, TargetOperand operand) : base(label, mnemonic)
+        public Format2Instruction(Mnemonic mnemonic, TargetOperand operand) : base(mnemonic)
         {
             if (operand == null)
                 throw new ArgumentNullException(nameof(operand));

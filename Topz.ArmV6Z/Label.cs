@@ -4,7 +4,7 @@ using System;
 namespace Topz.ArmV6Z
 {
     /// <summary>
-    /// Represents a lable in a program.
+    /// Represents a label in a program.
     /// </summary>
     internal sealed class Label : Node
     {

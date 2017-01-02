@@ -20,8 +20,6 @@ namespace Topz.ArmV6Z
         {
             var builder = new TokenBuilder();
             var tokens = builder.Procedure().Identifier("main")
-                                .StartOfBlock()
-                                .EndOfBlock()
                                 .Build();
 
             var parser = new Parser();
@@ -51,9 +49,7 @@ namespace Topz.ArmV6Z
         {
             var builder = new TokenBuilder();
             var tokens = builder.Procedure().Identifier("main")
-                                .StartOfBlock()
-                                .Format1Instruction(mnemonic, Registers.R3, Registers.R3, 1)
-                                .EndOfBlock()
+                                .Format1Instruction(mnemonic, Register.R3, Register.R3, 1)
                                 .Build();
 
             var parser = new Parser();
@@ -69,10 +65,9 @@ namespace Topz.ArmV6Z
 
             var instruction = main.Instructions[0] as Format1Instruction;
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Registers.R3, instruction.FirstOperand.Register);
-            Assert.AreEqual(Registers.R3, instruction.Destination.Register);
-            Assert.AreEqual(1, instruction.ShifterOperand.Immediate);
-            Assert.AreEqual(ShifterOperandType.Immediate, instruction.ShifterOperand.OperandType);
+            Assert.AreEqual(Register.R3, instruction.FirstOperand.Value);
+            Assert.AreEqual(Register.R3, instruction.Destination.Value);
+            Assert.AreEqual(1, ((ImmediateOperand)instruction.ShifterOperand).Value);
         }
 
         /// <summary>
@@ -86,9 +81,7 @@ namespace Topz.ArmV6Z
         {
             var builder = new TokenBuilder();
             var tokens = builder.Procedure().Identifier("main")
-                                .StartOfBlock()
                                 .Format2Instruction(mnemonic, 40)
-                                .EndOfBlock()
                                 .Build();
 
             var parser = new Parser();
@@ -117,9 +110,7 @@ namespace Topz.ArmV6Z
         {
             var builder = new TokenBuilder();
             var tokens = builder.Procedure().Identifier("main")
-                                .StartOfBlock()
                                 .Format3Instruction(mnemonic, 40)
-                                .EndOfBlock()
                                 .Build();
 
             var parser = new Parser();
@@ -149,9 +140,7 @@ namespace Topz.ArmV6Z
         {
             var builder = new TokenBuilder();
             var tokens = builder.Procedure().Identifier("main")
-                                .StartOfBlock()
-                                .Format4Instruction(mnemonic, Registers.R1)
-                                .EndOfBlock()
+                                .Format4Instruction(mnemonic, Register.R1)
                                 .Build();
 
             var parser = new Parser();
@@ -166,7 +155,7 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(1, main.Instructions.Count);
 
             var instruction = main.Instructions[0] as Format4Instruction;
-            Assert.AreEqual(Registers.R1, instruction.Operand.Register);
+            Assert.AreEqual(Register.R1, instruction.Operand.Register);
         }
 
         /// <summary>
@@ -181,9 +170,7 @@ namespace Topz.ArmV6Z
         {
             var builder = new TokenBuilder();
             var tokens = builder.Procedure().Identifier("main")
-                                .StartOfBlock()
-                                .Format5Instruction(mnemonic, Registers.R3, Registers.R4)
-                                .EndOfBlock()
+                                .Format5Instruction(mnemonic, Register.R3, Register.R4)
                                 .Build();
 
             var parser = new Parser();
@@ -199,8 +186,8 @@ namespace Topz.ArmV6Z
 
             var instruction = main.Instructions[0] as Format5Instruction;
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Registers.R3, instruction.First.Register);
-            Assert.AreEqual(Registers.R4, instruction.Second.Register);
+            Assert.AreEqual(Register.R3, instruction.First.Value);
+            Assert.AreEqual(Register.R4, instruction.Second.Value);
         }
 
         /// <summary>
@@ -215,9 +202,7 @@ namespace Topz.ArmV6Z
         {
             var builder = new TokenBuilder();
             var tokens = builder.Procedure().Identifier("main")
-                                .StartOfBlock()
-                                .Format6Instruction(mnemonic, Registers.R3, 1)
-                                .EndOfBlock()
+                                .Format6Instruction(mnemonic, Register.R3, 1)
                                 .Build();
 
             var parser = new Parser();
@@ -233,9 +218,8 @@ namespace Topz.ArmV6Z
 
             var instruction = main.Instructions[0] as Format6Instruction;
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Registers.R3, instruction.First.Register);
-            Assert.AreEqual(1, instruction.Second.Immediate);
-            Assert.AreEqual(ShifterOperandType.Immediate, instruction.Second.OperandType);
+            Assert.AreEqual(Register.R3, instruction.First.Value);
+            Assert.AreEqual(1, ((ImmediateOperand)instruction.Second).Value);
         }
 
         /// <summary>
@@ -260,10 +244,8 @@ namespace Topz.ArmV6Z
         {
             var builder = new TokenBuilder();
             var tokens = builder.Procedure().Identifier("main")
-                                .StartOfBlock()
-                                .Mnemonic(mnemonic).Register(Registers.R0)
-                                .ListItemSeparator().ImmediateOffsetAddressingMode(Registers.R10, 4)
-                                .EndOfBlock()
+                                .Mnemonic(mnemonic).Register(Register.R0)
+                                .ListItemSeparator().ImmediateOffsetAddressingMode(Register.R10, 4)
                                 .Build();
 
             var parser = new Parser();
@@ -280,8 +262,8 @@ namespace Topz.ArmV6Z
             var instruction = main.Instructions[0] as Format7Instruction;
 
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Registers.R0, instruction.First.Register);
-            Assert.AreEqual(Registers.R10, instruction.Second.BaseAddress.Register);
+            Assert.AreEqual(Register.R0, instruction.First.Register);
+            Assert.AreEqual(Register.R10, instruction.Second.BaseAddress.Register);
             Assert.AreEqual(4, ((ImmediateOffsetOperand)instruction.Second).Offset);
         }
 
@@ -294,10 +276,8 @@ namespace Topz.ArmV6Z
         {
             var builder = new TokenBuilder();
             var tokens = builder.Procedure().Identifier("main")
-                                .StartOfBlock()
-                                .Mnemonic(mnemonic).Register(Registers.R0)
-                                .ListItemSeparator().RegisterOffsetAddressingMode(Registers.R10, true, Registers.R1)
-                                .EndOfBlock()
+                                .Mnemonic(mnemonic).Register(Register.R0)
+                                .ListItemSeparator().RegisterOffsetAddressingMode(Register.R10, true, Register.R1)
                                 .Build();
 
             var parser = new Parser();
@@ -314,9 +294,9 @@ namespace Topz.ArmV6Z
             var instruction = main.Instructions[0] as Format7Instruction;
 
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Registers.R0, instruction.First.Register);
-            Assert.AreEqual(Registers.R10, instruction.Second.BaseAddress.Register);
-            Assert.AreEqual(Registers.R1, ((RegisterOffsetOperand)instruction.Second).Offset.Register);
+            Assert.AreEqual(Register.R0, instruction.First.Register);
+            Assert.AreEqual(Register.R10, instruction.Second.BaseAddress.Register);
+            Assert.AreEqual(Register.R1, ((RegisterOffsetOperand)instruction.Second).Offset.Register);
             Assert.True(((RegisterOffsetOperand)instruction.Second).AddToBase);
         }
 

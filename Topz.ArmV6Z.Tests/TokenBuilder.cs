@@ -42,24 +42,6 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
-        /// Adds the end of block symbol to the builder.
-        /// </summary>
-        /// <returns>This builder.</returns>
-        public TokenBuilder StartOfBlock()
-        {
-            return Token(Symbols.StartOfBlock, TokenType.Symbol);
-        }
-
-        /// <summary>
-        /// Adds the end of block symbol to the builder.
-        /// </summary>
-        /// <returns>This builder.</returns>
-        public TokenBuilder EndOfBlock()
-        {
-            return Token(Symbols.EndOfBlock, TokenType.Symbol);
-        }
-
-        /// <summary>
         /// Adds the <see cref="Symbols.LeftSquareBracket"/> 
         /// symbol to the builder.
         /// </summary>
@@ -90,13 +72,13 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
-        /// Add one of <see cref="Registers.All"/> to the builder.
+        /// Add one of <see cref="Register.All"/> to the builder.
         /// </summary>
         /// <param name="register">The register to add.</param>
         /// <returns>This builder.</returns>
         public TokenBuilder Register(string register)
         {
-            if (!Registers.All.Contains(register))
+            if (!ArmV6Z.Register.All.Contains(register))
                 throw new ArgumentException(nameof(register));
 
             return Token(register, TokenType.Register);

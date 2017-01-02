@@ -7,7 +7,7 @@ namespace Topz.ArmV6Z
     /// <summary>
     /// A register operand.
     /// </summary>
-    internal sealed class RegisterOperand
+    internal sealed class RegisterOperand : AddressingMode1
     {
         /// <summary>
         /// Intializes a new instance of the <see cref="RegisterOperand"/> class.
@@ -17,7 +17,7 @@ namespace Topz.ArmV6Z
         /// <paramref name="token"/> is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="token"/> is not one of <see cref="Registers.All"/>.
+        /// <paramref name="token"/> is not one of <see cref="Register.All"/>.
         /// The type of <paramref name="token"/> is not <see cref="TokenType.Register"/>.
         /// </exception>
         public RegisterOperand(Token<TokenType> token) : this(token.Position, token.Text)
@@ -35,7 +35,7 @@ namespace Topz.ArmV6Z
         /// <paramref name="position"/> or <paramref name="register"/> is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="register"/> is not one of <see cref="Registers.All"/>.
+        /// <paramref name="register"/> is not one of <see cref="Register.All"/>.
         /// </exception>
         public RegisterOperand(InputPosition position, string register)
         {
@@ -43,7 +43,7 @@ namespace Topz.ArmV6Z
                 throw new ArgumentNullException(nameof(position));
             if (register == null)
                 throw new ArgumentNullException(nameof(register));
-            if (!register.ToLower().IsOneOf(Registers.All))
+            if (!register.ToLower().IsOneOf(ArmV6Z.Register.All))
                 throw new ArgumentException("This is not a register.", nameof(register));
 
             Position = position;
@@ -66,6 +66,15 @@ namespace Topz.ArmV6Z
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// Returns a string that represents the current register.
+        /// </summary>
+        /// <returns>A string that represents the current register.</returns>
+        public override string ToString()
+        {
+            return Register;
         }
     }
 }

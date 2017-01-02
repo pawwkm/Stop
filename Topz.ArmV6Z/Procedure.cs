@@ -41,13 +41,13 @@ namespace Topz.ArmV6Z
             if (e.Action != NotifyCollectionChangedAction.Add)
                 return;
 
-            var labledInstructions = (from i in Instructions
+            var labeldInstructions = (from i in Instructions
                                       where i.Label != null
                                       select i).ToArray();
 
             foreach (Instruction instruction in e.NewItems)
             {
-                if (labledInstructions.Any(x => x.Label.Name == instruction.Label.Name))
+                if (labeldInstructions.Any(x => x.Label.Name == instruction.Label.Name))
                     throw new ArgumentException(instruction.Position.ToString($"Redefining the label '{instruction.Label.Name}'."));
             }
         }

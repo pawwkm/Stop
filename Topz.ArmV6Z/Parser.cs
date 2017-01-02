@@ -9,7 +9,7 @@ namespace Topz.ArmV6Z
     /// </summary>
     internal sealed class Parser
     {
-        private Dictionary<string, Func<Label, Mnemonic, Instruction>> table;
+        private Dictionary<string, Func<Mnemonic, Instruction>> table;
 
         private LexicalAnalyzer<TokenType> analyzer;
 
@@ -20,7 +20,7 @@ namespace Topz.ArmV6Z
         /// </summary>
         public Parser()
         {
-            table = new Dictionary<string, Func<Label, Mnemonic, Instruction>>()
+            table = new Dictionary<string, Func<Mnemonic, Instruction>>()
             {
                 { Mnemonic.Adc, Format1<AddWithCarryInstruction> },
                 { Mnemonic.Add, Format1<AddInstruction> },
@@ -75,12 +75,10 @@ namespace Topz.ArmV6Z
             Keyword(Keywords.Procedure);
             var identifier = Identifier();
 
-            Symbol(Symbols.StartOfBlock);
-
             var procedure = new Procedure(identifier.Position, identifier.Text);
             while (!analyzer.EndOfInput)
             {
-                if (analyzer.NextIs(Symbols.EndOfBlock))
+                if (analyzer.NextIs(TokenType.Keyword))
                     break;
 
                 try
@@ -92,10 +90,6 @@ namespace Topz.ArmV6Z
                     throw new ParsingException(ex.Message);
                 }
             }
-
-            var end = analyzer.Next();
-            if (end.Text != Symbols.EndOfBlock)
-                throw new ParsingException(end.Position.ToString($"Expected the '{Symbols.EndOfBlock}' symbol."));
 
             try
             {
@@ -117,7 +111,7 @@ namespace Topz.ArmV6Z
             var token = analyzer.Next();
             if (token.Type == TokenType.Identifier)
             {
-                Symbol(Symbols.EndOfLable);
+                Symbol(Symbols.EndOfLabel);
 
                 label = new Label(token.Position, token.Text);
                 token = analyzer.Next();
@@ -129,7 +123,10 @@ namespace Topz.ArmV6Z
             try
             {
                 var mnemonic = new Mnemonic(token.Text, token.Position);
-                return table[mnemonic.RawName](label, mnemonic);
+                var instruction = table[mnemonic.RawName](mnemonic);
+                instruction.Label = label;
+
+                return instruction;
             }
             catch (KeyNotFoundException)
             {
@@ -142,20 +139,17 @@ namespace Topz.ArmV6Z
         /// <para>mnemonic, register, register, shifting operand</para>
         /// </summary>
         /// <typeparam name="T">The type of instruction.</typeparam>
-        /// <param name="label">The label of the instruction, if any.</param>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <returns>The parsed instruction.</returns>
-        private T Format1<T>(Label label, Mnemonic mnemonic) where T : Format1Instruction
+        private T Format1<T>(Mnemonic mnemonic) where T : Format1Instruction
         {
-            var r1 = RegisterOperand();
+            var r1 = Register();
             Symbol(Symbols.ListItemSeparator);
 
-            var r2 = RegisterOperand();
+            var r2 = Register();
             Symbol(Symbols.ListItemSeparator);
 
-            var shifter = ShifterOperand();
-
-            return (T)Activator.CreateInstance(typeof(T), label, mnemonic, r1, r2, shifter);
+            return (T)Activator.CreateInstance(typeof(T), mnemonic, r1, r2, AddressingMode1());
         }
 
         /// <summary>
@@ -163,10 +157,9 @@ namespace Topz.ArmV6Z
         /// <para>mnemonic, target address</para>
         /// </summary>
         /// <typeparam name="T">The type of instruction.</typeparam>
-        /// <param name="label">The label of the instruction, if any.</param>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <returns>The parsed instruction.</returns>
-        private T Format2<T>(Label label, Mnemonic mnemonic) where T : Format2Instruction
+        private T Format2<T>(Mnemonic mnemonic) where T : Format2Instruction
         {
             var integer = Integer();
 
@@ -174,7 +167,7 @@ namespace Topz.ArmV6Z
             {
                 var operand = new TargetOperand(integer.Position, int.Parse(integer.Text));
 
-                return (T)Activator.CreateInstance(typeof(T), label, mnemonic, operand);
+                return (T)Activator.CreateInstance(typeof(T), mnemonic, operand);
             }
             catch (OverflowException)
             {
@@ -187,10 +180,9 @@ namespace Topz.ArmV6Z
         /// <para>mnemonic, immediate 16</para>
         /// </summary>
         /// <typeparam name="T">The type of instruction.</typeparam>
-        /// <param name="label">The label of the instruction, if any.</param>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <returns>The parsed instruction.</returns>
-        private T Format3<T>(Label label, Mnemonic mnemonic) where T : Format3Instruction
+        private T Format3<T>(Mnemonic mnemonic) where T : Format3Instruction
         {
             var integer = Integer();
 
@@ -198,7 +190,7 @@ namespace Topz.ArmV6Z
             {
                 var operand = new Immediate16Operand(integer.Position, ushort.Parse(integer.Text));
 
-                return (T)Activator.CreateInstance(typeof(T), label, mnemonic, operand);
+                return (T)Activator.CreateInstance(typeof(T), mnemonic, operand);
             }
             catch (OverflowException)
             {
@@ -211,12 +203,11 @@ namespace Topz.ArmV6Z
         /// <para>mnemonic, register</para>
         /// </summary>
         /// <typeparam name="T">The type of instruction.</typeparam>
-        /// <param name="label">The label of the instruction, if any.</param>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <returns>The parsed instruction.</returns>
-        private T Format4<T>(Label label, Mnemonic mnemonic) where T : Format4Instruction
+        private T Format4<T>(Mnemonic mnemonic) where T : Format4Instruction
         {
-            return (T)Activator.CreateInstance(typeof(T), label, mnemonic, RegisterOperand());
+            return (T)Activator.CreateInstance(typeof(T), mnemonic, RegisterOperand());
         }
 
         /// <summary>
@@ -224,17 +215,14 @@ namespace Topz.ArmV6Z
         /// <para>mnemonic, register, register</para>
         /// </summary>
         /// <typeparam name="T">The type of instruction.</typeparam>
-        /// <param name="label">The label of the instruction, if any.</param>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <returns>The parsed instruction.</returns>
-        private T Format5<T>(Label label, Mnemonic mnemonic) where T : Format5Instruction
+        private T Format5<T>(Mnemonic mnemonic) where T : Format5Instruction
         {
-            var r1 = RegisterOperand();
+            var r1 = Register();
             Symbol(Symbols.ListItemSeparator);
 
-            var r2 = RegisterOperand();
-
-            return (T)Activator.CreateInstance(typeof(T), label, mnemonic, r1, r2);
+            return (T)Activator.CreateInstance(typeof(T), mnemonic, r1, Register());
         }
 
         /// <summary>
@@ -242,17 +230,14 @@ namespace Topz.ArmV6Z
         /// <para>mnemonic, register, shifting operand</para>
         /// </summary>
         /// <typeparam name="T">The type of instruction.</typeparam>
-        /// <param name="label">The label of the instruction, if any.</param>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <returns>The parsed instruction.</returns>
-        private T Format6<T>(Label label, Mnemonic mnemonic) where T : Format6Instruction
+        private T Format6<T>(Mnemonic mnemonic) where T : Format6Instruction
         {
-            var register = RegisterOperand();
+            var register = Register();
             Symbol(Symbols.ListItemSeparator);
 
-            var shifter = ShifterOperand();
-
-            return (T)Activator.CreateInstance(typeof(T), label, mnemonic, register, shifter);
+            return (T)Activator.CreateInstance(typeof(T), mnemonic, register, AddressingMode1());
         }
 
         /// <summary>
@@ -260,17 +245,14 @@ namespace Topz.ArmV6Z
         /// <para>mnemonic, register, addressing mode</para>
         /// </summary>
         /// <typeparam name="T">The type of instruction.</typeparam>
-        /// <param name="label">The label of the instruction, if any.</param>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <returns>The parsed instruction.</returns>
-        private T Format7<T>(Label label, Mnemonic mnemonic) where T : Format7Instruction
+        private T Format7<T>(Mnemonic mnemonic) where T : Format7Instruction
         {
             var register = RegisterOperand();
             Symbol(Symbols.ListItemSeparator);
 
-            var addressingMode = AddressingModeOperand();
-
-            return (T)Activator.CreateInstance(typeof(T), label, mnemonic, register, addressingMode);
+            return (T)Activator.CreateInstance(typeof(T), mnemonic, register, AddressingMode2());
         }
 
         /// <summary>
@@ -279,51 +261,72 @@ namespace Topz.ArmV6Z
         /// <returns>The parsed operand.</returns>
         private RegisterOperand RegisterOperand()
         {
-            var register = analyzer.Next();
-            if (register.Type != TokenType.Register)
-                throw new ParsingException(register.Position.ToString("Expected a register."));
-
-            return new RegisterOperand(register.Position, register.Text);
+            var register = Register();
+            return new RegisterOperand(register.Position, register.Value);
         }
 
         /// <summary>
-        /// Parses a shifter operand.
-        /// </summary>
-        /// <returns>The shifter operand.</returns>
-        private ShifterOperand ShifterOperand()
-        {
-            var operand = analyzer.Next();
-            if (operand.Type == TokenType.Integer)
-                return new ShifterOperand(operand.Position, int.Parse(operand.Text));
-            if (operand.Type == TokenType.Register)
-            {
-                if (analyzer.NextIs(TokenType.RegisterShifter))
-                {
-                    var shifter = analyzer.Next();
-                    if (shifter.Type != TokenType.RegisterShifter)
-                        throw new ParsingException(shifter.Position.ToString("Expected a register shifter."));
-
-                    var immediate = analyzer.Next();
-                    if (immediate.Type != TokenType.Integer)
-                        throw new ParsingException(immediate.Position.ToString("Expected an integer."));
-
-                    return new ShifterOperand(operand.Position, int.Parse(operand.Text), shifter.Text);
-                }
-                else
-                    return new ShifterOperand(operand.Position, operand.Text);
-            }
-
-            throw new ParsingException(operand.Position.ToString("Expected a shifter operand."));
-        }
-
-        /// <summary>
-        /// Parses an adressing mode.
+        /// Parses adressing mode 1.
         /// </summary>
         /// <returns>The parsed addressing mode.</returns>
-        private AddressingModeOperand AddressingModeOperand()
+        private AddressingMode1 AddressingMode1()
+        {
+            var token = analyzer.Next();
+            if (token.Type == TokenType.Integer)
+                return new ImmediateOperand(ushort.Parse(token.Text), token.Position);
+            if (token.Type == TokenType.Register)
+            {
+                if (analyzer.NextIs(Symbols.ListItemSeparator))
+                {
+                    analyzer.Next();
+                    if (analyzer.NextIs(ArmV6Z.Register.Lsl))
+                    {
+                        analyzer.Next();
+                        if (analyzer.NextIs(TokenType.Integer))
+                            return new LogicalLeftShiftByImmediateOperand(new Register(token), int.Parse(Integer().Text));
+                        if (analyzer.NextIs(TokenType.Register))
+                            return new LogicalLeftShiftByRegisterOperand(new Register(token), new Register(analyzer.Next()));
+                    }
+                    else if (analyzer.NextIs(ArmV6Z.Register.Lsr))
+                    {
+                        analyzer.Next();
+                        if (analyzer.NextIs(TokenType.Integer))
+                            return new LogicalRightShiftByImmediateOperand(new Register(token), int.Parse(Integer().Text));
+                        if (analyzer.NextIs(TokenType.Register))
+                            return new LogicalRightShiftByRegisterOperand(new Register(token), new Register(analyzer.Next()));
+                    }
+                    else if (analyzer.NextIs(ArmV6Z.Register.Lsr))
+                    {
+                        if (analyzer.NextIs(TokenType.Integer))
+                            return new ArithmeticRightShiftByImmediateOperand(new Register(token), int.Parse(Integer().Text));
+                        if (analyzer.NextIs(TokenType.Register))
+                            return new ArithmeticRightShiftByRegisterOperand(new Register(token), new Register(analyzer.Next()));
+                    }
+                    else if (analyzer.NextIs(ArmV6Z.Register.Ror))
+                    {
+                        if (analyzer.NextIs(TokenType.Integer))
+                            return new RotateRightByImmediateOperand(new Register(token), int.Parse(Integer().Text));
+                        if (analyzer.NextIs(TokenType.Register))
+                            return new RotateRightByRegisterOperand(new Register(token), new Register(analyzer.Next()));
+                    }
+                    else if (analyzer.NextIs(ArmV6Z.Register.Rrx))
+                        return new RotateRightWithExtendOperand(new Register(token));
+                }
+                else
+                    return new RegisterOperand(token);
+            }
+
+            throw new ParsingException(token.Position.ToString("Expected a data-processing operand."));
+        }
+
+        /// <summary>
+        /// Parses adressing mode 2.
+        /// </summary>
+        /// <returns>The parsed addressing mode.</returns>
+        private AddressingMode2 AddressingMode2()
         {
             Symbol(Symbols.LeftSquareBracket);
-            var register = new RegisterOperand(Register());
+            var register = RegisterOperand();
 
             Symbol(Symbols.ListItemSeparator);
             if (analyzer.NextIs(TokenType.Integer))
@@ -336,7 +339,7 @@ namespace Topz.ArmV6Z
             else if (analyzer.NextIs(Symbols.Plus) || analyzer.NextIs(Symbols.Minus))
             {
                 var sign = analyzer.Next();
-                var offset = new RegisterOperand(Register());
+                var offset = RegisterOperand();
 
                 Symbol(Symbols.RightSquareBracket);
 
@@ -432,13 +435,13 @@ namespace Topz.ArmV6Z
         /// <exception cref="ParsingException">
         /// The next token was not an register.
         /// </exception>
-        private Token<TokenType> Register()
+        private Register Register()
         {
-            var register = analyzer.Next();
-            if (register.Type != TokenType.Register)
-                throw new ParsingException(register.Position.ToString("Expected a register."));
+            var token = analyzer.Next();
+            if (token.Type != TokenType.Register)
+                throw new ParsingException(token.Position.ToString("Expected a register."));
 
-            return register;
+            return new Register(token);
         }
     }
 }

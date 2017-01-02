@@ -5,19 +5,24 @@ namespace Topz.ArmV6Z
     /// <summary>
     /// A break point instruction.
     /// </summary>
-    internal class BreakPointInstruction : Format3Instruction
+    /// <remarks>See section A4.1.7</remarks>
+    internal sealed class BreakPointInstruction : Format3Instruction
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Format3Instruction"/> class.
         /// </summary>
-        /// <param name="label">The label of the instruction, if any.</param>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <param name="operand">The operand of the instruction.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="mnemonic"/> or <paramref name="operand"/> is null.
         /// </exception>
-        public BreakPointInstruction(Label label, Mnemonic mnemonic, Immediate16Operand operand) : base(label, mnemonic, operand)
+        /// <exception cref="ArgumentException">
+        /// <paramref name="mnemonic"/> is not <see cref="Mnemonic.Bkpt"/>.
+        /// </exception>
+        public BreakPointInstruction(Mnemonic mnemonic, Immediate16Operand operand) : base(mnemonic, operand)
         {
+            if (mnemonic.RawName != Mnemonic.Bkpt)
+                throw new ArgumentException($"The mnemonic is not {Mnemonic.Bkpt}", nameof(mnemonic));
         }
     }
 }

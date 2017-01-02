@@ -7,7 +7,7 @@ namespace Topz.ArmV6Z
     /// Load and Store Word or Unsigned Byte - Immediate offset.
     /// </summary>
     /// <remarks>See section A5.2.2</remarks>
-    internal sealed class ImmediateOffsetOperand : AddressingModeOperand
+    internal sealed class ImmediateOffsetOperand : AddressingMode2
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ImmediateOffsetOperand"/> class.
@@ -33,12 +33,21 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// Specifies the immediate offset used with the value of 
-        /// <see cref="AddressingModeOperand.BaseAddress"/> to form the address.
+        /// <see cref="AddressingMode2.BaseAddress"/> to form the address.
         /// </summary>
         public int Offset
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// Returns a string that represents the current offset.
+        /// </summary>
+        /// <returns>A string that represents the current offset.</returns>
+        public override string ToString()
+        {
+            return $"#{Offset}";
         }
     }
 }

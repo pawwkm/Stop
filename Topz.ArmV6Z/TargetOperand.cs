@@ -6,7 +6,7 @@ namespace Topz.ArmV6Z
     /// <summary>
     /// A target address operand.
     /// </summary>
-    internal class TargetOperand : Node
+    internal sealed class TargetOperand : Node
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TargetOperand"/> class.

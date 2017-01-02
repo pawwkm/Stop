@@ -6,7 +6,7 @@ namespace Topz.ArmV6Z
     /// Load and Store Word or unsigned byte - Register offset.
     /// </summary>
     /// <remarks>See section A5.2.3</remarks>
-    internal sealed class RegisterOffsetOperand : AddressingModeOperand
+    internal sealed class RegisterOffsetOperand : AddressingMode2
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RegisterOffsetOperand"/> class.
@@ -35,7 +35,7 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// If true then <see cref="Offset"/> is added to
-        /// <see cref="AddressingModeOperand.BaseAddress"/>;
+        /// <see cref="AddressingMode2.BaseAddress"/>;
         /// otherwise it is subtracted from it.
         /// </summary>
         public bool AddToBase
@@ -46,7 +46,7 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// The offset to add or subtract from the
-        /// <see cref="AddressingModeOperand.BaseAddress"/>.
+        /// <see cref="AddressingMode2.BaseAddress"/>.
         /// </summary>
         public RegisterOperand Offset
         {

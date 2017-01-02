@@ -14,14 +14,13 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// Initializes a new instance of the <see cref="Format7Instruction"/> class.
         /// </summary>
-        /// <param name="label">The label of the instruction, if any.</param>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <param name="first">The register operand of the instruction.</param>
         /// <param name="second">The addressing mode operand of the instruction.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="mnemonic"/>, <paramref name="first"/> or <paramref name="second"/> is null.
         /// </exception>
-        protected Format7Instruction(Label label, Mnemonic mnemonic, RegisterOperand first, AddressingModeOperand second) : base(label, mnemonic)
+        protected Format7Instruction(Mnemonic mnemonic, RegisterOperand first, AddressingMode2 second) : base(mnemonic)
         {
             if (first == null)
                 throw new ArgumentNullException(nameof(first));
@@ -44,10 +43,19 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// The addressing mode operand of the instruction.
         /// </summary>
-        public AddressingModeOperand Second
+        public AddressingMode2 Second
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// Returns a string that represents the current instruction.
+        /// </summary>
+        /// <returns>A string that represents the current instruction.</returns>
+        public override string ToString()
+        {
+            return $"{base.ToString()} {First}, {Second}";
         }
     }
 }

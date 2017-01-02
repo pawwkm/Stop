@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using Pote;
+using Pote.Text;
+using System;
+using System.Collections.Generic;
 
 namespace Topz.ArmV6Z
 {
     /// <summary>
-    /// The registers available in ARMv6Z
+    /// The registers availabel in ARMv6Z
     /// </summary>
-    internal class Registers
+    internal class Register
     {
         /// <summary>
         /// The 'asr' shifted register operand.
@@ -128,6 +131,47 @@ namespace Topz.ArmV6Z
         public const string ProgramCounter = "pc";
 
         /// <summary>
+        /// Intializes a new instance of the <see cref="Register"/> class.
+        /// </summary>
+        /// <param name="token">The token that represets a register.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="token"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="token"/> is not one of <see cref="All"/>.
+        /// The type of <paramref name="token"/> is not <see cref="TokenType.Register"/>.
+        /// </exception>
+        public Register(Token<TokenType> token) : this(token.Position, token.Text)
+        {
+            if (token.Type != TokenType.Register)
+                throw new ArgumentException("The token is not a register.", nameof(token));
+        }
+
+        /// <summary>
+        /// Intializes a new instance of the <see cref="Register"/> class.
+        /// </summary>
+        /// <param name="position">The position where the register was referenced.</param>
+        /// <param name="register">The actual register.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="position"/> or <paramref name="register"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="register"/> is not one of <see cref="All"/>.
+        /// </exception>
+        public Register(InputPosition position, string register)
+        {
+            if (position == null)
+                throw new ArgumentNullException(nameof(position));
+            if (register == null)
+                throw new ArgumentNullException(nameof(register));
+            if (!register.ToLower().IsOneOf(ArmV6Z.Register.All))
+                throw new ArgumentException("This is not a register.", nameof(register));
+
+            Position = position;
+            Value = register;
+        }
+
+        /// <summary>
         /// All of the registers.
         /// </summary>
         public static IEnumerable<string> All
@@ -175,6 +219,33 @@ namespace Topz.ArmV6Z
                     Rrx
                 };
             }
+        }
+
+        /// <summary>
+        /// The actual register.
+        /// </summary>
+        public string Value
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// The position where the register was referenced.
+        /// </summary>
+        public InputPosition Position
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Returns a string that represents the current register.
+        /// </summary>
+        /// <returns>A string that represents the current register.</returns>
+        public override string ToString()
+        {
+            return Value;
         }
     }
 }

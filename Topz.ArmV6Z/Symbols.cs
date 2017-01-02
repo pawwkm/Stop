@@ -3,24 +3,14 @@
 namespace Topz.ArmV6Z
 {
     /// <summary>
-    /// Defines all the symbols available.
+    /// Defines all the symbols availabel.
     /// </summary>
     internal static class Symbols
     {
         /// <summary>
-        /// The start of block symbol.
+        /// The end of label symbol.
         /// </summary>
-        public const string StartOfBlock = "{";
-
-        /// <summary>
-        /// The end of block symbol.
-        /// </summary>
-        public const string EndOfBlock = "}";
-
-        /// <summary>
-        /// The end of lable symbol.
-        /// </summary>
-        public const string EndOfLable = ":";
+        public const string EndOfLabel = ":";
 
         /// <summary>
         /// The list item separator symbol.
@@ -54,9 +44,7 @@ namespace Topz.ArmV6Z
         {
             get
             {
-                yield return StartOfBlock;
-                yield return EndOfBlock;
-                yield return EndOfLable;
+                yield return EndOfLabel;
                 yield return ListItemSeparator;
                 yield return LeftSquareBracket;
                 yield return RightSquareBracket;

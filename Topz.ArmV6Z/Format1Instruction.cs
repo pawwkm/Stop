@@ -11,15 +11,14 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// Intializes a new instance of the <see cref="Format1Instruction"/> class.
         /// </summary>
-        /// <param name="label">The label of the instruction, if any.</param>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <param name="r1">The first register.</param>
         /// <param name="r2">The second register.</param>
-        /// <param name="shifter">The third register.</param>
+        /// <param name="shifter">The addressing mode.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="mnemonic"/>, <paramref name="r1"/>, <paramref name="r2"/> or <paramref name="shifter"/> is null.
         /// </exception>
-        protected Format1Instruction(Label label, Mnemonic mnemonic, RegisterOperand r1, RegisterOperand r2, ShifterOperand shifter) : base(label, mnemonic)
+        protected Format1Instruction(Mnemonic mnemonic, Register r1, Register r2, AddressingMode1 shifter) : base(mnemonic)
         {
             if (r1 == null)
                 throw new ArgumentNullException(nameof(r1));
@@ -36,7 +35,7 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// The destination register.
         /// </summary>
-        public RegisterOperand Destination
+        public Register Destination
         {
             get;
             set;
@@ -45,7 +44,7 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// The first operand of the instruction.
         /// </summary>
-        public RegisterOperand FirstOperand
+        public Register FirstOperand
         {
             get;
             set;
@@ -54,10 +53,19 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// The second operand of the instruction.
         /// </summary>
-        public ShifterOperand ShifterOperand
+        public AddressingMode1 ShifterOperand
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// Returns a string that represents the current instruction.
+        /// </summary>
+        /// <returns>A string that represents the current instruction.</returns>
+        public override string ToString()
+        {
+            return $"{base.ToString()} {Destination}, {FirstOperand}, {ShifterOperand}";
         }
     }
 }

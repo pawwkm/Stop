@@ -60,9 +60,9 @@ namespace Topz.ArmV6Z
             char c = (char)Source.Peek();
             if (Source.MatchesAnyOf(Keywords.All))
                 return Keyword();
-            if (Source.MatchesAnyOf(Registers.All))
+            if (Source.MatchesAnyOf(ArmV6Z.Register.All))
                 return Register();
-            if (Source.MatchesAnyOf(Registers.Shifted))
+            if (Source.MatchesAnyOf(ArmV6Z.Register.Shifted))
                 return Shifted();
             if (Source.MatchesAnyOf(Symbols.All))
                 return Symbol();
@@ -176,7 +176,7 @@ namespace Topz.ArmV6Z
         private Token<TokenType> Register()
         {
             var start = Position.DeepCopy();
-            foreach (string register in Registers.All)
+            foreach (string register in ArmV6Z.Register.All)
             {
                 if (Consume(register))
                     return new Token<TokenType>(register, TokenType.Register, start);
@@ -192,7 +192,7 @@ namespace Topz.ArmV6Z
         private Token<TokenType> Shifted()
         {
             var start = Position.DeepCopy();
-            foreach (string shifter in Registers.Shifted)
+            foreach (string shifter in ArmV6Z.Register.Shifted)
             {
                 if (Consume(shifter))
                     return new Token<TokenType>(shifter, TokenType.RegisterShifter, start);

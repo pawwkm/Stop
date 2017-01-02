@@ -1,4 +1,6 @@
-﻿namespace Topz.ArmV6Z
+﻿using System;
+
+namespace Topz.ArmV6Z
 {
     /// <summary>
     /// Provides extension methods to the <see cref="Bit"/> enum.
@@ -21,7 +23,7 @@
                 case Bit.S:
                     return "s";
                 default:
-                    throw new System.ArgumentException($"The value '{bit}' is unsupported.", nameof(bit));
+                    throw new ArgumentException($"The value '{bit}' is unsupported.", nameof(bit));
             }
         }
     }

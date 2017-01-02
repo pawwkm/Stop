@@ -5,6 +5,7 @@
     /// These values are masks for the 31:28 bits of an 
     /// instruction.
     /// </summary>
+    /// <remarks>See section A3.2</remarks>
     internal enum Condition : uint
     {
         /// <summary>

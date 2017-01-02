@@ -52,9 +52,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddInstruction.cs" />
+    <Compile Include="AddressingMode1.cs" />
+    <Compile Include="AddressingMode3.cs" />
+    <Compile Include="AddressingMode4.cs" />
+    <Compile Include="AddressingMode5.cs" />
     <Compile Include="AddWithCarryInstruction.cs" />
-    <Compile Include="AddressingModeOperand.cs" />
+    <Compile Include="AddressingMode2.cs" />
     <Compile Include="AndInstruction.cs" />
+    <Compile Include="ArithmeticRightShiftByImmediateOperand.cs" />
+    <Compile Include="ArithmeticRightShiftByRegister.cs" />
     <Compile Include="Assembler.cs" />
     <Compile Include="Bit.cs" />
     <Compile Include="BitClearInstruction.cs" />
@@ -80,6 +86,7 @@
     <Compile Include="Format7Instruction.cs" />
     <Compile Include="Immediate16Operand.cs" />
     <Compile Include="ImmediateOffsetOperand.cs" />
+    <Compile Include="ImmediateOperand.cs" />
     <Compile Include="INamedNode.cs" />
     <Compile Include="Instruction.cs" />
     <Compile Include="BranchInstruction.cs" />
@@ -88,14 +95,19 @@
     <Compile Include="Label.cs" />
     <Compile Include="LexicalAnalyzer.cs" />
     <Compile Include="LoadRegisterInstruction.cs" />
+    <Compile Include="LogicalLeftShiftByImmediateOperand.cs" />
+    <Compile Include="LogicalLeftShiftByRegisterOperand.cs" />
+    <Compile Include="LogicalRightShiftByImmediateOperand.cs" />
+    <Compile Include="LogicalRightShiftByRegisterOperand.cs" />
     <Compile Include="Mnemonic.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Register.cs" />
     <Compile Include="RegisterOffsetOperand.cs" />
     <Compile Include="RegisterOperand.cs" />
-    <Compile Include="ShifterOperand.cs" />
-    <Compile Include="ShifterOperandType.cs" />
+    <Compile Include="RotateRightByImmediateOperand.cs" />
+    <Compile Include="RotateRightByRegisterOperand.cs" />
+    <Compile Include="RotateRightWithExtendOperand.cs" />
     <Compile Include="Symbols.cs" />
     <Compile Include="TargetOperand.cs" />
     <Compile Include="Pass.cs" />

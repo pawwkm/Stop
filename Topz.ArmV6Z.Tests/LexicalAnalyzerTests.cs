@@ -67,12 +67,12 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// Tests that <see cref="LexicalAnalyzer.NextTokenFromSource()"/> recognizes
-        /// all registers in <see cref="Registers.All"/> as <see cref="TokenType.Register"/>.
+        /// all registers in <see cref="Register.All"/> as <see cref="TokenType.Register"/>.
         /// </summary>
         [Test]
         public void NextTokenFromSource_Registers_RegistersRecognized()
         {
-            foreach (var register in Registers.All)
+            foreach (var register in Register.All)
             {
                 var analyzer = new LexicalAnalyzer(register.ToStreamReader());
                 var token = analyzer.Next();
@@ -119,13 +119,13 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// Tests that <see cref="LexicalAnalyzer.NextTokenFromSource()"/> recognizes
-        /// all register shifters in <see cref="Registers.Shifted"/> as 
+        /// all register shifters in <see cref="Register.Shifted"/> as 
         /// <see cref="TokenType.RegisterShifter"/>.
         /// </summary>
         [Test]
         public void NextTokenFromSource_RegisterShifters_RegisterShiftersRecognized()
         {
-            foreach (var shifter in Registers.Shifted)
+            foreach (var shifter in Register.Shifted)
             {
                 var analyzer = new LexicalAnalyzer(shifter.ToStreamReader());
                 var token = analyzer.Next();
