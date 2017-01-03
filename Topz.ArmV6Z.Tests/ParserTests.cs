@@ -2,6 +2,8 @@
 using NUnit.Framework;
 using Pote.Text;
 using System.Collections.Generic;
+using Topz.ArmV6Z.Instructions;
+using Topz.ArmV6Z.Operands;
 
 namespace Topz.ArmV6Z
 {
