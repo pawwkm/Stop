@@ -166,6 +166,43 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse <see cref="Format5Instruction"/> related instructions.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
+        [Test]
+        [TestCase(Mnemonic.Cpy)]
+        [TestCase(Mnemonic.Clz)]
+        public void Parse_Format5Instruction_ParsesInstruction(string mnemonic)
+        {
+            var builder = new TokenBuilder();
+            var tokens = builder.Procedure()
+                                .Identifier("main")
+                                .Mnemonic(mnemonic)
+                                .R3()
+                                .Comma()
+                                .R4()
+                                .Build();
+
+            var parser = new Parser();
+            var program = parser.Parse(LexicalAnalyzer(tokens));
+
+            Assert.AreEqual(1, program.Procedures.Count);
+            Assert.AreEqual(0, program.Data.Count);
+            Assert.AreEqual(0, program.Strings.Count);
+
+            var main = program.Procedures[0];
+            Assert.AreEqual("main", main.Name);
+            Assert.AreEqual(1, main.Instructions.Count);
+
+            var instruction = main.Instructions[0] as Format5Instruction;
+
+            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
+            Assert.AreEqual(Register.R3, instruction.Rd.Value);
+            Assert.AreEqual(Register.R4, instruction.Rm.Value);
+        }
+
+        /// <summary>
         /// Tests a given instruction using the <see cref="Format1Instruction"/>
         /// with the <see cref="ImmediateOperand"/>.
         /// </summary>
