@@ -150,7 +150,7 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// <para>Parses an instruction with the following format.</para>
-        /// <para>mnemonic register, register, shifting operand</para>
+        /// <para>mnemonic rd, rm, shifter_operand</para>
         /// </summary>
         /// <typeparam name="T">The type of instruction.</typeparam>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>

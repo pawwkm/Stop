@@ -5,7 +5,7 @@ namespace Topz.ArmV6Z.Instructions
 {
     /// <summary>
     /// <para>An instruction with the following syntax.</para>
-    /// <para>mnemonic register, register, shifting operand</para>
+    /// <para>mnemonic rd, rm, shifter_operand</para>
     /// </summary>
     internal abstract class Format1Instruction : Instruction
     {
@@ -13,23 +13,23 @@ namespace Topz.ArmV6Z.Instructions
         /// Intializes a new instance of the <see cref="Format1Instruction"/> class.
         /// </summary>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
-        /// <param name="r1">The first register.</param>
-        /// <param name="r2">The second register.</param>
+        /// <param name="rd">The first register.</param>
+        /// <param name="rm">The second register.</param>
         /// <param name="shifter">The addressing mode.</param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="mnemonic"/>, <paramref name="r1"/>, <paramref name="r2"/> or <paramref name="shifter"/> is null.
+        /// <paramref name="mnemonic"/>, <paramref name="rd"/>, <paramref name="rm"/> or <paramref name="shifter"/> is null.
         /// </exception>
-        protected Format1Instruction(Mnemonic mnemonic, Register r1, Register r2, AddressingMode1 shifter) : base(mnemonic)
+        protected Format1Instruction(Mnemonic mnemonic, Register rd, Register rm, AddressingMode1 shifter) : base(mnemonic)
         {
-            if (r1 == null)
-                throw new ArgumentNullException(nameof(r1));
-            if (r2 == null)
-                throw new ArgumentNullException(nameof(r2));
+            if (rd == null)
+                throw new ArgumentNullException(nameof(rd));
+            if (rm == null)
+                throw new ArgumentNullException(nameof(rm));
             if (shifter == null)
                 throw new ArgumentNullException(nameof(shifter));
 
-            Destination = r1;
-            FirstOperand = r2;
+            Destination = rd;
+            FirstOperand = rm;
             ShifterOperand = shifter;
         }
 
