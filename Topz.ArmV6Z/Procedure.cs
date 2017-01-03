@@ -71,6 +71,16 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// If true this declaration is only a reference
+        /// to a procedure in another program.
+        /// </summary>
+        public bool IsExternal
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// The instructions that the procedure is composed of in 
         /// the order they are to be executed.
         /// </summary>

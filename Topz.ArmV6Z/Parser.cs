@@ -62,7 +62,7 @@ namespace Topz.ArmV6Z
             program = new Program();
             while (!analyzer.EndOfInput)
             {
-                if (analyzer.NextIs(Keywords.Procedure))
+                if (analyzer.NextIs(Keywords.Procedure) || analyzer.NextIs(Keywords.External).Then(Keywords.Procedure))
                     Procedure();
             }
 
@@ -74,22 +74,34 @@ namespace Topz.ArmV6Z
         /// </summary>
         private void Procedure()
         {
+            var isExternal = false;
+            if (analyzer.NextIs(Keywords.External))
+            {
+                Keyword(Keywords.External);
+                isExternal = true;
+            }
+
             Keyword(Keywords.Procedure);
             var identifier = Identifier();
 
             var procedure = new Procedure(identifier.Position, identifier.Text);
-            while (!analyzer.EndOfInput)
-            {
-                if (analyzer.NextIs(TokenType.Keyword))
-                    break;
+            procedure.IsExternal = isExternal;
 
-                try
+            if (!isExternal)
+            {
+                while (!analyzer.EndOfInput)
                 {
-                    procedure.Instructions.Add(Instruction());
-                }
-                catch (ArgumentException ex)
-                {
-                    throw new ParsingException(ex.Message);
+                    if (analyzer.NextIs(TokenType.Keyword))
+                        break;
+
+                    try
+                    {
+                        procedure.Instructions.Add(Instruction());
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        throw new ParsingException(ex.Message);
+                    }
                 }
             }
 
@@ -214,7 +226,7 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// <para>Parses an instruction with the following format.</para>
-        /// <para>mnemonic register, register</para>
+        /// <para>mnemonic rd, rm</para>
         /// </summary>
         /// <typeparam name="T">The type of instruction.</typeparam>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>

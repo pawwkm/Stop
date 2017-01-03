@@ -10,6 +10,15 @@ namespace Topz.ArmV6Z
     internal class TokenBuilder : TokenBuilder<TokenBuilder, TokenType>
     {
         /// <summary>
+        /// Adds the 'external' keyword to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder External()
+        {
+            return Token(Keywords.External, TokenType.Keyword);
+        }
+
+        /// <summary>
         /// Adds the 'procedure' keyword to the builder.
         /// </summary>
         /// <returns>This builder.</returns>

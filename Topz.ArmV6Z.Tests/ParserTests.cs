@@ -31,9 +31,33 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(0, program.Data.Count);
             Assert.AreEqual(0, program.Strings.Count);
 
-            Procedure main = program.Procedures[0];
+            var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(0, main.Instructions.Count);
+        }
+
+        /// <summary>
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse a procedure without any content.
+        /// </summary>
+        [Test]
+        public void Parse_ExternalProcedure_ParsesProcedure()
+        {
+            var builder = new TokenBuilder();
+            var tokens = builder.External().Procedure().Identifier("main")
+                                .Build();
+
+            var parser = new Parser();
+            var program = parser.Parse(LexicalAnalyzer(tokens));
+
+            Assert.AreEqual(1, program.Procedures.Count);
+            Assert.AreEqual(0, program.Data.Count);
+            Assert.AreEqual(0, program.Strings.Count);
+
+            var main = program.Procedures[0];
+            Assert.AreEqual("main", main.Name);
+            Assert.AreEqual(0, main.Instructions.Count);
+            Assert.True(main.IsExternal);
         }
 
         /// <summary>
@@ -88,6 +112,7 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
+            Assert.False(main.IsExternal);
 
             var instruction = main.Instructions[0] as Format2Instruction;
             var operand = instruction.Operand as TargetOperand;
@@ -122,6 +147,7 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
+            Assert.False(main.IsExternal);
 
             var instruction = main.Instructions[0] as Format3Instruction;
             var operand = instruction.Operand as Immediate16Operand;
@@ -157,6 +183,7 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
+            Assert.False(main.IsExternal);
 
             var instruction = main.Instructions[0] as Format4Instruction;
             var operand = instruction.Operand as RegisterOperand;
@@ -194,6 +221,7 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
+            Assert.False(main.IsExternal);
 
             var instruction = main.Instructions[0] as Format5Instruction;
 
@@ -230,6 +258,7 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
+            Assert.False(main.IsExternal);
 
             var instruction = main.Instructions[0] as Format1Instruction;
             var operand = instruction.ShifterOperand as ImmediateOperand;
@@ -268,6 +297,7 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
+            Assert.False(main.IsExternal);
 
             var instruction = main.Instructions[0] as Format1Instruction;
             var operand = instruction.ShifterOperand as RegisterOperand;
@@ -309,6 +339,7 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
+            Assert.False(main.IsExternal);
 
             var instruction = main.Instructions[0] as Format1Instruction;
             var operand = instruction.ShifterOperand as LogicalLeftShiftByImmediateOperand;
@@ -351,6 +382,7 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
+            Assert.False(main.IsExternal);
 
             var instruction = main.Instructions[0] as Format1Instruction;
             var operand = instruction.ShifterOperand as LogicalLeftShiftByRegisterOperand;
@@ -393,6 +425,7 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
+            Assert.False(main.IsExternal);
 
             var instruction = main.Instructions[0] as Format1Instruction;
             var operand = instruction.ShifterOperand as LogicalRightShiftByImmediateOperand;
@@ -435,6 +468,7 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
+            Assert.False(main.IsExternal);
 
             var instruction = main.Instructions[0] as Format1Instruction;
             var operand = instruction.ShifterOperand as LogicalRightShiftByRegisterOperand;
@@ -477,6 +511,7 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
+            Assert.False(main.IsExternal);
 
             var instruction = main.Instructions[0] as Format1Instruction;
             var operand = instruction.ShifterOperand as ArithmeticRightShiftByImmediateOperand;
@@ -519,6 +554,7 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
+            Assert.False(main.IsExternal);
 
             var instruction = main.Instructions[0] as Format1Instruction;
             var operand = instruction.ShifterOperand as ArithmeticRightShiftByRegisterOperand;
@@ -561,6 +597,7 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
+            Assert.False(main.IsExternal);
 
             var instruction = main.Instructions[0] as Format1Instruction;
             var operand = instruction.ShifterOperand as RotateRightByImmediateOperand;
@@ -603,6 +640,7 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
+            Assert.False(main.IsExternal);
 
             var instruction = main.Instructions[0] as Format1Instruction;
             var operand = instruction.ShifterOperand as RotateRightByRegisterOperand;
@@ -644,6 +682,7 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
+            Assert.False(main.IsExternal);
 
             var instruction = main.Instructions[0] as Format1Instruction;
             var operand = instruction.ShifterOperand as RotateRightWithExtendOperand;
