@@ -13,22 +13,22 @@ namespace Topz.ArmV6Z.Instructions
         /// Initializes a new instance of the <see cref="Format4Instruction"/> class.
         /// </summary>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
-        /// <param name="operand">The operand of the instruction.</param>
+        /// <param name="rm">The operand of the instruction.</param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="mnemonic"/> or <paramref name="operand"/> is null.
+        /// <paramref name="mnemonic"/> or <paramref name="rm"/> is null.
         /// </exception>
-        protected Format4Instruction(Mnemonic mnemonic, RegisterOperand operand) : base(mnemonic)
+        protected Format4Instruction(Mnemonic mnemonic, RegisterOperand rm) : base(mnemonic)
         {
-            if (operand == null)
-                throw new ArgumentNullException(nameof(operand));
+            if (rm == null)
+                throw new ArgumentNullException(nameof(rm));
 
-            Operand = operand;
+            Rm = rm;
         }
 
         /// <summary>
         /// The operand of the instruction.
         /// </summary>
-        public RegisterOperand Operand
+        public RegisterOperand Rm
         {
             get;
             private set;
@@ -40,7 +40,7 @@ namespace Topz.ArmV6Z.Instructions
         /// <returns>A string that represents the current instruction.</returns>
         public override string ToString()
         {
-            return $"{base.ToString()} {Operand}";
+            return $"{base.ToString()} {Rm}";
         }
     }
 }

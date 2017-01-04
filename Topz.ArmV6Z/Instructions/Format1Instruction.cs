@@ -28,15 +28,15 @@ namespace Topz.ArmV6Z.Instructions
             if (shifter == null)
                 throw new ArgumentNullException(nameof(shifter));
 
-            Destination = rd;
-            FirstOperand = rm;
-            ShifterOperand = shifter;
+            Rd = rd;
+            Rm = rm;
+            Shifter = shifter;
         }
 
         /// <summary>
         /// The destination register.
         /// </summary>
-        public Register Destination
+        public Register Rd
         {
             get;
             set;
@@ -45,7 +45,7 @@ namespace Topz.ArmV6Z.Instructions
         /// <summary>
         /// The first operand of the instruction.
         /// </summary>
-        public Register FirstOperand
+        public Register Rm
         {
             get;
             set;
@@ -54,7 +54,7 @@ namespace Topz.ArmV6Z.Instructions
         /// <summary>
         /// The second operand of the instruction.
         /// </summary>
-        public AddressingMode1 ShifterOperand
+        public AddressingMode1 Shifter
         {
             get;
             set;
@@ -66,7 +66,7 @@ namespace Topz.ArmV6Z.Instructions
         /// <returns>A string that represents the current instruction.</returns>
         public override string ToString()
         {
-            return $"{base.ToString()} {Destination}{Symbols.Comma} {FirstOperand}{Symbols.Comma} {ShifterOperand}";
+            return $"{base.ToString()} {Rd}{Symbols.Comma} {Rm}{Symbols.Comma} {Shifter}";
         }
     }
 }
