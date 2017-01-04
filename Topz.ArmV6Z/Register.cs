@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Topz.ArmV6Z
 {
     /// <summary>
-    /// The registers availabel in ARMv6Z
+    /// The registers available in ARMv6Z
     /// </summary>
     internal class Register
     {
@@ -131,9 +131,9 @@ namespace Topz.ArmV6Z
         public const string ProgramCounter = "pc";
 
         /// <summary>
-        /// Intializes a new instance of the <see cref="Register"/> class.
+        /// Initializes a new instance of the <see cref="Register"/> class.
         /// </summary>
-        /// <param name="token">The token that represets a register.</param>
+        /// <param name="token">The token that represents a register.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="token"/> is null.
         /// </exception>
@@ -148,7 +148,7 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
-        /// Intializes a new instance of the <see cref="Register"/> class.
+        /// Initializes a new instance of the <see cref="Register"/> class.
         /// </summary>
         /// <param name="position">The position where the register was referenced.</param>
         /// <param name="register">The actual register.</param>

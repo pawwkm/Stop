@@ -2,15 +2,36 @@
   <GlobalSettings>
     <StringProperty Name="MergeSettingsFiles">NoMerge</StringProperty>
     <CollectionProperty Name="RecognizedWords">
+      <Value>adc</Value>
+      <Value>ARMv6Z</Value>
+      <Value>asr</Value>
+      <Value>bic</Value>
+      <Value>bkpt</Value>
+      <Value>bx</Value>
+      <Value>bxj</Value>
+      <Value>clz</Value>
+      <Value>cmn</Value>
+      <Value>cmp</Value>
+      <Value>cpy</Value>
+      <Value>eor</Value>
       <Value>eq</Value>
       <Value>ge</Value>
       <Value>gt</Value>
       <Value>hs</Value>
       <Value>Int</Value>
+      <Value>Jazelle</Value>
       <Value>lba</Value>
+      <Value>ldr</Value>
+      <Value>lr</Value>
       <Value>ls</Value>
+      <Value>lsl</Value>
+      <Value>lsr</Value>
       <Value>mbr</Value>
       <Value>Oem</Value>
+      <Value>rm</Value>
+      <Value>ror</Value>
+      <Value>rrx</Value>
+      <Value>sp</Value>
       <Value>Topz</Value>
       <Value>vc</Value>
       <Value>vs</Value>

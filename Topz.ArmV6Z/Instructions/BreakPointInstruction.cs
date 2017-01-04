@@ -10,7 +10,7 @@ namespace Topz.ArmV6Z.Instructions
     internal sealed class BreakPointInstruction : Format3Instruction
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Format3Instruction"/> class.
+        /// Initializes a new instance of the <see cref="BreakPointInstruction"/> class.
         /// </summary>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <param name="operand">The operand of the instruction.</param>

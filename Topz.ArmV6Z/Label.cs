@@ -40,7 +40,7 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// The address of the label counting from the beginning of
-        /// the contaning <see cref="Procedure"/>.
+        /// the containing <see cref="Procedure"/>.
         /// </summary>
         public uint Address
         {

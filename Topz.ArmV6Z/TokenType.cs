@@ -16,7 +16,7 @@
         Keyword,
 
         /// <summary>
-        /// The token is an indentifier.
+        /// The token is an identifier.
         /// </summary>
         Identifier,
 

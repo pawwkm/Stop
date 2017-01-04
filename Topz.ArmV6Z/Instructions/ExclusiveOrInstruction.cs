@@ -10,7 +10,7 @@ namespace Topz.ArmV6Z.Instructions
     internal sealed class ExclusiveOrInstruction : Format1Instruction
     {
         /// <summary>
-        /// Intializes a new instance of the <see cref="ExclusiveOrInstruction"/> class.
+        /// Initializes a new instance of the <see cref="ExclusiveOrInstruction"/> class.
         /// </summary>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <param name="rd">The first register.</param>

@@ -9,7 +9,7 @@ namespace Topz.ArmV6Z.Operands
     internal sealed class Immediate16Operand
     {
         /// <summary>
-        /// Initailizes a new instance of the <see cref="Immediate16Operand"/> class.
+        /// Initializes a new instance of the <see cref="Immediate16Operand"/> class.
         /// </summary>
         /// <param name="position">The position where the operand was declared.</param>
         /// <param name="value">The value of the operand.</param>

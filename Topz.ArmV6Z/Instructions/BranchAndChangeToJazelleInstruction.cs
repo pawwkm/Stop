@@ -5,7 +5,7 @@ namespace Topz.ArmV6Z.Instructions
 {
     /// <summary>
     /// Branches to an address and enters the Jazelle state if Jazelle is 
-    /// availabel. Otherwise this behaves as <see cref="BranchAndExchangeInstruction"/>.
+    /// available. Otherwise this behaves as <see cref="BranchAndExchangeInstruction"/>.
     /// </summary>
     /// <remarks>See section A4.1.11</remarks>
     internal sealed class BranchAndChangeToJazelleInstruction : Format4Instruction

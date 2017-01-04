@@ -32,27 +32,6 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
-        /// Checks that any added instruction's label is unique within the procedure.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The parameters for the event.</param>
-        private void CheckLabelUniqueness(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action != NotifyCollectionChangedAction.Add)
-                return;
-
-            var labeldInstructions = (from i in Instructions
-                                      where i.Label != null
-                                      select i).ToArray();
-
-            foreach (Instruction instruction in e.NewItems)
-            {
-                if (labeldInstructions.Any(x => x.Label.Name == instruction.Label.Name))
-                    throw new ArgumentException(instruction.Position.ToString($"Redefining the label '{instruction.Label.Name}'."));
-            }
-        }
-
-        /// <summary>
         /// Name of the procedure.
         /// </summary>
         public string Name
@@ -89,6 +68,27 @@ namespace Topz.ArmV6Z
             get
             {
                 return instructions;
+            }
+        }
+
+        /// <summary>
+        /// Checks that any added instruction's label is unique within the procedure.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The parameters for the event.</param>
+        private void CheckLabelUniqueness(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action != NotifyCollectionChangedAction.Add)
+                return;
+
+            var labeldInstructions = (from i in Instructions
+                                      where i.Label != null
+                                      select i).ToArray();
+
+            foreach (Instruction instruction in e.NewItems)
+            {
+                if (labeldInstructions.Any(x => x.Label.Name == instruction.Label.Name))
+                    throw new ArgumentException(instruction.Position.ToString($"Redefining the label '{instruction.Label.Name}'."));
             }
         }
     }

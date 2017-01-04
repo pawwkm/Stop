@@ -10,22 +10,6 @@ namespace Topz.ArmV6Z
     /// </summary>
     internal sealed class Mnemonic
     {
-        private static readonly PreParsedMnemonic[] table = PreParse(Adc, Bit.S, true).
-                                                            Concat(PreParse(Add, Bit.S, true)).
-                                                            Concat(PreParse(And, Bit.S, true)).
-                                                            Concat(PreParse(B, Bit.L, true)).
-                                                            Concat(PreParse(Bic, Bit.S, true)).
-                                                            Concat(PreParse(Bkpt, false)).
-                                                            Concat(PreParse(Bx)).
-                                                            Concat(PreParse(Bxj)).
-                                                            Concat(PreParse(Clz)).
-                                                            Concat(PreParse(Cmn)).
-                                                            Concat(PreParse(Cmp)).
-                                                            Concat(PreParse(Cpy)).
-                                                            Concat(PreParse(Eor, Bit.S, true)).
-                                                            Concat(PreParse(Ldr)).
-                                                            OrderByDescending(x => x.Name.Length).ToArray();
-
         /// <summary>
         /// The 'adc' mnemonic.
         /// </summary>
@@ -96,6 +80,22 @@ namespace Topz.ArmV6Z
         /// </summary>
         public const string Ldr = "ldr";
 
+        private static readonly PreParsedMnemonic[] Table = PreParse(Adc, Bit.S, true).
+                                                    Concat(PreParse(Add, Bit.S, true)).
+                                                    Concat(PreParse(And, Bit.S, true)).
+                                                    Concat(PreParse(B, Bit.L, true)).
+                                                    Concat(PreParse(Bic, Bit.S, true)).
+                                                    Concat(PreParse(Bkpt, false)).
+                                                    Concat(PreParse(Bx)).
+                                                    Concat(PreParse(Bxj)).
+                                                    Concat(PreParse(Clz)).
+                                                    Concat(PreParse(Cmn)).
+                                                    Concat(PreParse(Cmp)).
+                                                    Concat(PreParse(Cpy)).
+                                                    Concat(PreParse(Eor, Bit.S, true)).
+                                                    Concat(PreParse(Ldr)).
+                                                    OrderByDescending(x => x.Name.Length).ToArray();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Mnemonic"/> class.
         /// </summary>
@@ -114,7 +114,7 @@ namespace Topz.ArmV6Z
             if (position == null)
                 throw new ArgumentNullException(nameof(position));
 
-            var preParsed = (from entry in table
+            var preParsed = (from entry in Table
                              where entry.Name == name.ToLower()
                              select entry).FirstOrDefault();
 
@@ -136,7 +136,7 @@ namespace Topz.ArmV6Z
         {
             get
             {
-                return from entry in table
+                return from entry in Table
                        select entry.Name;
             }
         }
@@ -251,6 +251,12 @@ namespace Topz.ArmV6Z
         /// </summary>
         private class PreParsedMnemonic
         {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="PreParsedMnemonic"/> class.
+            /// </summary>
+            /// <param name="name">The name of the mnemonic.</param>
+            /// <param name="rawName">This is the mnemonic without condition, bits etc.</param>
+            /// <param name="condition">The condition for this instruction.</param>
             public PreParsedMnemonic(string name, string rawName, Condition condition)
             {
                 Name = name;
@@ -258,6 +264,13 @@ namespace Topz.ArmV6Z
                 Condition = condition;
             }
 
+            /// <summary>
+            /// Initializes a new instance of the <see cref="PreParsedMnemonic"/> class.
+            /// </summary>
+            /// <param name="name">The name of the mnemonic.</param>
+            /// <param name="rawName">This is the mnemonic without condition, bits etc.</param>
+            /// <param name="condition">The condition for this instruction.</param>
+            /// <param name="bit">Specifies if a special bit has been flipped.</param>
             public PreParsedMnemonic(string name, string rawName, Condition condition, Bit bit) : this(name, rawName, condition)
             {
                 Bit = bit;

@@ -10,7 +10,7 @@ namespace Topz.ArmV6Z.Instructions
     internal abstract class Format1Instruction : Instruction
     {
         /// <summary>
-        /// Intializes a new instance of the <see cref="Format1Instruction"/> class.
+        /// Initializes a new instance of the <see cref="Format1Instruction"/> class.
         /// </summary>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <param name="rd">The first register.</param>

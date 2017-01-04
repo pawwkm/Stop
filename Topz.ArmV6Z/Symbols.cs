@@ -3,7 +3,7 @@
 namespace Topz.ArmV6Z
 {
     /// <summary>
-    /// Defines all the symbols availabel.
+    /// Defines all the symbols available.
     /// </summary>
     internal static class Symbols
     {

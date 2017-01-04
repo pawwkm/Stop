@@ -42,10 +42,10 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
-        /// Parses a program into an ast.
+        /// Parses a program into an AST.
         /// </summary>
         /// <param name="source">The source to parse.</param>
-        /// <returns>The parsed ast.</returns>
+        /// <returns>The parsed AST.</returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="source"/> is null.
         /// </exception>
@@ -118,6 +118,7 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// Parses an instruction.
         /// </summary>
+        /// <returns>The parsed instruction.</returns>
         private Instruction Instruction()
         {
             var label = (Label)null;
@@ -280,7 +281,7 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
-        /// Parses adressing mode 1.
+        /// Parses addressing mode 1.
         /// </summary>
         /// <returns>The parsed addressing mode.</returns>
         private AddressingMode1 AddressingMode1()
@@ -340,7 +341,7 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
-        /// Parses adressing mode 2.
+        /// Parses addressing mode 2.
         /// </summary>
         /// <returns>The parsed addressing mode.</returns>
         private AddressingMode2 AddressingMode2()

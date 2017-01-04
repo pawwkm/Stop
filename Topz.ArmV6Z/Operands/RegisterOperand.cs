@@ -10,9 +10,9 @@ namespace Topz.ArmV6Z.Operands
     internal sealed class RegisterOperand : AddressingMode1
     {
         /// <summary>
-        /// Intializes a new instance of the <see cref="RegisterOperand"/> class.
+        /// Initializes a new instance of the <see cref="RegisterOperand"/> class.
         /// </summary>
-        /// <param name="token">The token that represets a register.</param>
+        /// <param name="token">The token that represents a register.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="token"/> is null.
         /// </exception>
@@ -27,7 +27,7 @@ namespace Topz.ArmV6Z.Operands
         }
 
         /// <summary>
-        /// Intializes a new instance of the <see cref="RegisterOperand"/> class.
+        /// Initializes a new instance of the <see cref="RegisterOperand"/> class.
         /// </summary>
         /// <param name="position">The position where the register was referenced.</param>
         /// <param name="register">The actual register.</param>
