@@ -11,33 +11,33 @@ namespace Topz.ArmV6Z.Operands
         /// <summary>
         /// Initializes a new instance of the <see cref="LogicalRightShiftByRegisterOperand"/> class.
         /// </summary>
-        /// <param name="register">The register whose value is to be shifted.</param>
-        /// <param name="shift">The register that the <paramref name="register"/> is being right shifted by.</param>
+        /// <param name="rm">The register whose value is to be shifted.</param>
+        /// <param name="rs">The register that the <paramref name="rm"/> is being right shifted by.</param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="register"/> or <paramref name="shift"/> is null.
+        /// <paramref name="rm"/> or <paramref name="rs"/> is null.
         /// </exception>
-        public LogicalRightShiftByRegisterOperand(Register register, Register shift)
+        public LogicalRightShiftByRegisterOperand(Register rm, Register rs)
         {
-            if (register == null)
-                throw new ArgumentNullException(nameof(register));
+            if (rm == null)
+                throw new ArgumentNullException(nameof(rm));
 
-            Register = register;
-            Shift = shift;
+            Rm = rm;
+            Rs = rs;
         }
 
         /// <summary>
         /// The register whose value is to be shifted.
         /// </summary>
-        public Register Register
+        public Register Rm
         {
             get;
             private set;
         }
 
         /// <summary>
-        /// The value that the <see cref="Register"/> is being right shifted by.
+        /// The value that the <see cref="Rm"/> is being right shifted by.
         /// </summary>
-        public Register Shift
+        public Register Rs
         {
             get;
             private set;
@@ -49,7 +49,7 @@ namespace Topz.ArmV6Z.Operands
         /// <returns>A string that represents the current operand.</returns>
         public override string ToString()
         {
-            return $"{Register}{Symbols.Comma} {Register.Lsr} {Shift}";
+            return $"{Rm}{Symbols.Comma} {Register.Lsr} {Rs}";
         }
     }
 }

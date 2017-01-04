@@ -35,7 +35,7 @@ namespace Topz.ArmV6Z.Operands
 
         /// <summary>
         /// If true then <see cref="Offset"/> is added to
-        /// <see cref="AddressingMode2.BaseAddress"/>;
+        /// <see cref="AddressingMode2.Rn"/>;
         /// otherwise it is subtracted from it.
         /// </summary>
         public bool AddToBase
@@ -46,7 +46,7 @@ namespace Topz.ArmV6Z.Operands
 
         /// <summary>
         /// The offset to add or subtract from the
-        /// <see cref="AddressingMode2.BaseAddress"/>.
+        /// <see cref="AddressingMode2.Rn"/>.
         /// </summary>
         public RegisterOperand Offset
         {

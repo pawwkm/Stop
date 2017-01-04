@@ -11,22 +11,22 @@ namespace Topz.ArmV6Z.Operands
         /// <summary>
         /// Initializes a new instance of the <see cref="AddressingMode2"/> class.
         /// </summary>
-        /// <param name="baseAddress">Specifies the register containing the base address.</param>
+        /// <param name="rn">Specifies the register containing the base address.</param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="baseAddress"/> is null.
+        /// <paramref name="rn"/> is null.
         /// </exception>
-        protected AddressingMode2(RegisterOperand baseAddress)
+        protected AddressingMode2(RegisterOperand rn)
         {
-            if (baseAddress == null)
-                throw new ArgumentNullException(nameof(baseAddress));
+            if (rn == null)
+                throw new ArgumentNullException(nameof(rn));
 
-            BaseAddress = baseAddress;
+            Rn = rn;
         }
 
         /// <summary>
         /// Specifies the register containing the base address.
         /// </summary>
-        public RegisterOperand BaseAddress
+        public RegisterOperand Rn
         {
             get;
             private set;

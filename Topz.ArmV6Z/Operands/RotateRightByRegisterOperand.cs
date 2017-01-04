@@ -11,33 +11,33 @@ namespace Topz.ArmV6Z.Operands
         /// <summary>
         /// Initializes a new instance of the <see cref="RotateRightByRegisterOperand"/> class.
         /// </summary>
-        /// <param name="register">The register whose value is to be shifted.</param>
-        /// <param name="rotation">The register that the <paramref name="register"/> is being right rotated by.</param>
+        /// <param name="rm">The register whose value is to be shifted.</param>
+        /// <param name="rs">The register that the <paramref name="rm"/> is being right rotated by.</param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="register"/> or <paramref name="rotation"/> is null.
+        /// <paramref name="rm"/> or <paramref name="rs"/> is null.
         /// </exception>
-        public RotateRightByRegisterOperand(Register register, Register rotation)
+        public RotateRightByRegisterOperand(Register rm, Register rs)
         {
-            if (register == null)
-                throw new ArgumentNullException(nameof(register));
+            if (rm == null)
+                throw new ArgumentNullException(nameof(rm));
 
-            Register = register;
-            Rotation = rotation;
+            Rm = rm;
+            Rs = rs;
         }
 
         /// <summary>
         /// The register whose value is to be rotated.
         /// </summary>
-        public Register Register
+        public Register Rm
         {
             get;
             private set;
         }
 
         /// <summary>
-        /// The value that the <see cref="Register"/> is being right rotated by.
+        /// The value that the <see cref="Rm"/> is being right rotated by.
         /// </summary>
-        public Register Rotation
+        public Register Rs
         {
             get;
             private set;
@@ -49,7 +49,7 @@ namespace Topz.ArmV6Z.Operands
         /// <returns>A string that represents the current operand.</returns>
         public override string ToString()
         {
-            return $"{Register}{Symbols.Comma} {Register.Ror} {Rotation}";
+            return $"{Rm}{Symbols.Comma} {Register.Ror} {Rs}";
         }
     }
 }

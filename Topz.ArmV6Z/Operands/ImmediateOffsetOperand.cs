@@ -33,7 +33,7 @@ namespace Topz.ArmV6Z.Operands
 
         /// <summary>
         /// Specifies the immediate offset used with the value of 
-        /// <see cref="AddressingMode2.BaseAddress"/> to form the address.
+        /// <see cref="AddressingMode2.Rn"/> to form the address.
         /// </summary>
         public int Offset
         {

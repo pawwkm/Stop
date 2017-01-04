@@ -11,22 +11,22 @@ namespace Topz.ArmV6Z.Operands
         /// <summary>
         /// Initializes a new instance of the <see cref="RotateRightWithExtendOperand"/> class.
         /// </summary>
-        /// <param name="register">The register to right shift by one bit.</param>
+        /// <param name="rm">The register to right shift by one bit.</param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="register"/> is null.
+        /// <paramref name="rm"/> is null.
         /// </exception>
-        public RotateRightWithExtendOperand(Register register)
+        public RotateRightWithExtendOperand(Register rm)
         {
-            if (register == null)
-                throw new ArgumentNullException(nameof(register));
+            if (rm == null)
+                throw new ArgumentNullException(nameof(rm));
 
-            Register = register;
+            Rm = rm;
         }
 
         /// <summary>
         /// The register to right shift by one bit.
         /// </summary>
-        public Register Register
+        public Register Rm
         {
             get;
             private set;
@@ -38,7 +38,7 @@ namespace Topz.ArmV6Z.Operands
         /// <returns>A string that represents the current operand.</returns>
         public override string ToString()
         {
-            return $"{Register}{Symbols.Comma} {Register.Rrx}";
+            return $"{Rm}{Symbols.Comma} {Register.Rrx}";
         }
     }
 }

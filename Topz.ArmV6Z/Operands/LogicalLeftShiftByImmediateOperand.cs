@@ -11,36 +11,36 @@ namespace Topz.ArmV6Z.Operands
         /// <summary>
         /// Initializes a new instance of the <see cref="LogicalLeftShiftByImmediateOperand"/> class.
         /// </summary>
-        /// <param name="register">The register whose value is to be shifted.</param>
-        /// <param name="shift">The value that the <paramref name="register"/> is being left shifted by.</param>
+        /// <param name="rm">The register whose value is to be shifted.</param>
+        /// <param name="shift">The value that the <paramref name="rm"/> is being left shifted by.</param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="register"/> is null.
+        /// <paramref name="rm"/> is null.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// The <paramref name="shift"/> is not between 0 - 31.
         /// </exception>
-        public LogicalLeftShiftByImmediateOperand(Register register, int shift)
+        public LogicalLeftShiftByImmediateOperand(Register rm, int shift)
         {
-            if (register == null)
-                throw new ArgumentNullException(nameof(register));
+            if (rm == null)
+                throw new ArgumentNullException(nameof(rm));
             if (shift < 0 || shift > 31)
                 throw new ArgumentOutOfRangeException(nameof(shift));
 
-            Register = register;
+            Rm = rm;
             Shift = shift;
         }
 
         /// <summary>
         /// The register whose value is to be shifted.
         /// </summary>
-        public Register Register
+        public Register Rm
         {
             get;
             private set;
         }
 
         /// <summary>
-        /// The value that the <see cref="Register"/> is being left shifted by.
+        /// The value that the <see cref="Rm"/> is being left shifted by.
         /// </summary>
         public int Shift
         {
@@ -54,7 +54,7 @@ namespace Topz.ArmV6Z.Operands
         /// <returns>A string that represents the current operand.</returns>
         public override string ToString()
         {
-            return $"{Register}{Symbols.Comma} {Register.Lsl} #{Shift}";
+            return $"{Rm}{Symbols.Comma} {Register.Lsl} #{Shift}";
         }
     }
 }

@@ -11,36 +11,36 @@ namespace Topz.ArmV6Z.Operands
         /// <summary>
         /// Initializes a new instance of the <see cref="RotateRightByImmediateOperand"/> class.
         /// </summary>
-        /// <param name="register">The register whose value is to be rotated.</param>
-        /// <param name="rotation">The value that the <paramref name="register"/> is being right rotated by.</param>
+        /// <param name="rm">The register whose value is to be rotated.</param>
+        /// <param name="rotation">The value that the <paramref name="rm"/> is being right rotated by.</param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="register"/> is null.
+        /// <paramref name="rm"/> is null.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// The <paramref name="rotation"/> is not between 1 - 31.
         /// </exception>
-        public RotateRightByImmediateOperand(Register register, int rotation)
+        public RotateRightByImmediateOperand(Register rm, int rotation)
         {
-            if (register == null)
-                throw new ArgumentNullException(nameof(register));
+            if (rm == null)
+                throw new ArgumentNullException(nameof(rm));
             if (rotation < 1 || rotation > 31)
                 throw new ArgumentOutOfRangeException(nameof(rotation));
 
-            Register = register;
+            Rm = rm;
             Rotation = rotation;
         }
 
         /// <summary>
         /// The register whose value is to be shifted.
         /// </summary>
-        public Register Register
+        public Register Rm
         {
             get;
             private set;
         }
 
         /// <summary>
-        /// The value that the <see cref="Register"/> is being right rotated by.
+        /// The value that the <see cref="Rm"/> is being right rotated by.
         /// </summary>
         public int Rotation
         {
@@ -54,7 +54,7 @@ namespace Topz.ArmV6Z.Operands
         /// <returns>A string that represents the current operand.</returns>
         public override string ToString()
         {
-            return $"{Register}{Symbols.Comma} {Register.Ror} #{Rotation}";
+            return $"{Rm}{Symbols.Comma} {Register.Ror} #{Rotation}";
         }
     }
 }

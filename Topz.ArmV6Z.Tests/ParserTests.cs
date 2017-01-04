@@ -370,7 +370,7 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
             Assert.AreEqual(Register.R1, instruction.Rd.Value);
             Assert.AreEqual(Register.R2, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Register.Value);
+            Assert.AreEqual(Register.R3, operand.Rm.Value);
             Assert.AreEqual(1, operand.Shift);
         }
 
@@ -413,8 +413,8 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
             Assert.AreEqual(Register.R1, instruction.Rd.Value);
             Assert.AreEqual(Register.R2, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Register.Value);
-            Assert.AreEqual(Register.R4, operand.Shift.Value);
+            Assert.AreEqual(Register.R3, operand.Rm.Value);
+            Assert.AreEqual(Register.R4, operand.Rs.Value);
         }
 
         /// <summary>
@@ -456,7 +456,7 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
             Assert.AreEqual(Register.R1, instruction.Rd.Value);
             Assert.AreEqual(Register.R2, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Register.Value);
+            Assert.AreEqual(Register.R3, operand.Rm.Value);
             Assert.AreEqual(1, operand.Shift);
         }
 
@@ -499,8 +499,8 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
             Assert.AreEqual(Register.R1, instruction.Rd.Value);
             Assert.AreEqual(Register.R2, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Register.Value);
-            Assert.AreEqual(Register.R4, operand.Shift.Value);
+            Assert.AreEqual(Register.R3, operand.Rm.Value);
+            Assert.AreEqual(Register.R4, operand.Rs.Value);
         }
 
         /// <summary>
@@ -542,7 +542,7 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
             Assert.AreEqual(Register.R1, instruction.Rd.Value);
             Assert.AreEqual(Register.R2, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Register.Value);
+            Assert.AreEqual(Register.R3, operand.Rm.Value);
             Assert.AreEqual(2, operand.Shift);
         }
 
@@ -585,8 +585,8 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
             Assert.AreEqual(Register.R1, instruction.Rd.Value);
             Assert.AreEqual(Register.R2, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Register.Value);
-            Assert.AreEqual(Register.R4, operand.Shift.Value);
+            Assert.AreEqual(Register.R3, operand.Rm.Value);
+            Assert.AreEqual(Register.R4, operand.Rs.Value);
         }
 
         /// <summary>
@@ -628,7 +628,7 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
             Assert.AreEqual(Register.R1, instruction.Rd.Value);
             Assert.AreEqual(Register.R2, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Register.Value);
+            Assert.AreEqual(Register.R3, operand.Rm.Value);
             Assert.AreEqual(2, operand.Rotation);
         }
 
@@ -671,8 +671,8 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
             Assert.AreEqual(Register.R1, instruction.Rd.Value);
             Assert.AreEqual(Register.R2, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Register.Value);
-            Assert.AreEqual(Register.R4, operand.Rotation.Value);
+            Assert.AreEqual(Register.R3, operand.Rm.Value);
+            Assert.AreEqual(Register.R4, operand.Rs.Value);
         }
 
         /// <summary>
@@ -713,7 +713,7 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
             Assert.AreEqual(Register.R1, instruction.Rd.Value);
             Assert.AreEqual(Register.R2, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Register.Value);
+            Assert.AreEqual(Register.R3, operand.Rm.Value);
         }
 
         /// <summary>
@@ -824,7 +824,7 @@ namespace Topz.ArmV6Z
 
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
             Assert.AreEqual(Register.R1, instruction.Rn.Value);
-            Assert.AreEqual(Register.R2, operand.Register.Value);
+            Assert.AreEqual(Register.R2, operand.Rm.Value);
             Assert.AreEqual(1, operand.Shift);
         }
 
@@ -864,8 +864,8 @@ namespace Topz.ArmV6Z
 
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
             Assert.AreEqual(Register.R1, instruction.Rn.Value);
-            Assert.AreEqual(Register.R2, operand.Register.Value);
-            Assert.AreEqual(Register.R3, operand.Shift.Value);
+            Assert.AreEqual(Register.R2, operand.Rm.Value);
+            Assert.AreEqual(Register.R3, operand.Rs.Value);
         }
 
         /// <summary>
@@ -904,7 +904,7 @@ namespace Topz.ArmV6Z
 
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
             Assert.AreEqual(Register.R1, instruction.Rn.Value);
-            Assert.AreEqual(Register.R2, operand.Register.Value);
+            Assert.AreEqual(Register.R2, operand.Rm.Value);
             Assert.AreEqual(1, operand.Shift);
         }
 
@@ -944,8 +944,8 @@ namespace Topz.ArmV6Z
 
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
             Assert.AreEqual(Register.R1, instruction.Rn.Value);
-            Assert.AreEqual(Register.R2, operand.Register.Value);
-            Assert.AreEqual(Register.R3, operand.Shift.Value);
+            Assert.AreEqual(Register.R2, operand.Rm.Value);
+            Assert.AreEqual(Register.R3, operand.Rs.Value);
         }
 
         /// <summary>
@@ -984,7 +984,7 @@ namespace Topz.ArmV6Z
 
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
             Assert.AreEqual(Register.R1, instruction.Rn.Value);
-            Assert.AreEqual(Register.R2, operand.Register.Value);
+            Assert.AreEqual(Register.R2, operand.Rm.Value);
             Assert.AreEqual(2, operand.Shift);
         }
 
@@ -1024,8 +1024,8 @@ namespace Topz.ArmV6Z
 
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
             Assert.AreEqual(Register.R1, instruction.Rn.Value);
-            Assert.AreEqual(Register.R2, operand.Register.Value);
-            Assert.AreEqual(Register.R3, operand.Shift.Value);
+            Assert.AreEqual(Register.R2, operand.Rm.Value);
+            Assert.AreEqual(Register.R3, operand.Rs.Value);
         }
 
         /// <summary>
@@ -1064,7 +1064,7 @@ namespace Topz.ArmV6Z
 
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
             Assert.AreEqual(Register.R1, instruction.Rn.Value);
-            Assert.AreEqual(Register.R2, operand.Register.Value);
+            Assert.AreEqual(Register.R2, operand.Rm.Value);
             Assert.AreEqual(2, operand.Rotation);
         }
 
@@ -1104,8 +1104,8 @@ namespace Topz.ArmV6Z
 
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
             Assert.AreEqual(Register.R1, instruction.Rn.Value);
-            Assert.AreEqual(Register.R2, operand.Register.Value);
-            Assert.AreEqual(Register.R3, operand.Rotation.Value);
+            Assert.AreEqual(Register.R2, operand.Rm.Value);
+            Assert.AreEqual(Register.R3, operand.Rs.Value);
         }
 
         /// <summary>
@@ -1143,7 +1143,7 @@ namespace Topz.ArmV6Z
 
             Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
             Assert.AreEqual(Register.R1, instruction.Rn.Value);
-            Assert.AreEqual(Register.R2, operand.Register.Value);
+            Assert.AreEqual(Register.R2, operand.Rm.Value);
         }
 
         /// <summary>
