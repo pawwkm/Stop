@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Topz.ArmV6Z
 {
@@ -49,6 +50,12 @@ namespace Topz.ArmV6Z
             }
         }
 
+        /// <summary>
+        /// Converts a condition from its assembly form.
+        /// </summary>
+        /// <param name="condition">The condition to convert.</param>
+        /// <returns>The converted condition.</returns>
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = Justifications.SimpleSwitch)]
         public static Condition ToCondition(this string condition)
         {
             switch (condition)

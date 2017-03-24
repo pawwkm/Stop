@@ -1,5 +1,8 @@
 ﻿namespace Topz.ArmV6Z
 {
+    /// <summary>
+    /// Syntax rule place holders.
+    /// </summary>
     internal static class Placeholders
     {
         /// <summary>
@@ -60,7 +63,7 @@
         /// <summary>
         /// The co-processor place holder.
         /// </summary>
-        public const string Coprocessor= "<coproc>";
+        public const string Coprocessor = "<coproc>";
 
         /// <summary>
         /// The addressing mode place holder.

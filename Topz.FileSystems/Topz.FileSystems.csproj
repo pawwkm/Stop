@@ -68,7 +68,6 @@
     <Compile Include="FileSystem.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="ISerializer.cs" />
-    <Compile Include="Justifications.cs" />
     <Compile Include="MasterBootRecord.cs" />
     <Compile Include="MasterBootRecordSerializer.cs" />
     <Compile Include="NativeMethods.cs">
@@ -100,6 +99,12 @@
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="CustomDictionary.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Topz\Topz.csproj">
+      <Project>{b641d7c5-eea8-4e77-9a9d-64a0df475159}</Project>
+      <Name>Topz</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

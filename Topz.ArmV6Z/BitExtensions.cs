@@ -27,6 +27,11 @@ namespace Topz.ArmV6Z
             }
         }
 
+        /// <summary>
+        /// Converts a bit from its assembly form.
+        /// </summary>
+        /// <param name="bit">The bit to convert.</param>
+        /// <returns>The converted bit.</returns>
         public static Bit ToBit(this string bit)
         {
             switch (bit)

@@ -44,18 +44,27 @@ namespace Topz.ArmV6Z
             private set;
         }
 
+        /// <summary>
+        /// The textual format of the instruction.
+        /// </summary>
         public string Format
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// The encoding of the instruction.
+        /// </summary>
         public string Encoding
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// The instruction values to encode.
+        /// </summary>
         public IDictionary<string, Operand> Values
         {
             get;

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Topz.ArmV6Z
 {
     /// <summary>
-    /// The registers available in ARMv6Z
+    /// The registers available in ARMv6Z.
     /// </summary>
     internal sealed class Register : Operand
     {

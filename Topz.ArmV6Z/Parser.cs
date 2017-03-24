@@ -13,21 +13,21 @@ namespace Topz.ArmV6Z
     {
         private static readonly Regex Regex = new Regex(@"\w+|\{\w+\}|\<\w*\>|\{\<\w*\>\}|\,", RegexOptions.Compiled);
 
-        private static readonly Dictionary<string, string> table = new Dictionary<string, string>()
+        private static readonly Dictionary<string, string> Table = new Dictionary<string, string>()
         {
-            { "ADD{<cond>}{S} <Rd>, <Rn>, <shifter_operand>",                      "cond 00 I 0100 S Rn Rd shifter_operand" },
-            { "AND{<cond>}{S} <Rd>, <Rn>, <shifter_operand>",                      "cond 00 I 0000 S Rn Rd shifter_operand" },
-            { "B{L}{<cond>} <target_address>",                                     "cond 101 L signed_immed_24" },
-            { "CMP{<cond>} <Rn>, <shifter_operand>",                               "cond 00 I 10101 Rn SBZ shifter_operand" },
-            { "LDR{<cond>} <Rd>, <addressing_mode>",                               "cond 01 I P U 0 W 1 Rn Rd addr_mode" },
-            { "LDR{<cond>}B <Rd>, <addressing_mode>",                              "cond 01 I P U 1 W 1 Rn Rd addr_mode"  },
-            { "LDR{<cond>}D <Rd>, <addressing_mode>",                              "cond 000 P U I W 0 Rn Rd addr_mode 1101 addr_mode" },
-            { "MOV{<cond>}{S} <Rd>, <shifter_operand>",                            "cond 00 I 1101 S SBZ Rd shifter_operand" },
-            { "STR{<cond>} <Rd>, <addressing_mode>",                               "cond 01 I P U 0 W 0 Rn Rd addr_mode" },
-            { "STR{<cond>}H <Rd>, <addressing_mode>",                              "cond 000 P U I W 0 Rn Rd addr_mode 1011 addr_mode" },
-            { "SUB{<cond>}{S} <Rd>, <Rn>, <shifter_operand>",                      "cond 00 I 0010 S Rn Rd shifter_operand" },
-            { "TEQ{<cond>} <Rn>, <shifter_operand>",                               "cond 00 I 1001 1 Rn SBZ shifter_operand" },
-            { "TST{<cond>} <Rn>, <shifter_operand>",                               "cond 00 I 1000 1 Rn SBZ shifter_operand" }
+            { "ADD{<cond>}{S} <Rd>, <Rn>, <shifter_operand>",   "cond 00 I 0100 S Rn Rd shifter_operand" },
+            { "AND{<cond>}{S} <Rd>, <Rn>, <shifter_operand>",   "cond 00 I 0000 S Rn Rd shifter_operand" },
+            { "B{L}{<cond>} <target_address>",                  "cond 101 L signed_immed_24" },
+            { "CMP{<cond>} <Rn>, <shifter_operand>",            "cond 00 I 10101 Rn SBZ shifter_operand" },
+            { "LDR{<cond>} <Rd>, <addressing_mode>",            "cond 01 I P U 0 W 1 Rn Rd addr_mode" },
+            { "LDR{<cond>}B <Rd>, <addressing_mode>",           "cond 01 I P U 1 W 1 Rn Rd addr_mode" },
+            { "LDR{<cond>}D <Rd>, <addressing_mode>",           "cond 000 P U I W 0 Rn Rd addr_mode 1101 addr_mode" },
+            { "MOV{<cond>}{S} <Rd>, <shifter_operand>",         "cond 00 I 1101 S SBZ Rd shifter_operand" },
+            { "STR{<cond>} <Rd>, <addressing_mode>",            "cond 01 I P U 0 W 0 Rn Rd addr_mode" },
+            { "STR{<cond>}H <Rd>, <addressing_mode>",           "cond 000 P U I W 0 Rn Rd addr_mode 1011 addr_mode" },
+            { "SUB{<cond>}{S} <Rd>, <Rn>, <shifter_operand>",   "cond 00 I 0010 S Rn Rd shifter_operand" },
+            { "TEQ{<cond>} <Rn>, <shifter_operand>",            "cond 00 I 1001 1 Rn SBZ shifter_operand" },
+            { "TST{<cond>} <Rn>, <shifter_operand>",            "cond 00 I 1000 1 Rn SBZ shifter_operand" }
         };
 
         private Fuck fuck;
@@ -35,6 +35,8 @@ namespace Topz.ArmV6Z
         private LexicalAnalyzer<TokenType> analyzer;
 
         private Program program;
+
+        private bool isExternal;
 
         /// <summary>
         /// Parses a program into an AST.
@@ -57,8 +59,13 @@ namespace Topz.ArmV6Z
             program = new Program();
             while (!analyzer.EndOfInput)
             {
-                if (analyzer.NextIs(Keywords.Procedure) || analyzer.NextIs(Keywords.External).Then(Keywords.Procedure))
+                isExternal = External();
+                if (analyzer.NextIs(Keywords.Procedure))
                     Procedure();
+                else if (analyzer.NextIs(Keywords.String))
+                    String();
+                else if (analyzer.NextIs(Keywords.Data))
+                    Data();
             }
 
             return program;
@@ -69,7 +76,6 @@ namespace Topz.ArmV6Z
         /// </summary>
         private void Procedure()
         {
-            var isExternal = External();
             Keyword(Keywords.Procedure);
             var identifier = Identifier();
 
@@ -186,7 +192,6 @@ namespace Topz.ArmV6Z
 
             if (isSigned && -Math.Pow(2, size) > value)
             {
-
             }
             else if (Math.Pow(2, size) - 1 < value)
                 throw new ParsingException(integer.Position.ToString($"The integer must fit in {size} bytes or less."));
@@ -307,10 +312,9 @@ namespace Topz.ArmV6Z
                 throw new ParsingException(token.Position.ToString("Mnemonic expected."));
 
             var mnemonic = new Mnemonic(token.Text, token.Position);
-            var entry = table.Where(e => e.Key.StartsWith(token.Text, StringComparison.InvariantCultureIgnoreCase)).Select(e => e).First();
+            var entry = Table.Where(e => e.Key.StartsWith(token.Text, StringComparison.InvariantCultureIgnoreCase)).Select(e => e).First();
 
             fuck = new Fuck();
-            fuck.Format = entry.Key;
             fuck.Encoding = entry.Value;
             fuck.Current++;
 
@@ -321,7 +325,7 @@ namespace Topz.ArmV6Z
             }
 
             while (fuck.Next.StartsWith("{"))
-                ParseOptional(mnemonic);
+                Optional(mnemonic);
 
             return mnemonic;
         }
@@ -338,34 +342,6 @@ namespace Topz.ArmV6Z
             Keyword(Keywords.External);
 
             return true;
-        }
-
-        /// <summary>
-        /// Parses the next operand.
-        /// </summary>
-        /// <returns>The next operand.</returns>
-        private void Operand(Instruction instruction)
-        {
-            switch (fuck.Next)
-            {
-                case Symbols.Comma:
-                    Symbol(Symbols.Comma);
-                    break;
-                case Placeholders.Rm:
-                case Placeholders.Rn:
-                    instruction.Values.Add(fuck.Next, Register());
-                    break;
-                case Placeholders.ShifterOperand:
-                    ShifterOperand(instruction);
-                    break;
-                case Placeholders.AddressingMode:
-                    AddressingMode(instruction);
-                    break;
-                default:
-                    throw new ParsingException(analyzer.LookAhead().Position.ToString($"{fuck.Next} expected."));
-            }
-
-            fuck.Current++;
         }
 
         /// <summary>
@@ -513,7 +489,11 @@ namespace Topz.ArmV6Z
                 throw new ParsingException(analyzer.LookAhead().Position.ToString($"Expected a {Placeholders.Shift}."));
         }
 
-        private void ParseOptional(Mnemonic mnemonic)
+        /// <summary>
+        /// Parses an optional part of the instruction.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic of the instruction.</param>
+        private void Optional(Mnemonic mnemonic)
         {
             foreach (Bit bit in Enum.GetValues(typeof(Bit)))
             {
@@ -546,18 +526,18 @@ namespace Topz.ArmV6Z
         {
             private List<string> chunks = new List<string>();
 
-            public string Format
-            {
-                get;
-                set;
-            }
-
+            /// <summary>
+            /// The encoding of the instruction.
+            /// </summary>
             public string Encoding
             {
                 get;
                 set;
             }
 
+            /// <summary>
+            /// Each chunk of the instruction format in lexical order.
+            /// </summary>
             public List<string> Chunks
             {
                 get
@@ -566,12 +546,18 @@ namespace Topz.ArmV6Z
                 }
             }
 
+            /// <summary>
+            /// The index of the current in <see cref="Chunks"/>.
+            /// </summary>
             public int Current
             {
                 get;
                 set;
             }
 
+            /// <summary>
+            /// The next element in <see cref="Chunks"/>.
+            /// </summary>
             public string Next
             {
                 get

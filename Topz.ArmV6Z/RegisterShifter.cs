@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 namespace Topz.ArmV6Z
 {
+    /// <summary>
+    /// The register shifters available in ARMv6Z.
+    /// </summary>
     internal sealed class RegisterShifter : Operand
     {
         /// <summary>

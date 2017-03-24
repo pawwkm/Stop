@@ -58,6 +58,7 @@
     <Compile Include="ConditionExtensions.cs" />
     <Compile Include="Data.cs" />
     <Compile Include="Directive.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Identifier.cs" />
     <Compile Include="INamedNode.cs" />
     <Compile Include="Instruction.cs" />
@@ -90,6 +91,10 @@
     <ProjectReference Include="..\Topz.FileFormats\Topz.FileFormats.csproj">
       <Project>{60231fa6-15c6-4fa3-9dce-a4be20d7c36a}</Project>
       <Name>Topz.FileFormats</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Topz\Topz.csproj">
+      <Project>{b641d7c5-eea8-4e77-9a9d-64a0df475159}</Project>
+      <Name>Topz</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

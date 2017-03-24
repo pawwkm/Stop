@@ -18,22 +18,30 @@
       <Value>ge</Value>
       <Value>gt</Value>
       <Value>hs</Value>
+      <Value>imm</Value>
       <Value>Int</Value>
       <Value>Jazelle</Value>
       <Value>lba</Value>
       <Value>ldr</Value>
+      <Value>ldrb</Value>
       <Value>lr</Value>
       <Value>ls</Value>
       <Value>lsl</Value>
       <Value>lsr</Value>
       <Value>mbr</Value>
+      <Value>mov</Value>
       <Value>Oem</Value>
       <Value>rm</Value>
       <Value>rn</Value>
       <Value>ror</Value>
       <Value>rrx</Value>
+      <Value>Rs</Value>
       <Value>sp</Value>
+      <Value>str</Value>
+      <Value>strh</Value>
+      <Value>teq</Value>
       <Value>Topz</Value>
+      <Value>tst</Value>
       <Value>vc</Value>
       <Value>vs</Value>
     </CollectionProperty>
