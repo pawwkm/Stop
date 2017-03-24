@@ -30,7 +30,7 @@ namespace Topz.ArmV6Z
             { "TST{<cond>} <Rn>, <shifter_operand>",            "cond 00 I 1000 1 Rn SBZ shifter_operand" }
         };
 
-        private Fuck fuck;
+        private FormatMatch match;
 
         private LexicalAnalyzer<TokenType> analyzer;
 
@@ -120,18 +120,18 @@ namespace Topz.ArmV6Z
 
             var instruction = new Instruction(Mnemonic());
             instruction.Label = label;
-            instruction.Encoding = fuck.Encoding;
+            instruction.Encoding = match.Encoding;
 
-            while (fuck.Next != null)
+            while (match.Next != null)
             {
-                switch (fuck.Next)
+                switch (match.Next)
                 {
                     case Symbols.Comma:
                         Symbol(Symbols.Comma);
                         break;
                     case Placeholders.Rd:
                     case Placeholders.Rn:
-                        instruction.Values.Add(fuck.Next, Register());
+                        instruction.Values.Add(match.Next, Register());
                         break;
                     case Placeholders.ShifterOperand:
                         ShifterOperand(instruction);
@@ -146,10 +146,10 @@ namespace Topz.ArmV6Z
                         instruction.Values[Placeholders.Immediate16] = Integer(16, false);
                         break;
                     default:
-                        throw new ParsingException(analyzer.LookAhead().Position.ToString($"{fuck.Next} expected."));
+                        throw new ParsingException(analyzer.LookAhead().Position.ToString($"{match.Next} expected."));
                 }
 
-                fuck.Current++;
+                match.Current++;
             }
 
             return instruction;
@@ -314,17 +314,17 @@ namespace Topz.ArmV6Z
             var mnemonic = new Mnemonic(token.Text, token.Position);
             var entry = Table.Where(e => e.Key.StartsWith(token.Text, StringComparison.InvariantCultureIgnoreCase)).Select(e => e).First();
 
-            fuck = new Fuck();
-            fuck.Encoding = entry.Value;
-            fuck.Current++;
+            match = new FormatMatch();
+            match.Encoding = entry.Value;
+            match.Current++;
 
-            foreach (Match match in Regex.Matches(entry.Key))
+            foreach (Match m in Regex.Matches(entry.Key))
             {
-                if (match.Value.Length != 0)
-                    fuck.Chunks.Add(match.Value);
+                if (m.Value.Length != 0)
+                    match.Chunks.Add(m.Value);
             }
 
-            while (fuck.Next.StartsWith("{"))
+            while (match.Next.StartsWith("{"))
                 Optional(mnemonic);
 
             return mnemonic;
@@ -498,7 +498,7 @@ namespace Topz.ArmV6Z
             foreach (Bit bit in Enum.GetValues(typeof(Bit)))
             {
                 var value = bit.ToString();
-                if (fuck.Next == '{' + value + '}')
+                if (match.Next == '{' + value + '}')
                 {
                     if (analyzer.NextIs(value) || analyzer.NextIs(value.ToLower()))
                     {
@@ -506,11 +506,11 @@ namespace Topz.ArmV6Z
                         mnemonic.Bit |= bit;
                     }
 
-                    fuck.Current++;
+                    match.Current++;
                 }
             }
 
-            if (fuck.Next == Placeholders.Condition)
+            if (match.Next == Placeholders.Condition)
             {
                 if (analyzer.NextIs(TokenType.Condition))
                 {
@@ -518,11 +518,14 @@ namespace Topz.ArmV6Z
                     mnemonic.Condition = token.Text.ToCondition();
                 }
 
-                fuck.Current++;
+                match.Current++;
             }
         }
 
-        private class Fuck
+        /// <summary>
+        /// The match of the current instruction being parsed.
+        /// </summary>
+        private class FormatMatch
         {
             private List<string> chunks = new List<string>();
 
