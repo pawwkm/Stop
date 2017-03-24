@@ -1,8 +1,8 @@
 ﻿using Pote.Text;
 using System;
 using System.Collections.Generic;
-using Topz.ArmV6Z.Instructions;
-using Topz.ArmV6Z.Operands;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Topz.ArmV6Z
 {
@@ -11,35 +11,30 @@ namespace Topz.ArmV6Z
     /// </summary>
     internal sealed class Parser
     {
-        private Dictionary<string, Func<Mnemonic, Instruction>> table;
+        private static readonly Regex Regex = new Regex(@"\w+|\{\w+\}|\<\w*\>|\{\<\w*\>\}|\,", RegexOptions.Compiled);
+
+        private static readonly Dictionary<string, string> table = new Dictionary<string, string>()
+        {
+            { "ADD{<cond>}{S} <Rd>, <Rn>, <shifter_operand>",                      "cond 00 I 0100 S Rn Rd shifter_operand" },
+            { "AND{<cond>}{S} <Rd>, <Rn>, <shifter_operand>",                      "cond 00 I 0000 S Rn Rd shifter_operand" },
+            { "B{L}{<cond>} <target_address>",                                     "cond 101 L signed_immed_24" },
+            { "CMP{<cond>} <Rn>, <shifter_operand>",                               "cond 00 I 10101 Rn SBZ shifter_operand" },
+            { "LDR{<cond>} <Rd>, <addressing_mode>",                               "cond 01 I P U 0 W 1 Rn Rd addr_mode" },
+            { "LDR{<cond>}B <Rd>, <addressing_mode>",                              "cond 01 I P U 1 W 1 Rn Rd addr_mode"  },
+            { "LDR{<cond>}D <Rd>, <addressing_mode>",                              "cond 000 P U I W 0 Rn Rd addr_mode 1101 addr_mode" },
+            { "MOV{<cond>}{S} <Rd>, <shifter_operand>",                            "cond 00 I 1101 S SBZ Rd shifter_operand" },
+            { "STR{<cond>} <Rd>, <addressing_mode>",                               "cond 01 I P U 0 W 0 Rn Rd addr_mode" },
+            { "STR{<cond>}H <Rd>, <addressing_mode>",                              "cond 000 P U I W 0 Rn Rd addr_mode 1011 addr_mode" },
+            { "SUB{<cond>}{S} <Rd>, <Rn>, <shifter_operand>",                      "cond 00 I 0010 S Rn Rd shifter_operand" },
+            { "TEQ{<cond>} <Rn>, <shifter_operand>",                               "cond 00 I 1001 1 Rn SBZ shifter_operand" },
+            { "TST{<cond>} <Rn>, <shifter_operand>",                               "cond 00 I 1000 1 Rn SBZ shifter_operand" }
+        };
+
+        private Fuck fuck;
 
         private LexicalAnalyzer<TokenType> analyzer;
 
         private Program program;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Parser"/> class.
-        /// </summary>
-        public Parser()
-        {
-            table = new Dictionary<string, Func<Mnemonic, Instruction>>()
-            {
-                { Mnemonic.Adc, Format1<AddWithCarryInstruction> },
-                { Mnemonic.Add, Format1<AddInstruction> },
-                { Mnemonic.And, Format1<AndInstruction> },
-                { Mnemonic.B, Format2<BranchInstruction> },
-                { Mnemonic.Bic, Format1<BitClearInstruction> },
-                { Mnemonic.Bkpt, Format3<BreakPointInstruction> },
-                { Mnemonic.Bx, Format4<BranchAndExchangeInstruction> },
-                { Mnemonic.Bxj, Format4<BranchAndChangeToJazelleInstruction> },
-                { Mnemonic.Clz, Format5<CountLeadingZeroesInstruction> },
-                { Mnemonic.Cmn, Format6<CompareNegativeInstruction> },
-                { Mnemonic.Cmp, Format6<CompareInstruction> },
-                { Mnemonic.Cpy, Format5<CopyInstruction> },
-                { Mnemonic.Eor, Format1<ExclusiveOrInstruction> },
-                { Mnemonic.Ldr, Format7<LoadRegisterInstruction> }
-            };
-        }
 
         /// <summary>
         /// Parses a program into an AST.
@@ -74,17 +69,11 @@ namespace Topz.ArmV6Z
         /// </summary>
         private void Procedure()
         {
-            var isExternal = false;
-            if (analyzer.NextIs(Keywords.External))
-            {
-                Keyword(Keywords.External);
-                isExternal = true;
-            }
-
+            var isExternal = External();
             Keyword(Keywords.Procedure);
             var identifier = Identifier();
 
-            var procedure = new Procedure(identifier.Position, identifier.Text);
+            var procedure = new Procedure(identifier.Position, identifier.Name);
             procedure.IsExternal = isExternal;
 
             if (!isExternal)
@@ -121,253 +110,43 @@ namespace Topz.ArmV6Z
         /// <returns>The parsed instruction.</returns>
         private Instruction Instruction()
         {
-            var label = (Label)null;
+            var label = Label();
 
-            var token = analyzer.Next();
-            if (token.Type == TokenType.Identifier)
+            var instruction = new Instruction(Mnemonic());
+            instruction.Label = label;
+            instruction.Encoding = fuck.Encoding;
+
+            while (fuck.Next != null)
             {
-                Symbol(Symbols.EndOfLabel);
-
-                label = new Label(token.Position, token.Text);
-                token = analyzer.Next();
-            }
-
-            if (token.Type != TokenType.Mnemonic)
-                throw new ParsingException(token.Position.ToString("Mnemonic expected."));
-
-            try
-            {
-                var mnemonic = new Mnemonic(token.Text, token.Position);
-                var instruction = table[mnemonic.RawName](mnemonic);
-                instruction.Label = label;
-
-                return instruction;
-            }
-            catch (KeyNotFoundException)
-            {
-                throw new ParsingException(analyzer.Position.ToString("Unknown instruction"));
-            }
-        }
-
-        /// <summary>
-        /// <para>Parses an instruction with the following format.</para>
-        /// <para>mnemonic rd, rm, shifter_operand</para>
-        /// </summary>
-        /// <typeparam name="T">The type of instruction.</typeparam>
-        /// <param name="mnemonic">The mnemonic of the instruction.</param>
-        /// <returns>The parsed instruction.</returns>
-        private T Format1<T>(Mnemonic mnemonic) where T : Format1Instruction
-        {
-            var r1 = Register();
-            Symbol(Symbols.Comma);
-
-            var r2 = Register();
-            Symbol(Symbols.Comma);
-
-            return (T)Activator.CreateInstance(typeof(T), mnemonic, r1, r2, AddressingMode1());
-        }
-
-        /// <summary>
-        /// <para>Parses an instruction with the following format.</para>
-        /// <para>mnemonic target address</para>
-        /// </summary>
-        /// <typeparam name="T">The type of instruction.</typeparam>
-        /// <param name="mnemonic">The mnemonic of the instruction.</param>
-        /// <returns>The parsed instruction.</returns>
-        private T Format2<T>(Mnemonic mnemonic) where T : Format2Instruction
-        {
-            var integer = Integer();
-
-            try
-            {
-                var operand = new TargetOperand(integer.Position, int.Parse(integer.Text));
-
-                return (T)Activator.CreateInstance(typeof(T), mnemonic, operand);
-            }
-            catch (OverflowException)
-            {
-                throw new ParsingException(integer.Position.ToString("The integer can't fit within 32 bits."));
-            }
-        }
-
-        /// <summary>
-        /// <para>Parses an instruction with the following format.</para>
-        /// <para>mnemonic immediate 16</para>
-        /// </summary>
-        /// <typeparam name="T">The type of instruction.</typeparam>
-        /// <param name="mnemonic">The mnemonic of the instruction.</param>
-        /// <returns>The parsed instruction.</returns>
-        private T Format3<T>(Mnemonic mnemonic) where T : Format3Instruction
-        {
-            var integer = Integer();
-
-            try
-            {
-                var operand = new Immediate16Operand(integer.Position, ushort.Parse(integer.Text));
-
-                return (T)Activator.CreateInstance(typeof(T), mnemonic, operand);
-            }
-            catch (OverflowException)
-            {
-                throw new ParsingException(integer.Position.ToString("The integer can't fit within 16 bits."));
-            }
-        }
-
-        /// <summary>
-        /// <para>Parses an instruction with the following format.</para>
-        /// <para>mnemonic register</para>
-        /// </summary>
-        /// <typeparam name="T">The type of instruction.</typeparam>
-        /// <param name="mnemonic">The mnemonic of the instruction.</param>
-        /// <returns>The parsed instruction.</returns>
-        private T Format4<T>(Mnemonic mnemonic) where T : Format4Instruction
-        {
-            return (T)Activator.CreateInstance(typeof(T), mnemonic, RegisterOperand());
-        }
-
-        /// <summary>
-        /// <para>Parses an instruction with the following format.</para>
-        /// <para>mnemonic rd, rm</para>
-        /// </summary>
-        /// <typeparam name="T">The type of instruction.</typeparam>
-        /// <param name="mnemonic">The mnemonic of the instruction.</param>
-        /// <returns>The parsed instruction.</returns>
-        private T Format5<T>(Mnemonic mnemonic) where T : Format5Instruction
-        {
-            var r1 = Register();
-            Symbol(Symbols.Comma);
-
-            return (T)Activator.CreateInstance(typeof(T), mnemonic, r1, Register());
-        }
-
-        /// <summary>
-        /// <para>Parses an instruction with the following format.</para>
-        /// <para>mnemonic register, shifting operand</para>
-        /// </summary>
-        /// <typeparam name="T">The type of instruction.</typeparam>
-        /// <param name="mnemonic">The mnemonic of the instruction.</param>
-        /// <returns>The parsed instruction.</returns>
-        private T Format6<T>(Mnemonic mnemonic) where T : Format6Instruction
-        {
-            var register = Register();
-            Symbol(Symbols.Comma);
-
-            return (T)Activator.CreateInstance(typeof(T), mnemonic, register, AddressingMode1());
-        }
-
-        /// <summary>
-        /// <para>Parses an instruction with the following format.</para>
-        /// <para>mnemonic register, addressing mode</para>
-        /// </summary>
-        /// <typeparam name="T">The type of instruction.</typeparam>
-        /// <param name="mnemonic">The mnemonic of the instruction.</param>
-        /// <returns>The parsed instruction.</returns>
-        private T Format7<T>(Mnemonic mnemonic) where T : Format7Instruction
-        {
-            var register = RegisterOperand();
-            Symbol(Symbols.Comma);
-
-            return (T)Activator.CreateInstance(typeof(T), mnemonic, register, AddressingMode2());
-        }
-
-        /// <summary>
-        /// Parses a register operand.
-        /// </summary>
-        /// <returns>The parsed operand.</returns>
-        private RegisterOperand RegisterOperand()
-        {
-            var register = Register();
-            return new RegisterOperand(register.Position, register.Value);
-        }
-
-        /// <summary>
-        /// Parses addressing mode 1.
-        /// </summary>
-        /// <returns>The parsed addressing mode.</returns>
-        private AddressingMode1 AddressingMode1()
-        {
-            var token = analyzer.Next();
-            if (token.Type == TokenType.Integer)
-                return new ImmediateOperand(ushort.Parse(token.Text), token.Position);
-            if (token.Type == TokenType.Register)
-            {
-                if (analyzer.NextIs(Symbols.Comma))
+                switch (fuck.Next)
                 {
-                    analyzer.Next();
-                    if (analyzer.NextIs(ArmV6Z.Register.Lsl))
-                    {
-                        analyzer.Next();
-                        if (analyzer.NextIs(TokenType.Integer))
-                            return new LogicalLeftShiftByImmediateOperand(new Register(token), int.Parse(Integer().Text));
-                        if (analyzer.NextIs(TokenType.Register))
-                            return new LogicalLeftShiftByRegisterOperand(new Register(token), new Register(analyzer.Next()));
-                    }
-                    else if (analyzer.NextIs(ArmV6Z.Register.Lsr))
-                    {
-                        analyzer.Next();
-                        if (analyzer.NextIs(TokenType.Integer))
-                            return new LogicalRightShiftByImmediateOperand(new Register(token), int.Parse(Integer().Text));
-                        if (analyzer.NextIs(TokenType.Register))
-                            return new LogicalRightShiftByRegisterOperand(new Register(token), new Register(analyzer.Next()));
-                    }
-                    else if (analyzer.NextIs(ArmV6Z.Register.Asr))
-                    {
-                        analyzer.Next();
-                        if (analyzer.NextIs(TokenType.Integer))
-                            return new ArithmeticRightShiftByImmediateOperand(new Register(token), int.Parse(Integer().Text));
-                        if (analyzer.NextIs(TokenType.Register))
-                            return new ArithmeticRightShiftByRegisterOperand(new Register(token), new Register(analyzer.Next()));
-                    }
-                    else if (analyzer.NextIs(ArmV6Z.Register.Ror))
-                    {
-                        analyzer.Next();
-                        if (analyzer.NextIs(TokenType.Integer))
-                            return new RotateRightByImmediateOperand(new Register(token), int.Parse(Integer().Text));
-                        if (analyzer.NextIs(TokenType.Register))
-                            return new RotateRightByRegisterOperand(new Register(token), new Register(analyzer.Next()));
-                    }
-                    else if (analyzer.NextIs(ArmV6Z.Register.Rrx))
-                    {
-                        analyzer.Next();
-
-                        return new RotateRightWithExtendOperand(new Register(token));
-                    }
+                    case Symbols.Comma:
+                        Symbol(Symbols.Comma);
+                        break;
+                    case Placeholders.Rd:
+                    case Placeholders.Rn:
+                        instruction.Values.Add(fuck.Next, Register());
+                        break;
+                    case Placeholders.ShifterOperand:
+                        ShifterOperand(instruction);
+                        break;
+                    case Placeholders.TargetAddress:
+                        TargetAddress(instruction);
+                        break;
+                    case Placeholders.AddressingMode:
+                        AddressingMode(instruction);
+                        break;
+                    case Placeholders.Immediate16:
+                        instruction.Values[Placeholders.Immediate16] = Integer(16, false);
+                        break;
+                    default:
+                        throw new ParsingException(analyzer.LookAhead().Position.ToString($"{fuck.Next} expected."));
                 }
-                else
-                    return new RegisterOperand(token);
+
+                fuck.Current++;
             }
 
-            throw new ParsingException(token.Position.ToString("Expected a data-processing operand."));
-        }
-
-        /// <summary>
-        /// Parses addressing mode 2.
-        /// </summary>
-        /// <returns>The parsed addressing mode.</returns>
-        private AddressingMode2 AddressingMode2()
-        {
-            Symbol(Symbols.LeftSquareBracket);
-            var register = RegisterOperand();
-
-            Symbol(Symbols.Comma);
-            if (analyzer.NextIs(TokenType.Integer))
-            {
-                var offset = Integer();
-                Symbol(Symbols.RightSquareBracket);
-
-                return new ImmediateOffsetOperand(register, int.Parse(offset.Text));
-            }
-            else if (analyzer.NextIs(Symbols.Plus) || analyzer.NextIs(Symbols.Minus))
-            {
-                var sign = analyzer.Next();
-                var offset = RegisterOperand();
-
-                Symbol(Symbols.RightSquareBracket);
-
-                return new RegisterOffsetOperand(register, sign.Text == Symbols.Plus, offset);
-            }
-
-            throw new ParsingException(analyzer.Next().Position.ToString("Expected an addressing mode."));
+            return instruction;
         }
 
         /// <summary>
@@ -388,17 +167,34 @@ namespace Topz.ArmV6Z
         /// Checks if the next token is an integer
         /// or throws an exception.
         /// </summary>
+        /// <param name="size">The maximum size of the number in bytes.</param>
+        /// <param name="isSigned">True of the number is signed: otherwise false for an unsigned number.</param>
         /// <returns>The parsed integer.</returns>
         /// <exception cref="ParsingException">
-        /// The next token was not an integer.
+        /// The next token was not an integer. The integer 
+        /// is not within the given <paramref name="size"/>.
         /// </exception>
-        private Token<TokenType> Integer()
+        private Integer Integer(byte size, bool isSigned)
         {
             var integer = analyzer.Next();
             if (integer.Type != TokenType.Integer)
                 throw new ParsingException(integer.Position.ToString("Expected an integer."));
 
-            return integer;
+            var value = int.Parse(integer.Text);
+            if (!isSigned && value < 0)
+                throw new ParsingException(integer.Position.ToString($"Expected an unsigned {size} bit integer."));
+
+            if (isSigned && -Math.Pow(2, size) > value)
+            {
+
+            }
+            else if (Math.Pow(2, size) - 1 < value)
+                throw new ParsingException(integer.Position.ToString($"The integer must fit in {size} bytes or less."));
+
+            if (Math.Pow(2, size) - 1 < value || isSigned && -Math.Pow(2, size) > value)
+                throw new ParsingException(integer.Position.ToString($"The integer must fit in {size} bytes or less."));
+
+            return new Integer(value, integer.Position);
         }
 
         /// <summary>
@@ -439,13 +235,13 @@ namespace Topz.ArmV6Z
         /// <exception cref="ParsingException">
         /// The next token was not an identifier.
         /// </exception>
-        private Token<TokenType> Identifier()
+        private Identifier Identifier()
         {
-            var identifier = analyzer.Next();
-            if (identifier.Type != TokenType.Identifier)
-                throw new ParsingException(identifier.Position.ToString("Expected an identifier."));
+            var token = analyzer.Next();
+            if (token.Type != TokenType.Identifier)
+                throw new ParsingException(token.Position.ToString("Expected an identifier."));
 
-            return identifier;
+            return new Identifier(token.Text, token.Position);
         }
 
         /// <summary>
@@ -463,6 +259,329 @@ namespace Topz.ArmV6Z
                 throw new ParsingException(token.Position.ToString("Expected a register."));
 
             return new Register(token);
+        }
+
+        /// <summary>
+        /// Checks if the next token is a register shifter
+        /// or throws an exception.
+        /// </summary>
+        /// <returns>The parsed register shifter.</returns>
+        /// <exception cref="ParsingException">
+        /// The next token was not an register shifter.
+        /// </exception>
+        private RegisterShifter RegisterShifter()
+        {
+            var token = analyzer.Next();
+            if (token.Type != TokenType.RegisterShifter)
+                throw new ParsingException(token.Position.ToString("Expected a register shifter."));
+
+            return new RegisterShifter(token);
+        }
+
+        /// <summary>
+        /// Parses the next label if any.
+        /// </summary>
+        /// <returns>The next label; otherwise null.</returns>
+        private Label Label()
+        {
+            if (!analyzer.NextIs(TokenType.Identifier))
+                return null;
+
+            var token = analyzer.Next();
+            Symbol(Symbols.EndOfLabel);
+
+            var label = new Label(token.Position, token.Text);
+            token = analyzer.Next();
+
+            return label;
+        }
+
+        /// <summary>
+        /// Parses the next mnemonic.
+        /// </summary>
+        /// <returns>The next mnemonic.</returns>
+        private Mnemonic Mnemonic()
+        {
+            var token = analyzer.Next();
+            if (token.Type != TokenType.Mnemonic)
+                throw new ParsingException(token.Position.ToString("Mnemonic expected."));
+
+            var mnemonic = new Mnemonic(token.Text, token.Position);
+            var entry = table.Where(e => e.Key.StartsWith(token.Text, StringComparison.InvariantCultureIgnoreCase)).Select(e => e).First();
+
+            fuck = new Fuck();
+            fuck.Format = entry.Key;
+            fuck.Encoding = entry.Value;
+            fuck.Current++;
+
+            foreach (Match match in Regex.Matches(entry.Key))
+            {
+                if (match.Value.Length != 0)
+                    fuck.Chunks.Add(match.Value);
+            }
+
+            while (fuck.Next.StartsWith("{"))
+                ParseOptional(mnemonic);
+
+            return mnemonic;
+        }
+
+        /// <summary>
+        /// Parses the next <see cref="Keywords.External"/> if any.
+        /// </summary>
+        /// <returns>True if the <see cref="Keywords.External"/> was parsed; otherwise false.</returns>
+        private bool External()
+        {
+            if (!analyzer.NextIs(Keywords.External))
+                return false;
+
+            Keyword(Keywords.External);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Parses the next operand.
+        /// </summary>
+        /// <returns>The next operand.</returns>
+        private void Operand(Instruction instruction)
+        {
+            switch (fuck.Next)
+            {
+                case Symbols.Comma:
+                    Symbol(Symbols.Comma);
+                    break;
+                case Placeholders.Rm:
+                case Placeholders.Rn:
+                    instruction.Values.Add(fuck.Next, Register());
+                    break;
+                case Placeholders.ShifterOperand:
+                    ShifterOperand(instruction);
+                    break;
+                case Placeholders.AddressingMode:
+                    AddressingMode(instruction);
+                    break;
+                default:
+                    throw new ParsingException(analyzer.LookAhead().Position.ToString($"{fuck.Next} expected."));
+            }
+
+            fuck.Current++;
+        }
+
+        /// <summary>
+        /// Parses the next shifter operand.
+        /// </summary>
+        /// <param name="instruction">The instruction to store the operand in.</param>
+        private void ShifterOperand(Instruction instruction)
+        {
+            if (analyzer.NextIs(TokenType.Integer))
+                instruction.Values.Add(Placeholders.Immediate, Integer(12, false));
+            else if (analyzer.NextIs(TokenType.Register))
+            {
+                instruction.Values.Add(Placeholders.Rm, Register());
+                if (!analyzer.NextIs(Symbols.Comma))
+                    return;
+
+                analyzer.Next();
+                if (analyzer.NextIs(ArmV6Z.RegisterShifter.Rrx))
+                    instruction.Values.Add(analyzer.Next().Text, null);
+                else if (analyzer.NextIs(TokenType.RegisterShifter).Then(TokenType.Register))
+                    instruction.Values.Add(analyzer.Next().Text, Register());
+                else if (analyzer.NextIs(TokenType.RegisterShifter).Then(TokenType.Integer))
+                    instruction.Values.Add(analyzer.Next().Text, Integer(12, false));
+                else
+                    throw new ParsingException(analyzer.LookAhead().Position.ToString("Register shifter expected."));
+            }
+            else
+                throw new ParsingException(analyzer.LookAhead().Position.ToString($"{Placeholders.Immediate} or {Placeholders.Rm} expected."));
+        }
+
+        /// <summary>
+        /// Parses the next target address operand.
+        /// </summary>
+        /// <param name="instruction">The instruction to store the operand in.</param>
+        private void TargetAddress(Instruction instruction)
+        {
+            if (analyzer.NextIs(TokenType.Integer))
+                instruction.Values[Placeholders.TargetAddress] = Integer(24, false);
+            else if (analyzer.NextIs(TokenType.Identifier))
+                instruction.Values[Placeholders.TargetAddress] = Identifier();
+            else
+                throw new ParsingException(analyzer.LookAhead().Position.ToString($"{Placeholders.TargetAddress} or identifier expected."));
+        }
+
+        /// <summary>
+        /// Parses the next target addressing mode.
+        /// </summary>
+        /// <param name="instruction">The instruction to store the operand in.</param>
+        private void AddressingMode(Instruction instruction)
+        {
+            Symbol(Symbols.LeftSquareBracket);
+            instruction.Values.Add(Placeholders.Rn, Register());
+
+            if (analyzer.NextIs(Symbols.Comma))
+            {
+                analyzer.Next();
+                if (analyzer.NextIs(TokenType.Integer))
+                {
+                    instruction.Values.Add(Placeholders.Offset12, Integer(12, true));
+                    Symbol(Symbols.RightSquareBracket);
+
+                    if (analyzer.NextIs(Symbols.ExclamationMark))
+                    {
+                        analyzer.Next();
+                        instruction.Values.Add(Symbols.ExclamationMark, null);
+                    }
+                }
+                else if (analyzer.NextIs(Symbols.Plus).Then(TokenType.Register) || analyzer.NextIs(Symbols.Minus).Then(TokenType.Register))
+                {
+                    var sign = analyzer.Next();
+
+                    instruction.Values.Add($"{sign.Text}{Placeholders.Rm}", Register());
+                    if (analyzer.NextIs(Symbols.Comma))
+                    {
+                        analyzer.Next();
+                        if (analyzer.NextIs(TokenType.RegisterShifter))
+                            Shift(instruction);
+                        else
+                            throw new ParsingException(analyzer.LookAhead().Position.ToString("Shift expected."));
+
+                        Symbol(Symbols.RightSquareBracket);
+                        if (analyzer.NextIs(Symbols.ExclamationMark))
+                        {
+                            analyzer.Next();
+                            instruction.Values.Add(Symbols.ExclamationMark, null);
+                        }
+                    }
+                    else
+                    {
+                        Symbol(Symbols.RightSquareBracket);
+                        if (analyzer.NextIs(Symbols.ExclamationMark))
+                        {
+                            analyzer.Next();
+                            instruction.Values.Add(Symbols.ExclamationMark, null);
+                        }
+                    }
+                }
+                else
+                    throw new ParsingException(analyzer.LookAhead().Position.ToString("Expected an integer or register."));
+            }
+            else if (analyzer.NextIs(Symbols.RightSquareBracket))
+            {
+                analyzer.Next();
+                Symbol(Symbols.Comma);
+
+                if (analyzer.NextIs(TokenType.Integer))
+                    instruction.Values.Add(Placeholders.Offset12, Integer(12, false));
+                else if (analyzer.NextIs(Symbols.Plus).Then(TokenType.Register) || analyzer.NextIs(Symbols.Minus).Then(TokenType.Register))
+                {
+                    var sign = analyzer.Next();
+                    instruction.Values.Add($"{sign.Text}{Placeholders.Rm}", Register());
+
+                    if (analyzer.NextIs(Symbols.Comma))
+                    {
+                        analyzer.Next();
+                        Shift(instruction);
+                    }
+                }
+                else
+                    throw new ParsingException(analyzer.LookAhead().Position.ToString("Expected an integer or register."));
+            }
+        }
+
+        /// <summary>
+        /// Parses a shift.
+        /// </summary>
+        /// <param name="instruction">The instruction to store the operand in.</param>
+        /// <remarks>See section A5.2.4.</remarks>
+        private void Shift(Instruction instruction)
+        {
+            if (analyzer.NextIs(TokenType.RegisterShifter))
+            {
+                if (analyzer.NextIs(ArmV6Z.RegisterShifter.Rrx))
+                    instruction.Values.Add(Placeholders.Shift, Register());
+                else
+                {
+                    instruction.Values.Add(Placeholders.Shift, RegisterShifter());
+                    if (analyzer.NextIs(ArmV6Z.RegisterShifter.Rrx))
+                        throw new ParsingException(analyzer.LookAhead().Position.ToString($"{ArmV6Z.RegisterShifter.Rrx} not allowed."));
+
+                    instruction.Values.Add(Placeholders.ShiftImmediate, RegisterShifter());
+                }
+            }
+            else
+                throw new ParsingException(analyzer.LookAhead().Position.ToString($"Expected a {Placeholders.Shift}."));
+        }
+
+        private void ParseOptional(Mnemonic mnemonic)
+        {
+            foreach (Bit bit in Enum.GetValues(typeof(Bit)))
+            {
+                var value = bit.ToString();
+                if (fuck.Next == '{' + value + '}')
+                {
+                    if (analyzer.NextIs(value) || analyzer.NextIs(value.ToLower()))
+                    {
+                        analyzer.Next();
+                        mnemonic.Bit |= bit;
+                    }
+
+                    fuck.Current++;
+                }
+            }
+
+            if (fuck.Next == Placeholders.Condition)
+            {
+                if (analyzer.NextIs(TokenType.Condition))
+                {
+                    var token = analyzer.Next();
+                    mnemonic.Condition = token.Text.ToCondition();
+                }
+
+                fuck.Current++;
+            }
+        }
+
+        private class Fuck
+        {
+            private List<string> chunks = new List<string>();
+
+            public string Format
+            {
+                get;
+                set;
+            }
+
+            public string Encoding
+            {
+                get;
+                set;
+            }
+
+            public List<string> Chunks
+            {
+                get
+                {
+                    return chunks;
+                }
+            }
+
+            public int Current
+            {
+                get;
+                set;
+            }
+
+            public string Next
+            {
+                get
+                {
+                    if (Chunks.Count <= Current)
+                        return null;
+
+                    return Chunks[Current];
+                }
+            }
         }
     }
 }

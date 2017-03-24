@@ -38,6 +38,11 @@ namespace Topz.ArmV6Z
         public const string Minus = "-";
 
         /// <summary>
+        /// The exclamation mark symbol.
+        /// </summary>
+        public const string ExclamationMark = "!";
+
+        /// <summary>
         /// All of the symbols.
         /// </summary>
         public static IEnumerable<string> All
@@ -50,6 +55,7 @@ namespace Topz.ArmV6Z
                 yield return RightSquareBracket;
                 yield return Plus;
                 yield return Minus;
+                yield return ExclamationMark;
             }
         }
     }

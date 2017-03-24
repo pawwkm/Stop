@@ -8,33 +8,8 @@ namespace Topz.ArmV6Z
     /// <summary>
     /// The registers available in ARMv6Z
     /// </summary>
-    internal class Register
+    internal sealed class Register : Operand
     {
-        /// <summary>
-        /// The 'asr' shifted register operand.
-        /// </summary>
-        public const string Asr = "asr";
-
-        /// <summary>
-        /// The 'lsl' shifted register operand.
-        /// </summary>
-        public const string Lsl = "lsl";
-
-        /// <summary>
-        /// The 'lsr' shifted register operand.
-        /// </summary>
-        public const string Lsr = "lsr";
-
-        /// <summary>
-        /// The 'ror' shifted register operand.
-        /// </summary>
-        public const string Ror = "ror";
-
-        /// <summary>
-        /// The 'rrx' shifted register operand.
-        /// </summary>
-        public const string Rrx = "rrx";
-
         /// <summary>
         /// The 'r0' register.
         /// </summary>
@@ -158,16 +133,13 @@ namespace Topz.ArmV6Z
         /// <exception cref="ArgumentException">
         /// <paramref name="register"/> is not one of <see cref="All"/>.
         /// </exception>
-        public Register(InputPosition position, string register)
+        public Register(InputPosition position, string register) : base(position)
         {
-            if (position == null)
-                throw new ArgumentNullException(nameof(position));
             if (register == null)
                 throw new ArgumentNullException(nameof(register));
-            if (!register.ToLower().IsOneOf(ArmV6Z.Register.All))
+            if (!register.ToLower().IsOneOf(All))
                 throw new ArgumentException("This is not a register.", nameof(register));
 
-            Position = position;
             Value = register;
         }
 
@@ -204,24 +176,6 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
-        /// All of the shifted register operands.
-        /// </summary>
-        public static IEnumerable<string> Shifted
-        {
-            get
-            {
-                return new[]
-                {
-                    Asr,
-                    Lsl,
-                    Lsr,
-                    Ror,
-                    Rrx
-                };
-            }
-        }
-
-        /// <summary>
         /// The actual register.
         /// </summary>
         public string Value
@@ -231,12 +185,30 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
-        /// The position where the register was referenced.
+        /// Compares two registers.
         /// </summary>
-        public InputPosition Position
+        /// <param name="left">The left hand side of the comparison.</param>
+        /// <param name="right">The right hand side of the comparison.</param>
+        /// <returns>True if the two registers are the same; otherwise false.</returns>
+        public static bool operator ==(Register left, string right)
         {
-            get;
-            private set;
+            if ((object)left == null && (object)right == null)
+                return true;
+            if ((object)left != null && (object)right == null || (object)left == null && (object)right != null)
+                return false;
+
+            return left.Value.ToLower() == right.ToLower();
+        }
+
+        /// <summary>
+        /// Compares two registers.
+        /// </summary>
+        /// <param name="left">The left hand side of the comparison.</param>
+        /// <param name="right">The right hand side of the comparison.</param>
+        /// <returns>True if the two registers are not the same; otherwise false.</returns>
+        public static bool operator !=(Register left, string right)
+        {
+            return !(left == right);
         }
 
         /// <summary>
@@ -246,6 +218,28 @@ namespace Topz.ArmV6Z
         public override string ToString()
         {
             return Value;
+        }
+
+        /// <summary>
+        /// Returns the hash code for this register.
+        /// </summary>
+        /// <returns>The hash code for this register.</returns>
+        public override int GetHashCode()
+        {
+            return Value.ToLower().GetHashCode();
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to the current object.
+        /// </summary>
+        /// <param name="obj">The object to compare with the current object.</param>
+        /// <returns>True if the specified object is equal to the current object; otherwise, false.</returns>
+        public override bool Equals(object obj)
+        {
+            if (obj is string)
+                return this == (string)obj;
+
+            return obj is Register && this == (Register)obj;
         }
     }
 }

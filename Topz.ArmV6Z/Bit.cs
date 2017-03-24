@@ -1,23 +1,26 @@
-﻿namespace Topz.ArmV6Z
+﻿using System;
+
+namespace Topz.ArmV6Z
 {
     /// <summary>
     /// Specific bits of an instruction.
     /// </summary>
+    [Flags]
     internal enum Bit
     {
         /// <summary>
         /// The instruction has no bits turned on.
         /// </summary>
-        None,
+        None = 0,
 
         /// <summary>
         /// The L bit is turned on.
         /// </summary>
-        L,
+        L = 1,
         
         /// <summary>
         /// The S bit is turned on.
         /// </summary>
-        S
+        S = 2
     }
 }

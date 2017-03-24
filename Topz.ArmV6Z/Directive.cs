@@ -1,7 +1,7 @@
 ﻿using Pote.Text;
 using System;
 
-namespace Topz.ArmV6Z.Directives
+namespace Topz.ArmV6Z
 {
     /// <summary>
     /// An assembler directive.

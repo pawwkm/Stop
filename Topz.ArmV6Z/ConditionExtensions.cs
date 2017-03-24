@@ -1,4 +1,6 @@
-﻿namespace Topz.ArmV6Z
+﻿using System;
+
+namespace Topz.ArmV6Z
 {
     /// <summary>
     /// Provides extensions for the <see cref="Condition"/> enum.
@@ -44,6 +46,43 @@
                     return "le";
                 default:
                     return "";
+            }
+        }
+
+        public static Condition ToCondition(this string condition)
+        {
+            switch (condition)
+            {
+                case "eq":
+                    return Condition.Equal;
+                case "ne":
+                    return Condition.NotEqual;
+                case "cs":
+                    return Condition.CarrySet;
+                case "cc":
+                    return Condition.CarryClear;
+                case "mi":
+                    return Condition.Minus;
+                case "pl":
+                    return Condition.Plus;
+                case "vs":
+                    return Condition.Overflow;
+                case "vc":
+                    return Condition.NoOverflow;
+                case "hi":
+                    return Condition.UnsignedHigher;
+                case "ls":
+                    return Condition.UnsignedLowerOrSame;
+                case "ge":
+                    return Condition.SignedGreaterThanOrEqual;
+                case "lt":
+                    return Condition.SignedLessThan;
+                case "gt":
+                    return Condition.SignedGreaterThan;
+                case "le":
+                    return Condition.LessThanOrEqual;
+                default:
+                    throw new NotSupportedException($"The condition '{condition}' is not supported.");
             }
         }
     }

@@ -119,13 +119,13 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// Tests that <see cref="LexicalAnalyzer.NextTokenFromSource()"/> recognizes
-        /// all register shifters in <see cref="Register.Shifted"/> as 
+        /// all register shifters in <see cref="RegisterShifter.All"/> as 
         /// <see cref="TokenType.RegisterShifter"/>.
         /// </summary>
         [Test]
         public void NextTokenFromSource_RegisterShifters_RegisterShiftersRecognized()
         {
-            foreach (var shifter in Register.Shifted)
+            foreach (var shifter in RegisterShifter.All)
             {
                 var analyzer = new LexicalAnalyzer(shifter.ToStreamReader());
                 var token = analyzer.Next();

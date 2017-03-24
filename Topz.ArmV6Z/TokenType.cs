@@ -51,6 +51,16 @@
         Symbol,
 
         /// <summary>
+        /// The token is one of the <see cref="Condition"/> values.
+        /// </summary>
+        Condition,
+
+        /// <summary>
+        /// The token is a coprocessor.
+        /// </summary>
+        Coprocessor,
+
+        /// <summary>
         /// The contents of the token could not be identified.
         /// </summary>
         Unknown,

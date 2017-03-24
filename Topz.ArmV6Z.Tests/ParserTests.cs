@@ -2,8 +2,6 @@
 using NUnit.Framework;
 using Pote.Text;
 using System.Collections.Generic;
-using Topz.ArmV6Z.Instructions;
-using Topz.ArmV6Z.Operands;
 
 namespace Topz.ArmV6Z
 {
@@ -21,11 +19,10 @@ namespace Topz.ArmV6Z
         public void Parse_EmptyProcedure_ParsesProcedure()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure().Identifier("main")
-                                .Build();
+            builder.Procedure().Identifier("main");
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -44,11 +41,10 @@ namespace Topz.ArmV6Z
         public void Parse_ExternalProcedure_ParsesProcedure()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.External().Procedure().Identifier("main")
-                                .Build();
+            builder.External().Procedure().Identifier("main");
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -62,48 +58,50 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
-        /// can parse <see cref="Format1Instruction"/> related instructions.
+        /// can parse an instruction using an immediate data processing operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
+        /// <remarks>See section A5.1.3.</remarks>
         [Test]
-        [TestCase(Mnemonic.Adc)]
-        [TestCase(Mnemonic.Add)]
-        [TestCase(Mnemonic.And)]
-        [TestCase(Mnemonic.Bic)]
-        [TestCase(Mnemonic.Eor)]
-        public void Parse_Format1Instruction_ParsesInstruction(string mnemonic)
+        public void Parse_ImmediateDataProcessingOperand_Success()
         {
-            Format1InstructionUsingAnImmediateOperand(mnemonic);
-            Format1InstructionUsingARegisterOperand(mnemonic);
-            Format1InstructionUsingALogicalLeftShiftByImmediate(mnemonic);
-            Format1InstructionUsingALogicalLeftShiftByRegister(mnemonic);
-            Format1InstructionUsingALogicalRightShiftByImmediate(mnemonic);
-            Format1InstructionUsingALogicalRightShiftByRegister(mnemonic);
-            Format1InstructionUsingAnArithmeticRightShiftByImmediate(mnemonic);
-            Format1InstructionUsingAnArithmeticRightShiftByRegister(mnemonic);
-            Format1InstructionUsingARotateRightByImmediate(mnemonic);
-            Format1InstructionUsingARotateRightByRegister(mnemonic);
-            Format1InstructionUsingARotateRightWithExtend(mnemonic);
+            var builder = new TokenBuilder();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic("ADD").R0().Comma().R1().Comma().Integer(21);
+
+            var parser = new Parser();
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+
+            Assert.AreEqual(1, program.Procedures.Count);
+            Assert.AreEqual(0, program.Data.Count);
+            Assert.AreEqual(0, program.Strings.Count);
+
+            var main = program.Procedures[0];
+            Assert.AreEqual("main", main.Name);
+            Assert.AreEqual(1, main.Instructions.Count);
+
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 3);
+            Assert.Null(instruction.Label);
+            Assert.AreEqual(instruction.Encoding, "cond 00 I 0100 S Rn Rd shifter_operand");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Placeholders.Immediate], 21);
         }
 
         /// <summary>
         /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
-        /// can parse <see cref="Format2Instruction"/> related instructions.
+        /// can parse an instruction using a register data processing operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
+        /// <remarks>See section A5.1.4.</remarks>
         [Test]
-        [TestCase(Mnemonic.B)]
-        public void Parse_Format2Instruction_ParsesInstruction(string mnemonic)
+        public void Parse_RegisterDataProcessingOperand_Success()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .Integer(43)
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2();
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -112,33 +110,31 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format2Instruction;
-            var operand = instruction.Operand as TargetOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(43, operand.Target);
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 3);
+            Assert.Null(instruction.Label);
+            Assert.AreEqual(instruction.Encoding, "cond 00 I 0100 S Rn Rd shifter_operand");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Placeholders.Rm], Register.R2);
         }
 
         /// <summary>
         /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
-        /// can parse <see cref="Format3Instruction"/> related instructions.
+        /// can parse an instruction using a logical left shift by immediate 
+        /// data processing operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
+        /// <remarks>See section A5.1.5.</remarks>
         [Test]
-        [TestCase(Mnemonic.Bkpt)]
-        public void Parse_Format3Instruction_ParsesInstruction(string mnemonic)
+        public void Parse_LogicalLeftShiftByImmediateDataProcessingOperand_Success()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .Integer(43)
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2().Comma().Lsl().Integer(2);
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -147,34 +143,32 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format3Instruction;
-            var operand = instruction.Operand as Immediate16Operand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(43, operand.Value);
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 4);
+            Assert.Null(instruction.Label);
+            Assert.AreEqual(instruction.Encoding, "cond 00 I 0100 S Rn Rd shifter_operand");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Placeholders.Rm], Register.R2);
+            Assert.AreEqual(instruction.Values[RegisterShifter.Lsl], 2);
         }
 
         /// <summary>
         /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
-        /// can parse <see cref="Format4Instruction"/> related instructions.
+        /// can parse an instruction using a logical left shift by register 
+        /// data processing operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
+        /// <remarks>See section A5.1.6.</remarks>
         [Test]
-        [TestCase(Mnemonic.Bx)]
-        [TestCase(Mnemonic.Bxj)]
-        public void Parse_Format4Instruction_ParsesInstruction(string mnemonic)
+        public void Parse_LogicalLeftShiftByRegisterDataProcessingOperand_Success()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R3()
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2().Comma().Lsl().R3();
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -183,36 +177,32 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format4Instruction;
-            var operand = instruction.Rm as RegisterOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R3, operand.Register);
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 4);
+            Assert.Null(instruction.Label);
+            Assert.AreEqual(instruction.Encoding, "cond 00 I 0100 S Rn Rd shifter_operand");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Placeholders.Rm], Register.R2);
+            Assert.AreEqual(instruction.Values[RegisterShifter.Lsl], Register.R3);
         }
 
         /// <summary>
         /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
-        /// can parse <see cref="Format5Instruction"/> related instructions.
+        /// can parse an instruction using a logical right shift by immediate 
+        /// data processing operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
+        /// <remarks>See section A5.1.7.</remarks>
         [Test]
-        [TestCase(Mnemonic.Cpy)]
-        [TestCase(Mnemonic.Clz)]
-        public void Parse_Format5Instruction_ParsesInstruction(string mnemonic)
+        public void Parse_LogicalRightShiftByImmediateDataProcessingOperand_Success()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R3()
-                                .Comma()
-                                .R4()
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2().Comma().Lsr().Integer(2);
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -221,58 +211,32 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format5Instruction;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R3, instruction.Rd.Value);
-            Assert.AreEqual(Register.R4, instruction.Rm.Value);
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 4);
+            Assert.Null(instruction.Label);
+            Assert.AreEqual(instruction.Encoding, "cond 00 I 0100 S Rn Rd shifter_operand");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Placeholders.Rm], Register.R2);
+            Assert.AreEqual(instruction.Values[RegisterShifter.Lsr], 2);
         }
 
         /// <summary>
         /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
-        /// can parse <see cref="Format6Instruction"/> related instructions.
+        /// can parse an instruction using a logical right shift by register 
+        /// data processing operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic of the instruction to test.</param>
+        /// <remarks>See section A5.1.8.</remarks>
         [Test]
-        [TestCase(Mnemonic.Cmp)]
-        [TestCase(Mnemonic.Cmn)]
-        public void Parse_Format6Instruction_ParsesInstruction(string mnemonic)
-        {
-            Format6InstructionUsingAnImmediateOperand(mnemonic);
-            Format6InstructionUsingARegisterOperand(mnemonic);
-            Format6InstructionUsingALogicalLeftShiftByImmediate(mnemonic);
-            Format6InstructionUsingALogicalLeftShiftByRegister(mnemonic);
-            Format6InstructionUsingALogicalRightShiftByImmediate(mnemonic);
-            Format6InstructionUsingALogicalRightShiftByRegister(mnemonic);
-            Format6InstructionUsingAnArithmeticRightShiftByImmediate(mnemonic);
-            Format6InstructionUsingAnArithmeticRightShiftByRegister(mnemonic);
-            Format6InstructionUsingARotateRightByImmediate(mnemonic);
-            Format6InstructionUsingARotateRightByRegister(mnemonic);
-            Format6InstructionUsingARotateRightWithExtend(mnemonic);
-        }
-
-        /// <summary>
-        /// Tests a given instruction using the <see cref="Format1Instruction"/>
-        /// with the <see cref="ImmediateOperand"/>.
-        /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format1InstructionUsingAnImmediateOperand(string mnemonic)
+        public void Parse_LogicalRightShiftByRegisterDataProcessingOperand_Success()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R3()
-                                .Comma()
-                                .R3()
-                                .Comma()
-                                .Integer(1)
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2().Comma().Lsr().R3();
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -281,37 +245,32 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format1Instruction;
-            var operand = instruction.Shifter as ImmediateOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R3, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, instruction.Rd.Value);
-            Assert.AreEqual(1, operand.Value);
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 4);
+            Assert.Null(instruction.Label);
+            Assert.AreEqual(instruction.Encoding, "cond 00 I 0100 S Rn Rd shifter_operand");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Placeholders.Rm], Register.R2);
+            Assert.AreEqual(instruction.Values[RegisterShifter.Lsr], Register.R3);
         }
 
         /// <summary>
-        /// Tests a given instruction using the <see cref="Format1Instruction"/>
-        /// with the <see cref="RegisterOperand"/>.
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse an instruction using an arithmetic right shift by immediate 
+        /// data processing operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format1InstructionUsingARegisterOperand(string mnemonic)
+        /// <remarks>See section A5.1.9.</remarks>
+        [Test]
+        public void Parse_ArithmeticRightShiftByImmediateDataProcessingOperand_Success()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R3()
-                                .Comma()
-                                .R3()
-                                .Comma()
-                                .R4()
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2().Comma().Asr().Integer(2);
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -320,40 +279,32 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format1Instruction;
-            var operand = instruction.Shifter as RegisterOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R3, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, instruction.Rd.Value);
-            Assert.AreEqual(Register.R4, operand.Register);
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 4);
+            Assert.Null(instruction.Label);
+            Assert.AreEqual(instruction.Encoding, "cond 00 I 0100 S Rn Rd shifter_operand");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Placeholders.Rm], Register.R2);
+            Assert.AreEqual(instruction.Values[RegisterShifter.Asr], 2);
         }
 
         /// <summary>
-        /// Tests a given instruction using the <see cref="Format1Instruction"/>
-        /// with the <see cref="LogicalLeftShiftByImmediateOperand"/>.
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse an instruction using an arithmetic right shift by register 
+        /// data processing operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format1InstructionUsingALogicalLeftShiftByImmediate(string mnemonic)
+        /// <remarks>See section A5.1.10.</remarks>
+        [Test]
+        public void Parse_ArithmeticRightShiftByRegisterDataProcessingOperand_Success()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R1()
-                                .Comma()
-                                .R2()
-                                .Comma()
-                                .R3()
-                                .Comma()
-                                .Lsl()
-                                .Integer(1)
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2().Comma().Asr().R3();
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -362,41 +313,32 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format1Instruction;
-            var operand = instruction.Shifter as LogicalLeftShiftByImmediateOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R1, instruction.Rd.Value);
-            Assert.AreEqual(Register.R2, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Rm.Value);
-            Assert.AreEqual(1, operand.Shift);
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 4);
+            Assert.Null(instruction.Label);
+            Assert.AreEqual(instruction.Encoding, "cond 00 I 0100 S Rn Rd shifter_operand");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Placeholders.Rm], Register.R2);
+            Assert.AreEqual(instruction.Values[RegisterShifter.Asr], Register.R3);
         }
 
         /// <summary>
-        /// Tests a given instruction using the <see cref="Format1Instruction"/>
-        /// with the <see cref="LogicalLeftShiftByRegisterOperand"/>.
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse an instruction using a right rotation shift by immediate 
+        /// data processing operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format1InstructionUsingALogicalLeftShiftByRegister(string mnemonic)
+        /// <remarks>See section A5.1.11.</remarks>
+        [Test]
+        public void Parse_RotateRightShiftByImmediateDataProcessingOperand_Success()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R1()
-                                .Comma()
-                                .R2()
-                                .Comma()
-                                .R3()
-                                .Comma()
-                                .Lsl()
-                                .R4()
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2().Comma().Ror().Integer(2);
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -405,41 +347,32 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format1Instruction;
-            var operand = instruction.Shifter as LogicalLeftShiftByRegisterOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R1, instruction.Rd.Value);
-            Assert.AreEqual(Register.R2, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Rm.Value);
-            Assert.AreEqual(Register.R4, operand.Rs.Value);
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 4);
+            Assert.Null(instruction.Label);
+            Assert.AreEqual(instruction.Encoding, "cond 00 I 0100 S Rn Rd shifter_operand");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Placeholders.Rm], Register.R2);
+            Assert.AreEqual(instruction.Values[RegisterShifter.Ror], 2);
         }
 
         /// <summary>
-        /// Tests a given instruction using the <see cref="Format1Instruction"/>
-        /// with the <see cref="LogicalRightShiftByImmediateOperand"/>.
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse an instruction using a right rotation shift by register 
+        /// data processing operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format1InstructionUsingALogicalRightShiftByImmediate(string mnemonic)
+        /// <remarks>See section A5.1.12.</remarks>
+        [Test]
+        public void Parse_RotateRightShiftByRegisterDataProcessingOperand_Success()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R1()
-                                .Comma()
-                                .R2()
-                                .Comma()
-                                .R3()
-                                .Comma()
-                                .Lsr()
-                                .Integer(1)
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2().Comma().Ror().R3();
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -448,41 +381,31 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format1Instruction;
-            var operand = instruction.Shifter as LogicalRightShiftByImmediateOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R1, instruction.Rd.Value);
-            Assert.AreEqual(Register.R2, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Rm.Value);
-            Assert.AreEqual(1, operand.Shift);
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 4);
+            Assert.Null(instruction.Label);
+            Assert.AreEqual(instruction.Encoding, "cond 00 I 0100 S Rn Rd shifter_operand");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Placeholders.Rm], Register.R2);
+            Assert.AreEqual(instruction.Values[RegisterShifter.Ror], Register.R3);
         }
 
         /// <summary>
-        /// Tests a given instruction using the <see cref="Format1Instruction"/>
-        /// with the <see cref="LogicalRightShiftByRegisterOperand"/>.
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse an instruction using a right rotation with extend data processing operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format1InstructionUsingALogicalRightShiftByRegister(string mnemonic)
+        /// <remarks>See section A5.1.13.</remarks>
+        [Test]
+        public void Parse_RotateRightWithExtendDataProcessingOperand_Success()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R1()
-                                .Comma()
-                                .R2()
-                                .Comma()
-                                .R3()
-                                .Comma()
-                                .Lsr()
-                                .R4()
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2().Comma().Rrx();
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -491,41 +414,31 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format1Instruction;
-            var operand = instruction.Shifter as LogicalRightShiftByRegisterOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R1, instruction.Rd.Value);
-            Assert.AreEqual(Register.R2, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Rm.Value);
-            Assert.AreEqual(Register.R4, operand.Rs.Value);
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 4);
+            Assert.Null(instruction.Label);
+            Assert.AreEqual(instruction.Encoding, "cond 00 I 0100 S Rn Rd shifter_operand");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Placeholders.Rm], Register.R2);
+            Assert.AreEqual(instruction.Values[RegisterShifter.Rrx], null);
         }
 
         /// <summary>
-        /// Tests a given instruction using the <see cref="Format1Instruction"/>
-        /// with the <see cref="ArithmeticRightShiftByImmediateOperand"/>.
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse an instruction using a target address operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format1InstructionUsingAnArithmeticRightShiftByImmediate(string mnemonic)
+        /// <remarks>See section A4.1.5.</remarks>
+        [Test]
+        public void Parse_TargetAddressOperand_ParsesProcedure()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R1()
-                                .Comma()
-                                .R2()
-                                .Comma()
-                                .R3()
-                                .Comma()
-                                .Asr()
-                                .Integer(2)
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic(Mnemonic.B).Integer(10);
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -534,41 +447,28 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format1Instruction;
-            var operand = instruction.Shifter as ArithmeticRightShiftByImmediateOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R1, instruction.Rd.Value);
-            Assert.AreEqual(Register.R2, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Rm.Value);
-            Assert.AreEqual(2, operand.Shift);
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 1);
+            Assert.Null(instruction.Label);
+            Assert.AreEqual(instruction.Encoding, "cond 101 L signed_immed_24");
+            Assert.AreEqual(instruction.Values[Placeholders.TargetAddress], 10);
         }
 
         /// <summary>
-        /// Tests a given instruction using the <see cref="Format1Instruction"/>
-        /// with the <see cref="ArithmeticRightShiftByRegisterOperand"/>.
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse an instruction using a target address operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format1InstructionUsingAnArithmeticRightShiftByRegister(string mnemonic)
+        /// <remarks>See section A4.1.5.</remarks>
+        [Test]
+        public void Parse_TargetLabelOperand_ParsesProcedure()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R1()
-                                .Comma()
-                                .R2()
-                                .Comma()
-                                .R3()
-                                .Comma()
-                                .Asr()
-                                .R4()
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic(Mnemonic.B).Identifier("Abc");
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -577,41 +477,28 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format1Instruction;
-            var operand = instruction.Shifter as ArithmeticRightShiftByRegisterOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R1, instruction.Rd.Value);
-            Assert.AreEqual(Register.R2, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Rm.Value);
-            Assert.AreEqual(Register.R4, operand.Rs.Value);
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 1);
+            Assert.Null(instruction.Label);
+            Assert.AreEqual(instruction.Encoding, "cond 101 L signed_immed_24");
+            Assert.AreEqual(instruction.Values[Placeholders.TargetAddress], "Abc");
         }
 
         /// <summary>
-        /// Tests a given instruction using the <see cref="Format1Instruction"/>
-        /// with the <see cref="RotateRightByImmediateOperand"/>.
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse an instruction using an immediate offset 12 operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format1InstructionUsingARotateRightByImmediate(string mnemonic)
+        /// <remarks>See section A5.2.2.</remarks>
+        [Test]
+        public void Parse_ImmediateOffset12Operand_ParsesProcedure()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R1()
-                                .Comma()
-                                .R2()
-                                .Comma()
-                                .R3()
-                                .Comma()
-                                .Ror()
-                                .Integer(2)
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().Comma().Integer(-1).RightSquareBracket();
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -620,41 +507,30 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format1Instruction;
-            var operand = instruction.Shifter as RotateRightByImmediateOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R1, instruction.Rd.Value);
-            Assert.AreEqual(Register.R2, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Rm.Value);
-            Assert.AreEqual(2, operand.Rotation);
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 3);
+            Assert.Null(instruction.Label);
+            Assert.AreEqual(instruction.Encoding, "cond 01 I P U 0 W 1 Rn Rd addr_mode");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Placeholders.Offset12], -1);
         }
 
         /// <summary>
-        /// Tests a given instruction using the <see cref="Format1Instruction"/>
-        /// with the <see cref="RotateRightByRegisterOperand"/>.
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse an instruction using a register offset operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format1InstructionUsingARotateRightByRegister(string mnemonic)
+        /// <remarks>See section A5.2.3.</remarks>
+        [Test]
+        public void Parse_RegisterOffsetOperand_ParsesProcedure()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R1()
-                                .Comma()
-                                .R2()
-                                .Comma()
-                                .R3()
-                                .Comma()
-                                .Ror()
-                                .R4()
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().Comma().Plus().R2().RightSquareBracket();
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -663,40 +539,30 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format1Instruction;
-            var operand = instruction.Shifter as RotateRightByRegisterOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R1, instruction.Rd.Value);
-            Assert.AreEqual(Register.R2, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Rm.Value);
-            Assert.AreEqual(Register.R4, operand.Rs.Value);
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 3);
+            Assert.Null(instruction.Label);
+            Assert.AreEqual(instruction.Encoding, "cond 01 I P U 0 W 1 Rn Rd addr_mode");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Symbols.Plus + Placeholders.Rm], Register.R2);
         }
 
         /// <summary>
-        /// Tests a given instruction using the <see cref="Format1Instruction"/>
-        /// with the <see cref="RotateRightWithExtendOperand"/>.
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse an instruction using a scaled register offset operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format1InstructionUsingARotateRightWithExtend(string mnemonic)
+        /// <remarks>See section A5.2.4.</remarks>
+        [Test]
+        public void Parse_ScaledRegisterOffsetOperand_ParsesProcedure()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R1()
-                                .Comma()
-                                .R2()
-                                .Comma()
-                                .R3()
-                                .Comma()
-                                .Rrx()
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().Comma().Plus().R2().Comma().Lsl().Lsr().RightSquareBracket();
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -705,35 +571,32 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format1Instruction;
-            var operand = instruction.Shifter as RotateRightWithExtendOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R1, instruction.Rd.Value);
-            Assert.AreEqual(Register.R2, instruction.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Rm.Value);
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 5);
+            Assert.Null(instruction.Label);
+            Assert.AreEqual(instruction.Encoding, "cond 01 I P U 0 W 1 Rn Rd addr_mode");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Symbols.Plus + Placeholders.Rm], Register.R2);
+            Assert.AreEqual(instruction.Values[Placeholders.Shift], RegisterShifter.Lsl);
+            Assert.AreEqual(instruction.Values[Placeholders.ShiftImmediate], RegisterShifter.Lsr);
         }
 
         /// <summary>
-        /// Tests a given instruction using the <see cref="Format6Instruction"/>
-        /// with the <see cref="ImmediateOperand"/>.
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse an instruction using an immediate pre-indexed offset 12 operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format6InstructionUsingAnImmediateOperand(string mnemonic)
+        /// <remarks>See section A5.2.5.</remarks>
+        [Test]
+        public void Parse_ImmediatePreIndexedOffset12Operand_ParsesProcedure()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R3()
-                                .Comma()
-                                .Integer(1)
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().Comma().Integer(-1).RightSquareBracket().ExclamationMark();
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -742,34 +605,31 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format6Instruction;
-            var operand = instruction.Shifter as ImmediateOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R3, instruction.Rn.Value);
-            Assert.AreEqual(1, operand.Value);
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 4);
+            Assert.Null(instruction.Label);
+            Assert.AreEqual(instruction.Encoding, "cond 01 I P U 0 W 1 Rn Rd addr_mode");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Placeholders.Offset12], -1);
+            Assert.Null(instruction.Values[Symbols.ExclamationMark]);
         }
 
         /// <summary>
-        /// Tests a given instruction using the <see cref="Format6Instruction"/>
-        /// with the <see cref="RegisterOperand"/>.
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse an instruction using a scaled register pre-indexed operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format6InstructionUsingARegisterOperand(string mnemonic)
+        /// <remarks>See section A5.2.7.</remarks>
+        [Test]
+        public void Parse_ScaledRegisterPreIndexedOperand_ParsesProcedure()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R3()
-                                .Comma()
-                                .R4()
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().Comma().Plus().R2().Comma().Lsl().Lsr().RightSquareBracket().ExclamationMark();
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -778,37 +638,33 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format6Instruction;
-            var operand = instruction.Shifter as RegisterOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R3, instruction.Rn.Value);
-            Assert.AreEqual(Register.R4, operand.Register);
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 6);
+            Assert.Null(instruction.Label);
+            Assert.AreEqual(instruction.Encoding, "cond 01 I P U 0 W 1 Rn Rd addr_mode");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Symbols.Plus + Placeholders.Rm], Register.R2);
+            Assert.AreEqual(instruction.Values[Placeholders.Shift], RegisterShifter.Lsl);
+            Assert.AreEqual(instruction.Values[Placeholders.ShiftImmediate], RegisterShifter.Lsr);
+            Assert.Null(instruction.Values[Symbols.ExclamationMark]);
         }
 
         /// <summary>
-        /// Tests a given instruction using the <see cref="Format6Instruction"/>
-        /// with the <see cref="LogicalLeftShiftByImmediateOperand"/>.
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse an instruction using a immediate 12 post-indexed operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format6InstructionUsingALogicalLeftShiftByImmediate(string mnemonic)
+        /// <remarks>See section A5.2.8.</remarks>
+        [Test]
+        public void Parse_Immediate12PostIndexedOperand_ParsesProcedure()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R1()
-                                .Comma()
-                                .R2()
-                                .Comma()
-                                .Lsl()
-                                .Integer(1)
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().RightSquareBracket().Comma().Integer(14);
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -817,38 +673,31 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format6Instruction;
-            var operand = instruction.Shifter as LogicalLeftShiftByImmediateOperand;
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 3);
+            Assert.Null(instruction.Label);
 
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R1, instruction.Rn.Value);
-            Assert.AreEqual(Register.R2, operand.Rm.Value);
-            Assert.AreEqual(1, operand.Shift);
+            Assert.AreEqual(instruction.Encoding, "cond 01 I P U 0 W 1 Rn Rd addr_mode");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Placeholders.Offset12], 14);
         }
 
         /// <summary>
-        /// Tests a given instruction using the <see cref="Format6Instruction"/>
-        /// with the <see cref="LogicalLeftShiftByRegisterOperand"/>.
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse an instruction using a register post-indexed operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format6InstructionUsingALogicalLeftShiftByRegister(string mnemonic)
+        /// <remarks>See section A5.2.9.</remarks>
+        [Test]
+        public void Parse_RegisterPostIndexedOperand_ParsesProcedure()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R1()
-                                .Comma()
-                                .R2()
-                                .Comma()
-                                .Lsl()
-                                .R3()
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().RightSquareBracket().Comma().Plus().R2();
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -857,38 +706,31 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format6Instruction;
-            var operand = instruction.Shifter as LogicalLeftShiftByRegisterOperand;
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 3);
+            Assert.Null(instruction.Label);
 
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R1, instruction.Rn.Value);
-            Assert.AreEqual(Register.R2, operand.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Rs.Value);
+            Assert.AreEqual(instruction.Encoding, "cond 01 I P U 0 W 1 Rn Rd addr_mode");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Symbols.Plus + Placeholders.Rm], Register.R2);
         }
 
         /// <summary>
-        /// Tests a given instruction using the <see cref="Format6Instruction"/>
-        /// with the <see cref="LogicalRightShiftByImmediateOperand"/>.
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse an instruction using a scaled register post-indexed operand.
         /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format6InstructionUsingALogicalRightShiftByImmediate(string mnemonic)
+        /// <remarks>See section A5.2.10.</remarks>
+        [Test]
+        public void Parse_ScaledRegisterPostIndexedOperand_ParsesProcedure()
         {
             var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R1()
-                                .Comma()
-                                .R2()
-                                .Comma()
-                                .Lsr()
-                                .Integer(1)
-                                .Build();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().RightSquareBracket().Comma().Plus().R2().Comma().Lsl().Lsr();
 
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -897,253 +739,17 @@ namespace Topz.ArmV6Z
             var main = program.Procedures[0];
             Assert.AreEqual("main", main.Name);
             Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
 
-            var instruction = main.Instructions[0] as Format6Instruction;
-            var operand = instruction.Shifter as LogicalRightShiftByImmediateOperand;
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 5);
+            Assert.Null(instruction.Label);
 
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R1, instruction.Rn.Value);
-            Assert.AreEqual(Register.R2, operand.Rm.Value);
-            Assert.AreEqual(1, operand.Shift);
-        }
-
-        /// <summary>
-        /// Tests a given instruction using the <see cref="Format6Instruction"/>
-        /// with the <see cref="LogicalRightShiftByRegisterOperand"/>.
-        /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format6InstructionUsingALogicalRightShiftByRegister(string mnemonic)
-        {
-            var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R1()
-                                .Comma()
-                                .R2()
-                                .Comma()
-                                .Lsr()
-                                .R3()
-                                .Build();
-
-            var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
-
-            Assert.AreEqual(1, program.Procedures.Count);
-            Assert.AreEqual(0, program.Data.Count);
-            Assert.AreEqual(0, program.Strings.Count);
-
-            var main = program.Procedures[0];
-            Assert.AreEqual("main", main.Name);
-            Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
-
-            var instruction = main.Instructions[0] as Format6Instruction;
-            var operand = instruction.Shifter as LogicalRightShiftByRegisterOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R1, instruction.Rn.Value);
-            Assert.AreEqual(Register.R2, operand.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Rs.Value);
-        }
-
-        /// <summary>
-        /// Tests a given instruction using the <see cref="Format6Instruction"/>
-        /// with the <see cref="ArithmeticRightShiftByImmediateOperand"/>.
-        /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format6InstructionUsingAnArithmeticRightShiftByImmediate(string mnemonic)
-        {
-            var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R1()
-                                .Comma()
-                                .R2()
-                                .Comma()
-                                .Asr()
-                                .Integer(2)
-                                .Build();
-
-            var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
-
-            Assert.AreEqual(1, program.Procedures.Count);
-            Assert.AreEqual(0, program.Data.Count);
-            Assert.AreEqual(0, program.Strings.Count);
-
-            var main = program.Procedures[0];
-            Assert.AreEqual("main", main.Name);
-            Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
-
-            var instruction = main.Instructions[0] as Format6Instruction;
-            var operand = instruction.Shifter as ArithmeticRightShiftByImmediateOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R1, instruction.Rn.Value);
-            Assert.AreEqual(Register.R2, operand.Rm.Value);
-            Assert.AreEqual(2, operand.Shift);
-        }
-
-        /// <summary>
-        /// Tests a given instruction using the <see cref="Format6Instruction"/>
-        /// with the <see cref="ArithmeticRightShiftByRegisterOperand"/>.
-        /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format6InstructionUsingAnArithmeticRightShiftByRegister(string mnemonic)
-        {
-            var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R1()
-                                .Comma()
-                                .R2()
-                                .Comma()
-                                .Asr()
-                                .R3()
-                                .Build();
-
-            var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
-
-            Assert.AreEqual(1, program.Procedures.Count);
-            Assert.AreEqual(0, program.Data.Count);
-            Assert.AreEqual(0, program.Strings.Count);
-
-            var main = program.Procedures[0];
-            Assert.AreEqual("main", main.Name);
-            Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
-
-            var instruction = main.Instructions[0] as Format6Instruction;
-            var operand = instruction.Shifter as ArithmeticRightShiftByRegisterOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R1, instruction.Rn.Value);
-            Assert.AreEqual(Register.R2, operand.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Rs.Value);
-        }
-
-        /// <summary>
-        /// Tests a given instruction using the <see cref="Format6Instruction"/>
-        /// with the <see cref="RotateRightByImmediateOperand"/>.
-        /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format6InstructionUsingARotateRightByImmediate(string mnemonic)
-        {
-            var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R1()
-                                .Comma()
-                                .R2()
-                                .Comma()
-                                .Ror()
-                                .Integer(2)
-                                .Build();
-
-            var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
-
-            Assert.AreEqual(1, program.Procedures.Count);
-            Assert.AreEqual(0, program.Data.Count);
-            Assert.AreEqual(0, program.Strings.Count);
-
-            var main = program.Procedures[0];
-            Assert.AreEqual("main", main.Name);
-            Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
-
-            var instruction = main.Instructions[0] as Format6Instruction;
-            var operand = instruction.Shifter as RotateRightByImmediateOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R1, instruction.Rn.Value);
-            Assert.AreEqual(Register.R2, operand.Rm.Value);
-            Assert.AreEqual(2, operand.Rotation);
-        }
-
-        /// <summary>
-        /// Tests a given instruction using the <see cref="Format6Instruction"/>
-        /// with the <see cref="RotateRightByRegisterOperand"/>.
-        /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format6InstructionUsingARotateRightByRegister(string mnemonic)
-        {
-            var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R1()
-                                .Comma()
-                                .R2()
-                                .Comma()
-                                .Ror()
-                                .R3()
-                                .Build();
-
-            var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
-
-            Assert.AreEqual(1, program.Procedures.Count);
-            Assert.AreEqual(0, program.Data.Count);
-            Assert.AreEqual(0, program.Strings.Count);
-
-            var main = program.Procedures[0];
-            Assert.AreEqual("main", main.Name);
-            Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
-
-            var instruction = main.Instructions[0] as Format6Instruction;
-            var operand = instruction.Shifter as RotateRightByRegisterOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R1, instruction.Rn.Value);
-            Assert.AreEqual(Register.R2, operand.Rm.Value);
-            Assert.AreEqual(Register.R3, operand.Rs.Value);
-        }
-
-        /// <summary>
-        /// Tests a given instruction using the <see cref="Format6Instruction"/>
-        /// with the <see cref="RotateRightWithExtendOperand"/>.
-        /// </summary>
-        /// <param name="mnemonic">The mnemonic to use for the test.</param>
-        private void Format6InstructionUsingARotateRightWithExtend(string mnemonic)
-        {
-            var builder = new TokenBuilder();
-            var tokens = builder.Procedure()
-                                .Identifier("main")
-                                .Mnemonic(mnemonic)
-                                .R1()
-                                .Comma()
-                                .R2()
-                                .Comma()
-                                .Rrx()
-                                .Build();
-
-            var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(tokens));
-
-            Assert.AreEqual(1, program.Procedures.Count);
-            Assert.AreEqual(0, program.Data.Count);
-            Assert.AreEqual(0, program.Strings.Count);
-
-            var main = program.Procedures[0];
-            Assert.AreEqual("main", main.Name);
-            Assert.AreEqual(1, main.Instructions.Count);
-            Assert.False(main.IsExternal);
-
-            var instruction = main.Instructions[0] as Format6Instruction;
-            var operand = instruction.Shifter as RotateRightWithExtendOperand;
-
-            Assert.AreEqual(mnemonic, instruction.Mnemonic.RawName);
-            Assert.AreEqual(Register.R1, instruction.Rn.Value);
-            Assert.AreEqual(Register.R2, operand.Rm.Value);
+            Assert.AreEqual(instruction.Encoding, "cond 01 I P U 0 W 1 Rn Rd addr_mode");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Symbols.Plus + Placeholders.Rm], Register.R2);
+            Assert.AreEqual(instruction.Values[Placeholders.Shift], RegisterShifter.Lsl);
+            Assert.AreEqual(instruction.Values[Placeholders.ShiftImmediate], RegisterShifter.Lsr);
         }
 
         /// <summary>

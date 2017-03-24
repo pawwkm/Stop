@@ -23,7 +23,22 @@ namespace Topz.ArmV6Z
                 case Bit.S:
                     return "s";
                 default:
-                    throw new ArgumentException($"The value '{bit}' is unsupported.", nameof(bit));
+                    throw new NotSupportedException($"The value '{bit}' is unsupported.");
+            }
+        }
+
+        public static Bit ToBit(this string bit)
+        {
+            switch (bit)
+            {
+                case "l":
+                    return Bit.L;
+                case "":
+                    return Bit.None;
+                case "s":
+                    return Bit.S;
+                default:
+                    throw new NotSupportedException($"The value '{bit}' is unsupported.");
             }
         }
     }

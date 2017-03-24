@@ -51,70 +51,36 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Instructions\AddInstruction.cs" />
-    <Compile Include="Operands\AddressingMode1.cs" />
-    <Compile Include="Operands\AddressingMode3.cs" />
-    <Compile Include="Operands\AddressingMode4.cs" />
-    <Compile Include="Operands\AddressingMode5.cs" />
-    <Compile Include="Instructions\AddWithCarryInstruction.cs" />
-    <Compile Include="Operands\AddressingMode2.cs" />
-    <Compile Include="Instructions\AndInstruction.cs" />
-    <Compile Include="Operands\ArithmeticRightShiftByImmediateOperand.cs" />
-    <Compile Include="Operands\ArithmeticRightShiftByRegisterOperand.cs" />
     <Compile Include="Assembler.cs" />
     <Compile Include="Bit.cs" />
-    <Compile Include="Instructions\BitClearInstruction.cs" />
     <Compile Include="BitExtensions.cs" />
-    <Compile Include="Instructions\BranchAndChangeToJazelleInstruction.cs" />
-    <Compile Include="Instructions\BranchAndExchangeInstruction.cs" />
-    <Compile Include="Instructions\BreakPointInstruction.cs" />
-    <Compile Include="Instructions\CompareInstruction.cs" />
-    <Compile Include="Instructions\CompareNegativeInstruction.cs" />
     <Compile Include="Condition.cs" />
     <Compile Include="ConditionExtensions.cs" />
-    <Compile Include="Instructions\CopyInstruction.cs" />
-    <Compile Include="Instructions\CountLeadingZeroesInstruction.cs" />
     <Compile Include="Data.cs" />
-    <Compile Include="Directives\Directive.cs" />
-    <Compile Include="Instructions\ExclusiveOrInstruction.cs" />
-    <Compile Include="Instructions\Format1Instruction.cs" />
-    <Compile Include="Instructions\Format2Instruction.cs" />
-    <Compile Include="Instructions\Format3Instruction.cs" />
-    <Compile Include="Instructions\Format4Instruction.cs" />
-    <Compile Include="Instructions\Format5Instruction.cs" />
-    <Compile Include="Instructions\Format6Instruction.cs" />
-    <Compile Include="Instructions\Format7Instruction.cs" />
-    <Compile Include="Operands\Immediate16Operand.cs" />
-    <Compile Include="Operands\ImmediateOffsetOperand.cs" />
-    <Compile Include="Operands\ImmediateOperand.cs" />
+    <Compile Include="Directive.cs" />
+    <Compile Include="Identifier.cs" />
     <Compile Include="INamedNode.cs" />
     <Compile Include="Instruction.cs" />
-    <Compile Include="Instructions\BranchInstruction.cs" />
+    <Compile Include="Integer.cs" />
     <Compile Include="IPass.cs" />
     <Compile Include="Keywords.cs" />
     <Compile Include="Label.cs" />
     <Compile Include="LexicalAnalyzer.cs" />
-    <Compile Include="Instructions\LoadRegisterInstruction.cs" />
-    <Compile Include="Operands\LogicalLeftShiftByImmediateOperand.cs" />
-    <Compile Include="Operands\LogicalLeftShiftByRegisterOperand.cs" />
-    <Compile Include="Operands\LogicalRightShiftByImmediateOperand.cs" />
-    <Compile Include="Operands\LogicalRightShiftByRegisterOperand.cs" />
     <Compile Include="Mnemonic.cs" />
     <Compile Include="Node.cs" />
+    <Compile Include="Operand.cs" />
     <Compile Include="Parser.cs" />
+    <Compile Include="Reference.cs" />
     <Compile Include="Register.cs" />
-    <Compile Include="Operands\RegisterOffsetOperand.cs" />
-    <Compile Include="Operands\RegisterOperand.cs" />
-    <Compile Include="Operands\RotateRightByImmediateOperand.cs" />
-    <Compile Include="Operands\RotateRightByRegisterOperand.cs" />
-    <Compile Include="Operands\RotateRightWithExtendOperand.cs" />
+    <Compile Include="RegisterShifter.cs" />
     <Compile Include="Symbols.cs" />
-    <Compile Include="Operands\TargetOperand.cs" />
     <Compile Include="Pass.cs" />
     <Compile Include="Procedure.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="String.cs" />
+    <Compile Include="Placeholders.cs" />
+    <Compile Include="Target.cs" />
     <Compile Include="TokenType.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -129,6 +95,7 @@
   <ItemGroup>
     <CodeAnalysisDictionary Include="CustomDictionary.xml" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

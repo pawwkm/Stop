@@ -71,6 +71,16 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// Adds the <see cref="Symbols.ExclamationMark"/> 
+        /// symbol to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder ExclamationMark()
+        {
+            return Token(Symbols.ExclamationMark, TokenType.Symbol);
+        }
+
+        /// <summary>
         /// Adds the <see cref="Symbols.Comma"/> 
         /// symbol to the builder.
         /// </summary>
@@ -78,6 +88,16 @@ namespace Topz.ArmV6Z
         public TokenBuilder Comma()
         {
             return Token(Symbols.Comma, TokenType.Symbol);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="Symbols.Plus"/> 
+        /// symbol to the builder.
+        /// </summary>
+        /// <returns>This builder.</returns>
+        public TokenBuilder Plus()
+        {
+            return Token(Symbols.Plus, TokenType.Symbol);
         }
 
         /// <summary>
@@ -225,48 +245,48 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
-        /// Adds the <see cref="Register.Asr"/> to the builder.
+        /// Adds the <see cref="RegisterShifter.Asr"/> to the builder.
         /// </summary>
         /// <returns>This builder.</returns>
         public TokenBuilder Asr()
         {
-            return Token(Register.Asr, TokenType.RegisterShifter);
+            return Token(RegisterShifter.Asr, TokenType.RegisterShifter);
         }
 
         /// <summary>
-        /// Adds the <see cref="Register.Lsl"/> to the builder.
+        /// Adds the <see cref="RegisterShifter.Lsl"/> to the builder.
         /// </summary>
         /// <returns>This builder.</returns>
         public TokenBuilder Lsl()
         {
-            return Token(Register.Lsl, TokenType.RegisterShifter);
+            return Token(RegisterShifter.Lsl, TokenType.RegisterShifter);
         }
 
         /// <summary>
-        /// Adds the <see cref="Register.Lsr"/> to the builder.
+        /// Adds the <see cref="RegisterShifter.Lsr"/> to the builder.
         /// </summary>
         /// <returns>This builder.</returns>
         public TokenBuilder Lsr()
         {
-            return Token(Register.Lsr, TokenType.RegisterShifter);
+            return Token(RegisterShifter.Lsr, TokenType.RegisterShifter);
         }
 
         /// <summary>
-        /// Adds the <see cref="Register.Ror"/> to the builder.
+        /// Adds the <see cref="RegisterShifter.Ror"/> to the builder.
         /// </summary>
         /// <returns>This builder.</returns>
         public TokenBuilder Ror()
         {
-            return Token(Register.Ror, TokenType.RegisterShifter);
+            return Token(RegisterShifter.Ror, TokenType.RegisterShifter);
         }
 
         /// <summary>
-        /// Adds the <see cref="Register.Rrx"/> to the builder.
+        /// Adds the <see cref="RegisterShifter.Rrx"/> to the builder.
         /// </summary>
         /// <returns>This builder.</returns>
         public TokenBuilder Rrx()
         {
-            return Token(Register.Rrx, TokenType.RegisterShifter);
+            return Token(RegisterShifter.Rrx, TokenType.RegisterShifter);
         }
 
         /// <summary>
@@ -276,10 +296,17 @@ namespace Topz.ArmV6Z
         /// <returns>This builder.</returns>
         public TokenBuilder Mnemonic(string mnemonic)
         {
-            if (!ArmV6Z.Mnemonic.All.Contains(mnemonic))
-                throw new ArgumentException(nameof(mnemonic));
+            return Token(mnemonic.ToLower(), TokenType.Mnemonic);
+        }
 
-            return Token(mnemonic, TokenType.Mnemonic);
+        /// <summary>
+        /// Adds a condition to an instruction.
+        /// </summary>
+        /// <param name="condition">The condition to add.</param>
+        /// <returns>This builder.</returns>
+        public TokenBuilder Condition(Condition condition)
+        {
+            return Token(condition.AsText(), TokenType.Condition);
         }
 
         /// <summary>

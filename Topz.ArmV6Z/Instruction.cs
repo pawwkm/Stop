@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Topz.ArmV6Z
@@ -7,7 +8,7 @@ namespace Topz.ArmV6Z
     /// Represents an instruction in a program.
     /// </summary>
     [DebuggerDisplay("{ToString(),nq}")]
-    internal abstract class Instruction : Node
+    internal sealed class Instruction : Node
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Instruction"/> class.
@@ -16,7 +17,7 @@ namespace Topz.ArmV6Z
         /// <exception cref="ArgumentNullException">
         /// <paramref name="mnemonic"/> is null.
         /// </exception>
-        protected Instruction(Mnemonic mnemonic) : base(mnemonic.Position)
+        public Instruction(Mnemonic mnemonic) : base(mnemonic.Position)
         {
             if (mnemonic == null)
                 throw new ArgumentNullException(nameof(mnemonic));
@@ -42,6 +43,23 @@ namespace Topz.ArmV6Z
             get;
             private set;
         }
+
+        public string Format
+        {
+            get;
+            set;
+        }
+
+        public string Encoding
+        {
+            get;
+            set;
+        }
+
+        public IDictionary<string, Operand> Values
+        {
+            get;
+        } = new Dictionary<string, Operand>();
 
         /// <summary>
         /// Returns a string that represents the current instruction.

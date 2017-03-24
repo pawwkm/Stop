@@ -62,7 +62,7 @@ namespace Topz.ArmV6Z
                 return Keyword();
             if (Source.MatchesAnyOf(ArmV6Z.Register.All))
                 return Register();
-            if (Source.MatchesAnyOf(ArmV6Z.Register.Shifted))
+            if (Source.MatchesAnyOf(RegisterShifter.All))
                 return Shifted();
             if (Source.MatchesAnyOf(Symbols.All))
                 return Symbol();
@@ -192,7 +192,7 @@ namespace Topz.ArmV6Z
         private Token<TokenType> Shifted()
         {
             var start = Position.DeepCopy();
-            foreach (string shifter in ArmV6Z.Register.Shifted)
+            foreach (string shifter in ArmV6Z.RegisterShifter.All)
             {
                 if (Consume(shifter))
                     return new Token<TokenType>(shifter, TokenType.RegisterShifter, start);
