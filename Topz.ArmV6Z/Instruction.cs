@@ -1,23 +1,28 @@
-﻿using Pote.Text;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Topz.ArmV6Z
 {
     /// <summary>
     /// Represents an instruction in a program.
     /// </summary>
-    internal abstract class Instruction : Node
+    [DebuggerDisplay("{ToString(),nq}")]
+    internal sealed class Instruction : Node
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Instruction"/> class.
         /// </summary>
-        /// <param name="position">The position of the instruction in the program's source code.</param>
         /// <param name="mnemonic">The mnemonic of the instruction.</param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="position"/> or <paramref name="mnemonic"/> is null.
+        /// <paramref name="mnemonic"/> is null.
         /// </exception>
-        protected Instruction(InputPosition position, Mnemonic mnemonic) : base(position)
+        public Instruction(Mnemonic mnemonic) : base(mnemonic.Position)
         {
+            if (mnemonic == null)
+                throw new ArgumentNullException(nameof(mnemonic));
+
+            Mnemonic = mnemonic;
         }
 
         /// <summary>
@@ -27,7 +32,7 @@ namespace Topz.ArmV6Z
         public Label Label
         {
             get;
-            private set;
+            set;
         }
 
         /// <summary>
@@ -37,6 +42,44 @@ namespace Topz.ArmV6Z
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// The textual format of the instruction.
+        /// </summary>
+        public string Format
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// The encoding of the instruction.
+        /// </summary>
+        public string Encoding
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// The instruction values to encode.
+        /// </summary>
+        public IDictionary<string, Operand> Values
+        {
+            get;
+        } = new Dictionary<string, Operand>();
+
+        /// <summary>
+        /// Returns a string that represents the current instruction.
+        /// </summary>
+        /// <returns>A string that represents the current instruction.</returns>
+        public override string ToString()
+        {
+            if (Label == null)
+                return Mnemonic.ToString();
+
+            return $"{Label.Name}: {Mnemonic}";
         }
     }
 }

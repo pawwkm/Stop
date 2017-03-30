@@ -46,6 +46,19 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// Visits an instruction node.
+        /// </summary>
+        /// <param name="instruction">The instruction node to visit.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="instruction"/> is null.
+        /// </exception>
+        public virtual void Visit(Instruction instruction)
+        {
+            if (instruction == null)
+                throw new ArgumentNullException(nameof(instruction));
+        }
+
+        /// <summary>
         /// Visits a data node.
         /// </summary>
         /// <param name="data">The data node to visit.</param>
@@ -69,26 +82,6 @@ namespace Topz.ArmV6Z
         {
             if (s == null)
                 throw new ArgumentNullException(nameof(s));
-        }
-
-        /// <summary>
-        /// Visits an un supported node type.
-        /// </summary>
-        /// <param name="node">The node to visit.</param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="node"/> is null.
-        /// </exception>
-        /// <exception cref="InvalidOperationException">
-        /// The type of <paramref name="node"/> is not supported by this pass.
-        /// </exception>
-        public virtual void Visit(Node node)
-        {
-            if (node == null)
-                throw new ArgumentNullException(nameof(node));
-
-            string name = node.GetType().FullName;
-
-            throw new InvalidOperationException("The node type '" + name + "' is not supported by this pass.");
         }
     }
 }

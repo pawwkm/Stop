@@ -108,7 +108,7 @@ namespace Topz.ArmV6Z
         {
             foreach (INamedNode node in e.NewItems)
             {
-                if (AllNamedNodes.Any(x => x.Name == node.Name))
+                if (AllNamedNodes.Any(x => x.Name == node.Name && x != node))
                     throw new ArgumentException("The node name is not unique.");
             }
         }

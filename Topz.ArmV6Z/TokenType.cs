@@ -1,7 +1,7 @@
 ﻿namespace Topz.ArmV6Z
 {
     /// <summary>
-    /// The type of tokens in a script.
+    /// The type of tokens in a program.
     /// </summary>
     internal enum TokenType
     {
@@ -16,7 +16,7 @@
         Keyword,
 
         /// <summary>
-        /// The token is an indentifier.
+        /// The token is an identifier.
         /// </summary>
         Identifier,
 
@@ -31,6 +31,11 @@
         Register,
 
         /// <summary>
+        /// The token is a register shifter.
+        /// </summary>
+        RegisterShifter,
+
+        /// <summary>
         /// The token is an integer.
         /// </summary>
         Integer,
@@ -39,6 +44,21 @@
         /// The token is a string.
         /// </summary>
         String,
+
+        /// <summary>
+        /// The token is a symbol.
+        /// </summary>
+        Symbol,
+
+        /// <summary>
+        /// The token is one of the <see cref="Condition"/> values.
+        /// </summary>
+        Condition,
+
+        /// <summary>
+        /// The token is a coprocessor.
+        /// </summary>
+        Coprocessor,
 
         /// <summary>
         /// The contents of the token could not be identified.

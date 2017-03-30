@@ -1,8 +1,6 @@
-﻿using Pote;
-using Pote.Text;
+﻿using Pote.Text;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Topz.ArmV6Z
 {
@@ -12,94 +10,64 @@ namespace Topz.ArmV6Z
     internal sealed class Mnemonic
     {
         /// <summary>
+        /// The 'add' mnemonic.
+        /// </summary>
+        public const string Add = "add";
+
+        /// <summary>
+        /// The 'and' mnemonic.
+        /// </summary>
+        public const string And = "and";
+
+        /// <summary>
         /// The 'b' mnemonic.
         /// </summary>
         public const string B = "b";
 
         /// <summary>
-        /// The 'eq' mnemonic extension.
+        /// The 'cmp' mnemonic.
         /// </summary>
-        public const string EqualExtension = "eq";
+        public const string Cmp = "cmp";
 
         /// <summary>
-        /// The 'ne' mnemonic extension.
+        /// The 'ldr' mnemonic.
         /// </summary>
-        public const string NotEqualExtension = "ne";
+        public const string Ldr = "ldr";
 
         /// <summary>
-        /// The 'cs' mnemonic extension.
+        /// The 'ldrb' mnemonic.
         /// </summary>
-        public const string CarrySetExtension = "cs";
+        public const string Ldrb = "ldrb";
 
         /// <summary>
-        /// The 'hs' mnemonic extension.
+        /// The 'mov' mnemonic.
         /// </summary>
-        public const string UnsignedHigherOrSameExtension = "hs";
+        public const string Mov = "mov";
 
         /// <summary>
-        /// The 'cc' mnemonic extension.
+        /// The 'str' mnemonic.
         /// </summary>
-        public const string CarryClearExtension = "cc";
+        public const string Str = "str";
 
         /// <summary>
-        /// The 'cl' mnemonic extension.
+        /// The 'strh' mnemonic.
         /// </summary>
-        public const string UnsignedLowerExtension = "cl";
+        public const string Strh = "strh";
 
         /// <summary>
-        /// The 'mi' mnemonic extension.
+        /// The 'sub' mnemonic.
         /// </summary>
-        public const string MinusExtension = "mi";
+        public const string Sub = "sub";
 
         /// <summary>
-        /// The 'pl' mnemonic extension.
+        /// The 'teq' mnemonic.
         /// </summary>
-        public const string PlusExtension = "pl";
+        public const string Teq = "teq";
 
         /// <summary>
-        /// The 'vs' mnemonic extension.
+        /// The 'tst' mnemonic.
         /// </summary>
-        public const string OverflowExtension = "vs";
-
-        /// <summary>
-        /// The 'vc' mnemonic extension.
-        /// </summary>
-        public const string NoOverflowExtension = "vc";
-
-        /// <summary>
-        /// The 'hi' mnemonic extension.
-        /// </summary>
-        public const string UnsignedHigherExtension = "hi";
-
-        /// <summary>
-        /// The 'ls' mnemonic extension.
-        /// </summary>
-        public const string UnsignedLowerOrSameExtension = "ls";
-
-        /// <summary>
-        /// The 'ge' mnemonic extension.
-        /// </summary>
-        public const string SignedGreaterThanOrEqualExtension = "ge";
-
-        /// <summary>
-        /// The 'lt' mnemonic extension.
-        /// </summary>
-        public const string SignedLessThanExtension = "lt";
-
-        /// <summary>
-        /// The 'gt' mnemonic extension.
-        /// </summary>
-        public const string SignedGreaterThanExtension = "gt";
-
-        /// <summary>
-        /// The 'le' mnemonic extension.
-        /// </summary>
-        public const string LessThanOrEqualExtension = "le";
-
-        /// <summary>
-        /// The 'al' mnemonic extension.
-        /// </summary>
-        public const string AlwaysExtension = "al";
+        public const string Tst = "tst";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Mnemonic"/> class.
@@ -119,8 +87,7 @@ namespace Topz.ArmV6Z
             if (position == null)
                 throw new ArgumentNullException(nameof(position));
 
-            if (!name.ToLower().IsOneOf(All.ToArray()))
-                throw new ArgumentException("This is not a mnemonic.", nameof(name));
+            Position = position;
 
             Name = name;
         }
@@ -132,88 +99,24 @@ namespace Topz.ArmV6Z
         {
             get
             {
-                return new[]
-                {
-                    B
-                };
+                yield return Add;
+                yield return And;
+                yield return B;
+                yield return Cmp;
+                yield return Ldr;
+                yield return Mov;
+                yield return Strh;
+                yield return Str;
+                yield return Sub;
+                yield return Teq;
+                yield return Tst;
             }
         }
-
+        
         /// <summary>
-        /// A list of all the mnemonics with their extensions.
-        /// </summary>
-        public static IEnumerable<string> AllWithExtensions
-        {
-            get
-            {
-                foreach (string mnemonic in All)
-                {
-
-                    foreach (string extension in CommonExtensions)
-                        yield return mnemonic + extension;
-                }
-            }
-        }
-
-        /// <summary>
-        /// A list of all the mnemonics with and without their extensions.
-        /// Essentially a combo of <see cref="All"/> and <see cref="AllWithExtensions"/>.
-        /// </summary>
-        public static IEnumerable<string> AllWithAndWithoutExtensions
-        {
-            get
-            {
-                foreach (var mnemonic in All)
-                    yield return mnemonic;
-
-                foreach (var mnemonic in AllWithExtensions)
-                    yield return mnemonic;
-            }
-        }
-
-        /// <summary>
-        /// All common extensions.
-        /// </summary>
-        public static IEnumerable<string> CommonExtensions
-        {
-            get
-            {
-                return new string[]
-                {
-                    EqualExtension,
-                    NotEqualExtension,
-                    CarrySetExtension,
-                    UnsignedHigherOrSameExtension,
-                    CarryClearExtension,
-                    UnsignedLowerExtension,
-                    MinusExtension,
-                    PlusExtension,
-                    OverflowExtension,
-                    NoOverflowExtension,
-                    UnsignedHigherExtension,
-                    UnsignedLowerOrSameExtension,
-                    SignedGreaterThanOrEqualExtension,
-                    SignedLessThanExtension,
-                    SignedGreaterThanExtension,
-                    LessThanOrEqualExtension,
-                    AlwaysExtension
-                };
-            }
-        }
-
-        /// <summary>
-        /// The name of the mnemonic.
+        /// This is the mnemonic without condition, bits etc.
         /// </summary>
         public string Name
-        {
-            get;
-            private set;
-        }
-
-        /// <summary>
-        /// The same as <see cref="Name"/>, but without the condition at the end.
-        /// </summary>
-        public string NameWithoutCondtition
         {
             get;
             private set;
@@ -232,12 +135,30 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// Specifies if a special bit has been flipped.
+        /// </summary>
+        public Bit Bit
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// The position of the mnemonic in the program.
         /// </summary>
         public InputPosition Position
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// Returns a string that represents the current mnemonic.
+        /// </summary>
+        /// <returns>A string that represents the current mnemonic.</returns>
+        public override string ToString()
+        {
+            return $"{Name}{Condition.AsText()}{Bit.AsText()}";
         }
     }
 }

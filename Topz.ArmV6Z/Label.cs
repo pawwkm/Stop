@@ -4,7 +4,7 @@ using System;
 namespace Topz.ArmV6Z
 {
     /// <summary>
-    /// Represents a lable in a program.
+    /// Represents a label in a program.
     /// </summary>
     internal sealed class Label : Node
     {
@@ -40,7 +40,7 @@ namespace Topz.ArmV6Z
 
         /// <summary>
         /// The address of the label counting from the beginning of
-        /// the contaning <see cref="Procedure"/>.
+        /// the containing <see cref="Procedure"/>.
         /// </summary>
         public uint Address
         {

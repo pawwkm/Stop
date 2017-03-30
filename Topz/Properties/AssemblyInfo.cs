@@ -6,12 +6,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Topz.ArmV6Z")]
+[assembly: AssemblyTitle("Topz")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Topz.ArmV6Z")]
-[assembly: AssemblyCopyright("Copyright © Paw W. K. Møller 2016")]
+[assembly: AssemblyProduct("Topz")]
+[assembly: AssemblyCopyright("Copyright ©  2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -21,7 +21,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("0ca1b2ea-dfa5-4395-99cb-3c1c5ca2d433")]
+[assembly: Guid("b641d7c5-eea8-4e77-9a9d-64a0df475159")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -37,5 +37,3 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 [assembly: CLSCompliant(false)]
-[assembly: InternalsVisibleTo("Topz.ArmV6Z.Tests")]
-[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
