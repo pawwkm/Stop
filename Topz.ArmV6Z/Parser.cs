@@ -312,20 +312,43 @@ namespace Topz.ArmV6Z
                 throw new ParsingException(token.Position.ToString("Mnemonic expected."));
 
             var mnemonic = new Mnemonic(token.Text, token.Position);
-            var entry = Table.Where(e => e.Key.StartsWith(token.Text, StringComparison.InvariantCultureIgnoreCase)).Select(e => e).First();
+            var postfix = analyzer.LookAhead().Text.IsBit() ? analyzer.Next() : null ;
 
-            match = new FormatMatch();
-            match.Encoding = entry.Value;
-            match.Current++;
+            var entries = from row in Table
+                          where row.Key.StartsWith(token.Text, StringComparison.InvariantCultureIgnoreCase)
+                          select row;
 
-            foreach (Match m in Regex.Matches(entry.Key))
+            var wasSet = false;
+            foreach (var entry in entries)
             {
-                if (m.Value.Length != 0)
-                    match.Chunks.Add(m.Value);
+                match = new FormatMatch();
+                match.Encoding = entry.Value;
+                match.Current++;
+
+                foreach (Match m in Regex.Matches(entry.Key))
+                {
+                    if (m.Value.Length != 0)
+                        match.Chunks.Add(m.Value);
+                }
+
+                if (postfix == null && !match.Chunks[2].IsBit() || postfix != null && match.Chunks[2].ToLower() == postfix.Text.ToLower())
+                {
+                    wasSet = true;
+                    break;
+                }
             }
+
+            if (!wasSet)
+                throw new ParsingException(token.Position.ToString("Fuck is this?"));
 
             while (match.Next.StartsWith("{"))
                 Optional(mnemonic);
+
+            if (postfix != null)
+            {
+                mnemonic.Bit = postfix.Text.ToBit();
+                match.Current++;
+            }
 
             return mnemonic;
         }

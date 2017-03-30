@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Topz.ArmV6Z
 {
@@ -7,6 +9,21 @@ namespace Topz.ArmV6Z
     /// </summary>
     internal static class BitExtensions
     {
+        private static readonly Dictionary<string, Bit> Table = new Dictionary<string, Bit>()
+        {
+            { "",  Bit.None },
+            { "l", Bit.L },
+            { "L", Bit.L },
+            { "s", Bit.S },
+            { "S", Bit.S },
+            { "h", Bit.H },
+            { "H", Bit.H },
+            { "d", Bit.D },
+            { "D", Bit.D },
+            { "b", Bit.B },
+            { "B", Bit.B },
+        };
+
         /// <summary>
         /// Converts a bit to its assembly form.
         /// </summary>
@@ -14,17 +31,10 @@ namespace Topz.ArmV6Z
         /// <returns>The converted bit.</returns>
         public static string AsText(this Bit bit)
         {
-            switch (bit)
-            {
-                case Bit.L:
-                    return "l";
-                case Bit.None:
-                    return "";
-                case Bit.S:
-                    return "s";
-                default:
-                    throw new NotSupportedException($"The value '{bit}' is unsupported.");
-            }
+            if (Table.ContainsValue(bit))
+                return Table.First(x => x.Value == bit).Key;
+
+            throw new NotSupportedException($"The value '{bit}' is unsupported.");
         }
 
         /// <summary>
@@ -34,17 +44,20 @@ namespace Topz.ArmV6Z
         /// <returns>The converted bit.</returns>
         public static Bit ToBit(this string bit)
         {
-            switch (bit)
-            {
-                case "l":
-                    return Bit.L;
-                case "":
-                    return Bit.None;
-                case "s":
-                    return Bit.S;
-                default:
-                    throw new NotSupportedException($"The value '{bit}' is unsupported.");
-            }
+            if (Table.ContainsKey(bit))
+                return Table[bit];
+
+            throw new NotSupportedException($"The value '{bit}' is unsupported.");
+        }
+
+        /// <summary>
+        /// Tests if the string represents a <see cref="Bit"/>.
+        /// </summary>
+        /// <param name="value">The value to check.</param>
+        /// <returns>True if the string represents a <see cref="Bit"/> value: otherwise false.</returns>
+        public static bool IsBit(this string value)
+        {
+            return Table.ContainsKey(value);
         }
     }
 }

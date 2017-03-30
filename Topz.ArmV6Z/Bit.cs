@@ -21,6 +21,21 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// The S bit is turned on.
         /// </summary>
-        S = 2
+        S = 2,
+
+        /// <summary>
+        /// The H bit is turned on.
+        /// </summary>
+        H = 4,
+
+        /// <summary>
+        /// The D bit is turned on.
+        /// </summary>
+        D = 8,
+
+        /// <summary>
+        /// The B bit is turned on.
+        /// </summary>
+        B = 16
     }
 }
