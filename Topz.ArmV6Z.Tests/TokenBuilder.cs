@@ -318,5 +318,15 @@ namespace Topz.ArmV6Z
         {
             return Token($"{value}", TokenType.Integer);
         }
+
+        /// <summary>
+        /// Adds a bit to the builder.
+        /// </summary>
+        /// <param name="value">The value of the bit.</param>
+        /// <returns>This builder.</returns>
+        public TokenBuilder Bit(Bit value)
+        {
+            return Token(value.AsText(), TokenType.Identifier);
+        }
     }
 }

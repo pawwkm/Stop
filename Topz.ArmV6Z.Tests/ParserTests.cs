@@ -753,6 +753,40 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// Tests that <see cref="Parser.Parse(LexicalAnalyzer{TokenType})"/>
+        /// can parse an overloaded instruction.
+        /// </summary>
+        [Test]
+        public void Parse_OverloadedInstruction_ParsesProcedure()
+        {
+            var builder = new TokenBuilder();
+            builder.Procedure().Identifier("main")
+                   .Mnemonic(Mnemonic.Ldr).Bit(Bit.B).R0().Comma().LeftSquareBracket().R1().Comma().Plus().R2().Comma().Lsl().Lsr().RightSquareBracket();
+
+            var parser = new Parser();
+            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+
+            Assert.AreEqual(1, program.Procedures.Count);
+            Assert.AreEqual(0, program.Data.Count);
+            Assert.AreEqual(0, program.Strings.Count);
+
+            var main = program.Procedures[0];
+            Assert.AreEqual("main", main.Name);
+            Assert.AreEqual(1, main.Instructions.Count);
+
+            var instruction = main.Instructions[0];
+            Assert.AreEqual(instruction.Values.Count, 5);
+            Assert.Null(instruction.Label);
+            Assert.AreEqual(instruction.Encoding, "cond 01 I P U 1 W 1 Rn Rd addr_mode");
+            Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
+            Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
+            Assert.AreEqual(instruction.Values[Symbols.Plus + Placeholders.Rm], Register.R2);
+            Assert.AreEqual(instruction.Values[Placeholders.Shift], RegisterShifter.Lsl);
+            Assert.AreEqual(instruction.Values[Placeholders.ShiftImmediate], RegisterShifter.Lsr);
+            Assert.AreEqual(instruction.Mnemonic.Bit, Bit.B);
+        }
+
+        /// <summary>
         /// Creates a substitute for an <see cref="LexicalAnalyzer{TokenType}"/>.
         /// </summary>
         /// <param name="tokens">The tokens the analyzer will consume.</param>
