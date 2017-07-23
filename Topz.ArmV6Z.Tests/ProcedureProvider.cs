@@ -31,7 +31,8 @@ namespace Topz.ArmV6Z
 
                 { "and r5, r6, #432",        new byte[] { 0xE2, 0x06, 0x5E, 0x1B } },
                 { "cmp r0, r1",              new byte[] { 0xE1, 0x50, 0x00, 0x01 } },
-                { "mov r0, r1",              new byte[] { 0xE1, 0xA0, 0x00, 0x01 } }
+                { "mov r0, r1",              new byte[] { 0xE1, 0xA0, 0x00, 0x01 } },
+                { "sub r7, r8, #234",        new byte[] { 0xE2, 0x48, 0x70, 0xEA } },
             };
 
             foreach (var test in tests)
