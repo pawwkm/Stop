@@ -18,7 +18,7 @@ namespace Topz.ArmV6Z
             { "ADD{<cond>}{S} <Rd>, <Rn>, <shifter_operand>",   "cond 00 I 0100 S Rn Rd shifter_operand" },
             { "AND{<cond>}{S} <Rd>, <Rn>, <shifter_operand>",   "cond 00 I 0000 S Rn Rd shifter_operand" },
             { "B{L}{<cond>} <target_address>",                  "cond 101 L signed_immed_24" },
-            { "CMP{<cond>} <Rn>, <shifter_operand>",            "cond 00 I 10101 Rn SBZ shifter_operand" },
+            { "CMP{<cond>} <Rn>, <shifter_operand>",            "cond 00 I 10101 Rn 0000 shifter_operand" },
             { "LDR{<cond>} <Rd>, <addressing_mode>",            "cond 01 I P U 0 W 1 Rn Rd addr_mode" },
             { "LDR{<cond>}B <Rd>, <addressing_mode>",           "cond 01 I P U 1 W 1 Rn Rd addr_mode" },
             { "LDR{<cond>}D <Rd>, <addressing_mode>",           "cond 000 P U I W 0 Rn Rd addr_mode 1101 addr_mode" },
