@@ -17,17 +17,19 @@ namespace Topz.ArmV6Z
         {
             var tests = new Dictionary<string, byte[]>()
             {
-                { "add r10, r10, #21",      new byte[] { 0xE2, 0x8A, 0xA0, 0x15 } },
-                { "add r10, r10, r10",      new byte[] { 0xE0, 0x8A, 0xA0, 0x0A } },
-                { "add r0, r1, r2, lsl #2", new byte[] { 0xE0, 0x81, 0x01, 0x02 } },
-                { "add r0, r1, r2, lsl r4", new byte[] { 0xE0, 0x81, 0x04, 0x12 } },
-                { "add r0, r1, r2, lsr #2", new byte[] { 0xE0, 0x81, 0x01, 0x22 } },
-                { "add r0, r1, r2, lsr r4", new byte[] { 0xE0, 0x81, 0x04, 0x32 } },
-                { "add r0, r1, r2, asr #2", new byte[] { 0xE0, 0x81, 0x01, 0x42 } },
-                { "add r0, r1, r2, asr r4", new byte[] { 0xE0, 0x81, 0x04, 0x52 } },
-                { "add r0, r1, r2, ror #2", new byte[] { 0xE0, 0x81, 0x01, 0x62 } },
-                { "add r0, r1, r2, ror r4", new byte[] { 0xE0, 0x81, 0x04, 0x72 } },
-                { "add r0, r1, r2, rrx",    new byte[] { 0xE0, 0x81, 0x00, 0x62 } }
+                { "add r10, r10, #21",       new byte[] { 0xE2, 0x8A, 0xA0, 0x15 } },
+                { "add r10, r10, r10",       new byte[] { 0xE0, 0x8A, 0xA0, 0x0A } },
+                { "add r0, r1, r2, lsl #2",  new byte[] { 0xE0, 0x81, 0x01, 0x02 } },
+                { "add r0, r1, r2, lsl r4",  new byte[] { 0xE0, 0x81, 0x04, 0x12 } },
+                { "add r0, r1, r2, lsr #2",  new byte[] { 0xE0, 0x81, 0x01, 0x22 } },
+                { "add r0, r1, r2, lsr r4",  new byte[] { 0xE0, 0x81, 0x04, 0x32 } },
+                { "add r0, r1, r2, asr #2",  new byte[] { 0xE0, 0x81, 0x01, 0x42 } },
+                { "add r0, r1, r2, asr r4",  new byte[] { 0xE0, 0x81, 0x04, 0x52 } },
+                { "add r0, r1, r2, ror #2",  new byte[] { 0xE0, 0x81, 0x01, 0x62 } },
+                { "add r0, r1, r2, ror r4",  new byte[] { 0xE0, 0x81, 0x04, 0x72 } },
+                { "add r0, r1, r2, rrx",     new byte[] { 0xE0, 0x81, 0x00, 0x62 } },
+
+                { "and r5, r6, #432",        new byte[] { 0xE2, 0x06, 0x5E, 0x1B } },
             };
 
             foreach (var test in tests)
