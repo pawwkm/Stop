@@ -12,6 +12,10 @@ namespace Topz.ArmV6Z
     /// </summary>
     internal sealed class LexicalAnalyzer : LexicalAnalyzer<TokenType>
     {
+        private static string[] conditions = (from Condition c in Enum.GetValues(typeof(Condition))
+                                              select c.AsText()).ToArray();
+
+
         /// <summary>
         /// Initializes a new instance of the <see cref="LexicalAnalyzer"/> class.
         /// </summary>
@@ -66,7 +70,7 @@ namespace Topz.ArmV6Z
                 return Shifted();
             if (Source.MatchesAnyOf(Symbols.All))
                 return Symbol();
-            if (Source.MatchesAnyOf(false, Mnemonic.All))
+            if (Source.MatchesAnyOf(Mnemonic.All))
                 return LexMnemonic();
             if (char.IsLetter(c) || c == '_')
                 return Identifier();

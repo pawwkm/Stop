@@ -47,6 +47,10 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="Atom\AddressType.cs" />
     <Compile Include="Atom\Atom.cs" />
     <Compile Include="Atom\AtomLinker.cs" />
     <Compile Include="Atom\AtomReader.cs" />

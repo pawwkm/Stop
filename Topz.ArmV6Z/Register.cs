@@ -51,9 +51,9 @@ namespace Topz.ArmV6Z
         public const string R7 = "r7";
 
         /// <summary>
-        /// The 'r1' register.
+        /// The 'r8' register.
         /// </summary>
-        public const string R8 = "r1";
+        public const string R8 = "r8";
 
         /// <summary>
         /// The 'r9' register.
@@ -116,7 +116,7 @@ namespace Topz.ArmV6Z
         /// <paramref name="token"/> is not one of <see cref="All"/>.
         /// The type of <paramref name="token"/> is not <see cref="TokenType.Register"/>.
         /// </exception>
-        public Register(Token<TokenType> token) : this(token.Position, token.Text)
+        public Register(Token<TokenType> token) : this(token.Text, token.Position)
         {
             if (token.Type != TokenType.Register)
                 throw new ArgumentException("The token is not a register.", nameof(token));
@@ -125,15 +125,15 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// Initializes a new instance of the <see cref="Register"/> class.
         /// </summary>
-        /// <param name="position">The position where the register was referenced.</param>
         /// <param name="register">The actual register.</param>
+        /// <param name="position">The position where the register was referenced.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="position"/> or <paramref name="register"/> is null.
         /// </exception>
         /// <exception cref="ArgumentException">
         /// <paramref name="register"/> is not one of <see cref="All"/>.
         /// </exception>
-        public Register(InputPosition position, string register) : base(position)
+        public Register(string register, InputPosition position) : base(position)
         {
             if (register == null)
                 throw new ArgumentNullException(nameof(register));
@@ -240,6 +240,58 @@ namespace Topz.ArmV6Z
                 return this == (string)obj;
 
             return obj is Register && this == (Register)obj;
+        }
+
+        public static explicit operator int (Register register)
+        {
+            if (register == null)
+                throw new ArgumentNullException(nameof(register));
+
+            switch (register.Value)
+            {
+                case R0:
+                    return 0;
+                case R1:
+                    return 1;
+                case R2:
+                    return 2;
+                case R3:
+                    return 3;
+                case R4:
+                    return 4;
+                case R5:
+                    return 5;
+                case R6:
+                    return 6;
+                case R7:
+                    return 7;
+                case R8:
+                    return 8;
+                case R9:
+                    return 9;
+                case R10:
+                    return 10;
+                case R11:
+                    return 11;
+                case R12:
+                    return 12;
+                case R13:
+                case StackPointer:
+                    return 13;
+                case R14:
+                case LinkRegister:
+                    return 14;
+                case R15:
+                case ProgramCounter:
+                    return 15;
+                default:
+                    throw new ArgumentException(nameof(register));
+            }
+        }
+
+        public static explicit operator uint(Register register)
+        {
+            return (uint)((int)register);
         }
     }
 }

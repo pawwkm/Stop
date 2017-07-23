@@ -159,11 +159,7 @@ namespace Topz.FileFormats.Atom
             procedure.Code.Add(0x00);
             procedure.Code.Add(0x00);
 
-            procedure.References.Add(new Reference(file.Atoms[0])
-            {
-                IsAddressInLittleEndian = true,
-                SizeOfAddress = 2
-            });
+            procedure.References.Add(new Reference(file.Atoms[0]));
 
             var binary = new byte[] 
             {
@@ -206,11 +202,7 @@ namespace Topz.FileFormats.Atom
             procedure.Code.Add(0x00);
             procedure.Code.Add(0x00);
 
-            procedure.References.Add(new Reference(data)
-            {
-                IsAddressInLittleEndian = true,
-                SizeOfAddress = 2
-            });
+            procedure.References.Add(new Reference(data));
 
             var binary = new byte[]
             {
@@ -244,6 +236,9 @@ namespace Topz.FileFormats.Atom
             sub.Code.Add(0xAA);
             sub.Code.Add(0x55);
 
+            var reference = new Reference(sub);
+            reference.AddressType = AddressType.ArmTargetAddress;
+
             var main = new Procedure();
             file.Atoms.Add(main);
 
@@ -252,12 +247,7 @@ namespace Topz.FileFormats.Atom
             main.Name = "Proc";
             main.Code.Add(0x00);
             main.Code.Add(0x00);
-
-            main.References.Add(new Reference(sub)
-            {
-                IsAddressInLittleEndian = true,
-                SizeOfAddress = 2
-            });
+            main.References.Add(reference);
 
             var binary = new byte[]
             {

@@ -79,7 +79,7 @@ namespace Topz.ArmV6Z
             Keyword(Keywords.Procedure);
             var identifier = Identifier();
 
-            var procedure = new Procedure(identifier.Position, identifier.Name);
+            var procedure = new Procedure(identifier.Name, identifier.Position);
             procedure.IsExternal = isExternal;
 
             if (!isExternal)

@@ -33,10 +33,10 @@ namespace Topz.FileSystems.Scripting
             if (code == null)
                 throw new ArgumentNullException(nameof(code));
 
-            using (StreamReader reader = new StreamReader(code))
+            using (var reader = new StreamReader(code))
             {
-                LexicalAnalyzer analyzer = new LexicalAnalyzer(reader);
-                Parser parser = new Parser();
+                var analyzer = new LexicalAnalyzer(reader);
+                var parser = new Parser();
 
                 commands.AddRange(parser.Parse(analyzer));
             }
@@ -47,7 +47,7 @@ namespace Topz.FileSystems.Scripting
         /// </summary>
         public void Run()
         {
-            foreach (Command command in commands)
+            foreach (var command in commands)
                 command.Execute(context);
         }
 
@@ -66,10 +66,10 @@ namespace Topz.FileSystems.Scripting
             if (code == null)
                 throw new ArgumentNullException(nameof(code));
 
-            LexicalAnalyzer analyzer = new LexicalAnalyzer(code.ToStreamReader());
-            Parser parser = new Parser();
+            var analyzer = new LexicalAnalyzer(code.ToStreamReader());
+            var parser = new Parser();
 
-            foreach (Command command in parser.Parse(analyzer))
+            foreach (var command in parser.Parse(analyzer))
             {
                 command.Execute(context);
                 commands.Add(command);

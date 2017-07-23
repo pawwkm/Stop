@@ -31,20 +31,5 @@ namespace Topz.ArmV6Z
             get;
             private set;
         }
-
-        /// <summary>
-        /// Accepts a given <paramref name="pass"/>.
-        /// </summary>
-        /// <param name="pass">The pass to accept.</param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="pass"/> is null.
-        /// </exception>
-        public void Accept(IPass pass)
-        {
-            if (pass == null)
-                throw new ArgumentNullException(nameof(pass));
-
-            pass.Visit((dynamic)this);
-        }
     }
 }

@@ -64,30 +64,8 @@ namespace Topz.FileFormats.Atom
             foreach (var reference in procedure.References)
             {
                 writer.Write((uint)of.Atoms.IndexOf(reference.Atom));
-                writer.Write(reference.IsAddressInLittleEndian);
-                writer.Write(reference.SizeOfAddress);
-
-                if (reference.SizeOfAddress == 2)
-                {
-                    if (reference.IsAddressInLittleEndian)
-                        writer.Write((ushort)reference.Address);
-                    else
-                        writer.WriteBigEndian((ushort)reference.Address);
-                }
-                else if (reference.SizeOfAddress == 4)
-                {
-                    if (reference.IsAddressInLittleEndian)
-                        writer.Write(reference.Address);
-                    else
-                        writer.WriteBigEndian(reference.Address);
-                }
-                else
-                {
-                    if (reference.IsAddressInLittleEndian)
-                        writer.Write((ulong)reference.Address);
-                    else
-                        writer.WriteBigEndian((ulong)reference.Address);
-                }
+                writer.Write((byte)reference.AddressType);
+                writer.Write(reference.Address);
             }
         }
 

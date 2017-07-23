@@ -148,8 +148,7 @@ namespace Topz.FileFormats.Atom
 
                         var r = new Reference(referenced);
                         r.Address = reference.Address;
-                        r.IsAddressInLittleEndian = reference.IsAddressInLittleEndian;
-                        r.SizeOfAddress = reference.SizeOfAddress;
+                        r.AddressType = reference.AddressType;
 
                         if (!referenced.IsGlobal)
                         {
@@ -259,19 +258,22 @@ namespace Topz.FileFormats.Atom
             {
                 foreach (var reference in procedure.References)
                 {
-                    var offset = (long)(addresses[procedure] + reference.Address);
-                    stream.Seek(offset, SeekOrigin.Begin);
+                    if (reference.AddressType == AddressType.ArmTargetAddress)
+                        throw new NotSupportedException();
 
-                    byte[] bytes = null;
-                    if (reference.SizeOfAddress == 2)
-                        bytes = BitConverter.GetBytes((ushort)addresses[reference.Atom]);
-                    else
-                        bytes = BitConverter.GetBytes(addresses[reference.Atom]);
+                    //var offset = (long)(addresses[procedure] + reference.Address);
+                    //stream.Seek(offset, SeekOrigin.Begin);
 
-                    if (!reference.IsAddressInLittleEndian)
-                        bytes.Reverse();
+                    //byte[] bytes = null;
+                    //if (reference.SizeOfAddress == 2)
+                    //    bytes = BitConverter.GetBytes((ushort)addresses[reference.Atom]);
+                    //else
+                    //    bytes = BitConverter.GetBytes(addresses[reference.Atom]);
 
-                    stream.Write(bytes, 0, bytes.Length);
+                    //if (!reference.IsAddressInLittleEndian)
+                    //    bytes.Reverse();
+
+                    //stream.Write(bytes, 0, bytes.Length);
                 }
             }
         }

@@ -41,9 +41,8 @@ address and if it the address is in little endian.
         \hline
         \textbf{Offset} & \textbf{Size in Bytes} & \textbf{Description}                             \\ \hline
         0               & 4                      & The number of the atom that is being referenced. \\ \hline
-        4               & 1                      & Boolean telling if the address is little endian. \\ \hline
-        5               & 1                      & Type of address.                                 \\ \hline
-        6               & 4                      & The address to relocate.                         \\ \hline
+        4               & 1                      & Type of address.                                 \\ \hline
+        5               & 4                      & The address to relocate.                         \\ \hline
     \end{tabular}
 \end{table}
 
@@ -51,9 +50,6 @@ address and if it the address is in little endian.
 The number of an atom is the number of atoms declared before the referenced one.
 This number is used instead of the name to save space and improve performance. 
 This number is an unsigned 32 bit integer.
-
-\subsubsection{Is it in Little Endian}
-If true the address is in little endian; otherwise false.
 
 \subsubsection{Address Type}
 \begin{table}[h]

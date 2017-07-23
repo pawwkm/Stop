@@ -1,5 +1,4 @@
-﻿using Pote;
-using System;
+﻿using System;
 
 namespace Topz.FileFormats.Atom
 {
@@ -9,8 +8,6 @@ namespace Topz.FileFormats.Atom
     public sealed class Reference
     {
         private Atom atom;
-
-        private byte sizeOfAddress = 4;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Reference"/> class.
@@ -28,34 +25,12 @@ namespace Topz.FileFormats.Atom
         }
 
         /// <summary>
-        /// If true the <see cref="Address"/> is in little endian;
-        /// otherwise it is in big endian.
+        /// The type of address to relocate.
         /// </summary>
-        public bool IsAddressInLittleEndian
+        public AddressType AddressType
         {
             get;
             set;
-        }
-
-        /// <summary>
-        /// The size of an address in bytes.
-        /// </summary>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="value"/> is not 2, 4 or 8.
-        /// </exception>
-        public byte SizeOfAddress
-        {
-            get
-            {
-                return sizeOfAddress;
-            }
-            set
-            {
-                if (!sizeOfAddress.IsOneOf(2, 4, 8))
-                    throw new ArgumentException("The address size can only be 2, 4 or 8 bytes long", nameof(value));
-
-                sizeOfAddress = value;
-            }
         }
 
         /// <summary>
@@ -103,7 +78,7 @@ namespace Topz.FileFormats.Atom
             if (reference == null)
                 throw new ArgumentNullException(nameof(reference));
 
-            return Address < reference.Address + reference.SizeOfAddress && reference.Address < Address + SizeOfAddress;
+            return false;
         }
     }
 }

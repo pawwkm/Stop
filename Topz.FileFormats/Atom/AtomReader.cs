@@ -11,7 +11,7 @@ namespace Topz.FileFormats.Atom
     /// </summary>
     public class AtomReader
     {
-        private List<Tuple<Procedure, uint, bool, byte, uint>> references = new List<Tuple<Procedure, uint, bool, byte, uint>>();
+        private List<Tuple<Procedure, uint, uint>> references = new List<Tuple<Procedure, uint, uint>>();
 
         private BinaryReader reader;
 
@@ -404,11 +404,11 @@ namespace Topz.FileFormats.Atom
 
                 var size = reader.ReadByte();
                 if (!size.IsOneOf(2, 4))
-                    throw new InvalidObjectFileException("The address size at " + ToHex(Position - 1) + " is invalid. It must be 2 or 4.");
+                    throw new InvalidObjectFileException($"The address size at {ToHex(Position - 1)} is invalid. It must be 2 or 4.");
 
                 var address = (uint)Address(size, isLittleEndian);
 
-                references.Add(new Tuple<Procedure, uint, bool, byte, uint>(owner, number, isLittleEndian, size, address));
+                references.Add(new Tuple<Procedure, uint, uint>(owner, number, address));
             }
         }
 
@@ -431,9 +431,7 @@ namespace Topz.FileFormats.Atom
                 }
 
                 var reference = new Reference(file.Atoms[(int)tuple.Item2]);
-                reference.IsAddressInLittleEndian = tuple.Item3;
-                reference.SizeOfAddress = tuple.Item4;
-                reference.Address = tuple.Item5;
+                reference.Address = tuple.Item3;
 
                 foreach (var r in tuple.Item1.References)
                 {

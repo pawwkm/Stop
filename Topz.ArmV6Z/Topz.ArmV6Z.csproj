@@ -51,6 +51,9 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Assembler.cs" />
     <Compile Include="Bit.cs" />
     <Compile Include="BitExtensions.cs" />
@@ -58,12 +61,15 @@
     <Compile Include="ConditionExtensions.cs" />
     <Compile Include="Data.cs" />
     <Compile Include="Directive.cs" />
+    <Compile Include="Encoder.cs" />
+    <Compile Include="EncodingException.cs" />
+    <Compile Include="EncodingPass.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Identifier.cs" />
+    <Compile Include="IEnumerable`1Extensions.cs" />
     <Compile Include="INamedNode.cs" />
     <Compile Include="Instruction.cs" />
     <Compile Include="Integer.cs" />
-    <Compile Include="IPass.cs" />
     <Compile Include="Keywords.cs" />
     <Compile Include="Label.cs" />
     <Compile Include="LexicalAnalyzer.cs" />

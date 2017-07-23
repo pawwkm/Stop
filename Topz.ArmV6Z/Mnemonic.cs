@@ -132,7 +132,7 @@ namespace Topz.ArmV6Z
         {
             get;
             set;
-        }
+        } = Condition.Always;
 
         /// <summary>
         /// Specifies if a special bit has been flipped.

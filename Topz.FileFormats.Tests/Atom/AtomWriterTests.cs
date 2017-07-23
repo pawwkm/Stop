@@ -153,13 +153,7 @@ namespace Topz.FileFormats.Atom
             procedure.Code.Add(0x00);
             procedure.Code.Add(0x00);
             procedure.Code.Add(0x00);
-
-            procedure.References.Add(new Reference(s)
-            {
-                IsAddressInLittleEndian = true,
-                SizeOfAddress = 4,
-                Address = 0x00
-            });
+            procedure.References.Add(new Reference(s));
 
             using (var stream = new MemoryStream())
             {
