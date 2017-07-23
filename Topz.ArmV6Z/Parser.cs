@@ -26,7 +26,7 @@ namespace Topz.ArmV6Z
             { "STR{<cond>} <Rd>, <addressing_mode>",            "cond 01 I P U 0 W 0 Rn Rd addr_mode" },
             { "STR{<cond>}H <Rd>, <addressing_mode>",           "cond 000 P U I W 0 Rn Rd addr_mode 1011 addr_mode" },
             { "SUB{<cond>}{S} <Rd>, <Rn>, <shifter_operand>",   "cond 00 I 0010 S Rn Rd shifter_operand" },
-            { "TEQ{<cond>} <Rn>, <shifter_operand>",            "cond 00 I 1001 1 Rn SBZ shifter_operand" },
+            { "TEQ{<cond>} <Rn>, <shifter_operand>",            "cond 00 I 1001 1 Rn 0000 shifter_operand" },
             { "TST{<cond>} <Rn>, <shifter_operand>",            "cond 00 I 1000 1 Rn SBZ shifter_operand" }
         };
 
