@@ -399,5 +399,64 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(expected, binary);
             Assert.AreEqual(0, index);
         }
+
+        /// <summary>
+        /// Tests that <see cref="Encoder.EncodeLoadStoreOperand(ref uint, int, Instruction)"/> 
+        /// can encode a immediate load/store operand at a given index in the instruction.
+        /// </summary>
+        /// <param name="offset">The immediate offset.</param>
+        /// <param name="expected">The expected result of the encoding.</param>
+        [TestCase(-4095, 0x5000FFFu)]
+        [TestCase(0, 0x5000000u)]
+        [TestCase(4095, 0x5000FFFu)]
+        public void EncodeLoadStoreOperand_ImmediateOffset12Operand_CorectlyEncoded(int offset, uint expected)
+        {
+            var binary = 0u;
+            var index = 11;
+
+            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new InputPosition()));
+            instruction.Values.Add(Placeholders.Offset12, new Integer(offset, new InputPosition()));
+
+            index = Encoder.EncodeLoadStoreOperand(ref binary, index, instruction);
+
+            Assert.AreEqual(expected, binary);
+            Assert.AreEqual(0, index);
+        }
+
+        /// <summary>
+        /// Tests that <see cref="Encoder.EncodeLoadStoreOperand(ref uint, int, Instruction)"/> 
+        /// can encode a scaled register offset operand at a given index in the instruction.
+        /// </summary>
+        /// <param name="shifter">The register shifter.</param>
+        /// <param name="offset">The immediate offset.</param>
+        /// <param name="expected">The expected result of the encoding.</param>
+        [TestCase(RegisterShifter.Lsl, 0, 0x7800007u)]
+        [TestCase(RegisterShifter.Lsl, 31, 0x7800F87u)]
+        [TestCase(RegisterShifter.Lsr, 1, 0x78000A7u)]
+        [TestCase(RegisterShifter.Lsr, 16, 0x7800827u)]
+        [TestCase(RegisterShifter.Lsr, 32, 0x7800027u)]
+        [TestCase(RegisterShifter.Asr, 1, 0x78000C7u)]
+        [TestCase(RegisterShifter.Asr, 16, 0x7800847u)]
+        [TestCase(RegisterShifter.Asr, 32, 0x7800047u)]
+        [TestCase(RegisterShifter.Ror, 1, 0x78000E7u)]
+        [TestCase(RegisterShifter.Ror, 16, 0x7800867u)]
+        [TestCase(RegisterShifter.Ror, 31, 0x7800FE7u)]
+        [TestCase(RegisterShifter.Rrx, 0, 0x7800067u)]
+        public void EncodeLoadStoreOperand_ScaledRegisterOffsetOperand_CorectlyEncoded(string shifter, int offset, uint expected)
+        {
+            var binary = 0u;
+            var index = 11;
+
+            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new InputPosition()));
+            instruction.Values.Add(Placeholders.ShiftImmediate, new Integer(offset, new InputPosition()));
+            instruction.Values.Add(Placeholders.Shift, new RegisterShifter(shifter, new InputPosition()));
+            instruction.Values.Add(Placeholders.Rn, new Register(Register.R6, new InputPosition()));
+            instruction.Values.Add(Symbols.Plus + Placeholders.Rm, new Register(Register.R7, new InputPosition()));
+
+            index = Encoder.EncodeLoadStoreOperand(ref binary, index, instruction);
+
+            Assert.AreEqual(expected, binary);
+            Assert.AreEqual(0, index);
+        }
     }
 }

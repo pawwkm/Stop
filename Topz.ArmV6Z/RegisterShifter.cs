@@ -46,7 +46,7 @@ namespace Topz.ArmV6Z
         /// <paramref name="token"/> is not one of <see cref="All"/>.
         /// The type of <paramref name="token"/> is not <see cref="TokenType.RegisterShifter"/>.
         /// </exception>
-        public RegisterShifter(Token<TokenType> token) : this(token.Position, token.Text)
+        public RegisterShifter(Token<TokenType> token) : this(token.Text, token.Position)
         {
             if (token.Type != TokenType.RegisterShifter)
                 throw new ArgumentException("The token is not a register shifter.", nameof(token));
@@ -55,15 +55,15 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// Initializes a new instance of the <see cref="RegisterShifter"/> class.
         /// </summary>
-        /// <param name="position">The position where the register was referenced.</param>
         /// <param name="shifter">The actual register.</param>
+        /// <param name="position">The position where the register was referenced.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="position"/> or <paramref name="shifter"/> is null.
         /// </exception>
         /// <exception cref="ArgumentException">
         /// <paramref name="shifter"/> is not one of <see cref="All"/>.
         /// </exception>
-        public RegisterShifter(InputPosition position, string shifter) : base(position)
+        public RegisterShifter(string shifter, InputPosition position) : base(position)
         {
             if (shifter == null)
                 throw new ArgumentNullException(nameof(shifter));

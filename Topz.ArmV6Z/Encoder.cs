@@ -2,6 +2,9 @@
 
 namespace Topz.ArmV6Z
 {
+    /// <summary>
+    /// Encodes various parts of an instruction.
+    /// </summary>
     internal static class Encoder
     {
         /// <summary>
@@ -62,10 +65,10 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
-        /// Encodes a bit into an instruction.
+        /// Encodes a shifter operand as specified on section A5.1.
         /// </summary>
-        /// <param name="binary">The instruction to apply the bit to.</param>
-        /// <param name="index">The index where the bit is applied to.</param>
+        /// <param name="binary">The instruction to apply the operand to.</param>
+        /// <param name="index">The index where the operand is applied to.</param>
         /// <param name="instruction">The instruction that carries the shifter operand.</param>
         /// <returns>The new index.</returns>
         public static int EncodeShifterOperand(ref uint binary, int index, Instruction instruction)
@@ -175,6 +178,147 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// Encodes a load/store operand as specified on section A5.2.
+        /// </summary>
+        /// <param name="binary">The instruction to apply the operand to.</param>
+        /// <param name="index">The index where the operand is applied to.</param>
+        /// <param name="instruction">The instruction that carries the shifter operand.</param>
+        /// <returns>The new index.</returns>
+        public static int EncodeLoadStoreOperand(ref uint binary, int index, Instruction instruction)
+        {
+            if (instruction.Values.ContainsKey(Placeholders.Offset12))
+            {
+                // Set the 26th and 24th bit.
+                binary |= 1 << 26;
+                binary |= 1 << 24;
+
+                var offset = instruction.Values[Placeholders.Offset12] as Integer;
+                if (Math.Abs(offset.Value) > 4095)
+                    throw new EncodingException(offset.Position.ToString("The offset exceeds 12 bits."));
+
+                binary |= ((uint)Math.Abs(offset.Value) << index - 11);
+                if (instruction.Values.ContainsKey(Symbols.ExclamationMark))
+                    binary |= 1 << 21;
+            }
+            else if (instruction.Values.ContainsKey(Symbols.Plus + Placeholders.Rm) || instruction.Values.ContainsKey(Symbols.Minus + Placeholders.Rm))
+            {
+                // Set the 26th, 25th and 24th bit.
+                binary |= 1 << 26;
+                binary |= 1 << 25;
+                binary |= 1 << 24;
+
+                if (instruction.Values.ContainsKey(Symbols.ExclamationMark))
+                    binary |= 1 << 21;
+
+                var rm = 0u;
+                if (instruction.Values.ContainsKey(Symbols.Plus + Placeholders.Rm))
+                {
+                    rm = (uint)((Register)instruction.Values[Symbols.Plus + Placeholders.Rm]);
+                    binary |= 1 << 23;
+                }
+                else
+                    rm = (uint)((Register)instruction.Values[Symbols.Minus + Placeholders.Rm]);
+
+                binary |= rm << index - 11;
+                if (instruction.Values.ContainsKey(Placeholders.Shift))
+                {
+                    var shift = 0u;
+
+                    Integer immediate = null;
+                    if (instruction.Values.ContainsKey(Placeholders.ShiftImmediate))
+                        immediate = (Integer)instruction.Values[Placeholders.ShiftImmediate];
+
+                    var register = instruction.Values[Placeholders.Shift] as RegisterShifter;
+                    if (register == RegisterShifter.Lsl)
+                    {
+                        if (immediate.Value < 0 || immediate.Value > 31)
+                            throw new EncodingException(immediate.Position.ToString("Immediate must be from 0 to 31."));
+                    }
+                    else if (register == RegisterShifter.Lsr)
+                    {
+                        shift = 1;
+                        if (immediate.Value < 0 || immediate.Value > 32)
+                            throw new EncodingException(immediate.Position.ToString("Immediate must be from 1 to 32."));
+                    }
+                    else if (register == RegisterShifter.Asr)
+                    {
+                        shift = 2;
+                        if (immediate.Value < 0 || immediate.Value > 32)
+                            throw new EncodingException(immediate.Position.ToString("Immediate must be from 1 to 32."));
+                    }
+                    else if (register == RegisterShifter.Ror)
+                    {
+                        shift = 3;
+                        if (immediate.Value < 0 || immediate.Value > 31)
+                            throw new EncodingException(immediate.Position.ToString("Immediate must be from 1 to 31."));
+                    }
+                    else if (register == RegisterShifter.Rrx)
+                        shift = 3;
+
+                    binary |= shift << 5;
+                    if (immediate != null && immediate.Value != 32)
+                        binary |= (uint)immediate.Value << 7;
+                }
+            }
+
+            if (instruction.Values.ContainsKey(Placeholders.PostIndexed))
+                binary &= ~(1u << 24);
+
+            return index - 11;
+        }
+
+        /// <summary>
+        /// Encodes a load/store operand as specified on section A5.3.
+        /// </summary>
+        /// <param name="binary">The instruction to apply the operand to.</param>
+        /// <param name="index">The index where the operand is applied to.</param>
+        /// <param name="instruction">The instruction that carries the shifter operand.</param>
+        /// <returns>The new index.</returns>
+        public static int EncodeMiscellaneousLoadStoreOperand(ref uint binary, int index, Instruction instruction)
+        {
+            if (instruction.Values.ContainsKey(Placeholders.Offset8))
+            {
+                // Set the 24th and 22th bit.
+                binary |= 1 << 24;
+                binary |= 1 << 22;
+
+                var offset = instruction.Values[Placeholders.Offset8] as Integer;
+                if (Math.Abs(offset.Value) > 4095)
+                    throw new EncodingException(offset.Position.ToString("The offset exceeds 12 bits."));
+
+                binary |= ((uint)Math.Abs(offset.Value) << index - 11);
+                if (instruction.Values.ContainsKey(Symbols.ExclamationMark))
+                    binary |= 1 << 21;
+            }
+            else if (instruction.Values.ContainsKey(Symbols.Plus + Placeholders.Rm) || instruction.Values.ContainsKey(Symbols.Minus + Placeholders.Rm))
+            {
+                // Set the 24th, 7th and 4th bit.
+                binary |= 1 << 24;
+                binary |= 1 << 7;
+                binary |= 1 << 4;
+
+                if (instruction.Values.ContainsKey(Symbols.ExclamationMark))
+                    binary |= 1 << 21;
+
+                var rm = 0u;
+                if (instruction.Values.ContainsKey(Symbols.Plus + Placeholders.Rm))
+                {
+                    rm = (uint)((Register)instruction.Values[Symbols.Plus + Placeholders.Rm]);
+                    binary |= 1 << 23;
+                }
+                else
+                    rm = (uint)((Register)instruction.Values[Symbols.Minus + Placeholders.Rm]);
+
+                binary |= rm << index - 3;
+            }
+
+            if (instruction.Values.ContainsKey(Placeholders.PostIndexed))
+                binary &= ~(1u << 24);
+
+            return index - 4;
+        }
+
+        /// <summary>
         /// Encodes an immediate integer data processing operand 
         /// as specified in section A5.1.3.
         /// </summary>
@@ -195,22 +339,6 @@ namespace Topz.ArmV6Z
             }
 
             throw new Exception($"The immediate {value} could not be encoded.");
-        }
-
-        /// <summary>
-        /// Converts an integer to binary.
-        /// </summary>
-        /// <param name="value">The integer to convert.</param>
-        /// <returns>The binary value.</returns>
-        public static string ToBinary(uint value)
-        {
-            var text = Convert.ToString(value, 2);
-            text = text.PadLeft(32, '0');
-
-            for (int i = 4; i <= text.Length; i += 4)
-                text = text.Insert(i++, " ");
-
-            return text.Substring(0, text.Length - 1);
         }
     }
 }

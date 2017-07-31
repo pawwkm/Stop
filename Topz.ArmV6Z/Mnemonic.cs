@@ -35,11 +35,6 @@ namespace Topz.ArmV6Z
         public const string Ldr = "ldr";
 
         /// <summary>
-        /// The 'ldrb' mnemonic.
-        /// </summary>
-        public const string Ldrb = "ldrb";
-
-        /// <summary>
         /// The 'mov' mnemonic.
         /// </summary>
         public const string Mov = "mov";
@@ -48,11 +43,6 @@ namespace Topz.ArmV6Z
         /// The 'str' mnemonic.
         /// </summary>
         public const string Str = "str";
-
-        /// <summary>
-        /// The 'strh' mnemonic.
-        /// </summary>
-        public const string Strh = "strh";
 
         /// <summary>
         /// The 'sub' mnemonic.
@@ -105,7 +95,6 @@ namespace Topz.ArmV6Z
                 yield return Cmp;
                 yield return Ldr;
                 yield return Mov;
-                yield return Strh;
                 yield return Str;
                 yield return Sub;
                 yield return Teq;

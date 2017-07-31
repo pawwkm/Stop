@@ -1,6 +1,7 @@
-﻿using System;
+﻿using Pote;
+using Pote.Text;
+using System;
 using Topz.FileFormats.Atom;
-using Pote;
 
 namespace Topz.ArmV6Z
 {
@@ -15,6 +16,12 @@ namespace Topz.ArmV6Z
         /// <param name="source">The program to assemble.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="source"/> is null.
+        /// </exception>
+        /// <exception cref="ParsingException">
+        /// A problem occurred when parsing.
+        /// </exception>
+        /// <exception cref="EncodingException">
+        /// A problem occurred when encoding.
         /// </exception>
         /// <returns>The assembled program.</returns>
         public ObjectFile Assemble(string source)

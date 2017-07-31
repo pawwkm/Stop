@@ -682,6 +682,7 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
             Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
             Assert.AreEqual(instruction.Values[Placeholders.Offset12], 14);
+            Assert.Null(instruction.Values[Placeholders.PostIndexed]);
         }
 
         /// <summary>
@@ -715,6 +716,7 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(instruction.Values[Placeholders.Rd], Register.R0);
             Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
             Assert.AreEqual(instruction.Values[Symbols.Plus + Placeholders.Rm], Register.R2);
+            Assert.Null(instruction.Values[Placeholders.PostIndexed]);
         }
 
         /// <summary>
@@ -750,6 +752,7 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(instruction.Values[Symbols.Plus + Placeholders.Rm], Register.R2);
             Assert.AreEqual(instruction.Values[Placeholders.Shift], RegisterShifter.Lsl);
             Assert.AreEqual(instruction.Values[Placeholders.ShiftImmediate], RegisterShifter.Lsr);
+            Assert.Null(instruction.Values[Placeholders.PostIndexed]);
         }
 
         /// <summary>

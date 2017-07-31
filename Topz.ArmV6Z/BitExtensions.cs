@@ -59,5 +59,15 @@ namespace Topz.ArmV6Z
         {
             return Table.ContainsKey(value);
         }
+
+        /// <summary>
+        /// Tests if the string represents a <see cref="Bit"/>.
+        /// </summary>
+        /// <param name="value">The value to check.</param>
+        /// <returns>True if the string represents a <see cref="Bit"/> value: otherwise false.</returns>
+        public static bool IsBit(this char value)
+        {
+            return Table.ContainsKey(value.ToString());
+        }
     }
 }

@@ -34,7 +34,7 @@ namespace Topz.ArmV6Z
                 { "mov r0, r1",                    new byte[] { 0xE1, 0xA0, 0x00, 0x01 } },
                 { "movs r0, r1",                   new byte[] { 0xE1, 0xB0, 0x00, 0x01 } },
                 { "sub r7, r8, #234",              new byte[] { 0xE2, 0x48, 0x70, 0xEA } },
-                { "subs r7, r8, #234",             new byte[] { 0xE2, 0x48, 0x70, 0xEA } },
+                { "subs r7, r8, #234",             new byte[] { 0xE2, 0x58, 0x70, 0xEA } },
                 { "teq r9, r10",                   new byte[] { 0xE1, 0x39, 0x00, 0x0A } },
                 { "tst r11, r12",                  new byte[] { 0xE1, 0x1B, 0x00, 0x0C } },
 
@@ -53,6 +53,11 @@ namespace Topz.ArmV6Z
 
                 { "str r0, [r1, #0]",              new byte[] { 0xE5, 0x81, 0x00, 0x00 } },
                 { "strh r0, [r1, #0]",             new byte[] { 0xE1, 0xC1, 0x00, 0xB0 } },
+                { "strh r0, [r1, r2]",             new byte[] { 0xE1, 0x81, 0x00, 0xB2 } },
+                { "strh r0, [r1, #0]!",            new byte[] { 0xE1, 0xE1, 0x00, 0xB0 } },
+                { "strh r0, [r1, r2]!",            new byte[] { 0xE1, 0xA1, 0x00, 0xB2 } },
+                { "strh r0, [r1], #0",             new byte[] { 0xE0, 0xC1, 0x00, 0xB0 } },
+                { "strh r0, [r1], r2",             new byte[] { 0xE0, 0x81, 0x00, 0xB2 } },
 
                 { "b #1234",                       new byte[] { 0xEA, 0x00, 0x01, 0x34 } },
                 { "bl #1234",                      new byte[] { 0xEB, 0x00, 0x01, 0x34 } }
