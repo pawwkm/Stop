@@ -2,6 +2,7 @@
 using Pote.Text;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Topz.ArmV6Z
 {
@@ -242,6 +243,11 @@ namespace Topz.ArmV6Z
             return obj is Register && this == (Register)obj;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="register"></param>
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = Justifications.SimpleSwitch)]
         public static explicit operator int (Register register)
         {
             if (register == null)

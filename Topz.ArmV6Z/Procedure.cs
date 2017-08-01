@@ -87,7 +87,7 @@ namespace Topz.ArmV6Z
 
             foreach (Instruction instruction in e.NewItems)
             {
-                if (labeldInstructions.Any(x => x.Label.Name == instruction.Label.Name))
+                if (labeldInstructions.Any(x => x != instruction && x.Label.Name == instruction.Label.Name))
                     throw new ArgumentException(instruction.Position.ToString($"Redefining the label '{instruction.Label.Name}'."));
             }
         }

@@ -13,6 +13,8 @@ namespace Topz.ArmV6Z
     {
         private FileFormats.Atom.Procedure current;
 
+        private Procedure fuck;
+
         /// <summary>
         /// The assembled object code.
         /// </summary>
@@ -35,6 +37,17 @@ namespace Topz.ArmV6Z
         public override void Visit(Program program)
         {
             Code = new ObjectFile();
+
+            // Add all the atoms to allow future references.
+            foreach (var p in program.Procedures)
+                Code.Atoms.Add(new FileFormats.Atom.Procedure() { Name = p.Name });
+
+            foreach (var s in program.Strings)
+                Code.Atoms.Add(new NullTerminatedString() { Name = s.Name });
+
+            foreach (var d in program.Data)
+                Code.Atoms.Add(new FileFormats.Atom.Data() { Name = d.Name });
+
             base.Visit(program);
         }
 
@@ -47,12 +60,12 @@ namespace Topz.ArmV6Z
         /// </exception>
         protected override void Visit(Procedure procedure)
         {
-            current = new FileFormats.Atom.Procedure();
+            fuck = procedure;
+            current = Code.Atoms.OfType<FileFormats.Atom.Procedure>().First(x => x.Name == procedure.Name);
             current.Name = procedure.Name;
             current.IsDefined = !procedure.IsExternal;
             current.IsMain = procedure.IsMain;
 
-            Code.Atoms.Add(current);
             base.Visit(procedure);
         }
 
@@ -70,10 +83,8 @@ namespace Topz.ArmV6Z
 
             var value = 0u;
             var index = 31;
-
-            var isPreIndexed = false;
+            
             var skipedFirstAddressMode = false;
-
             foreach (var chunk in instruction.Encoding.Split(' '))
             {
                 if (chunk == "cond")
@@ -104,7 +115,7 @@ namespace Topz.ArmV6Z
                         throw new EncodingException(instruction.Mnemonic.Position.ToString("Could not encode the U bit."));
                 }
                 else if (chunk == "P")
-                    index = Encoder.Encode(ref value, index, isPreIndexed = IsPreIndexed(instruction));
+                    index = Encoder.Encode(ref value, index, IsPreIndexed(instruction));
                 else if (chunk == "W")
                     index = Encoder.Encode(ref value, index, false);
                 else if (chunk == "shifter_operand")
@@ -127,6 +138,44 @@ namespace Topz.ArmV6Z
                 else if (chunk == "signed_immed_24")
                 {
                     index -= 24;
+                    if (instruction.Values[Placeholders.TargetAddress] is Integer)
+                    {
+                        var address = new AbsoluteAddress((ulong)((Integer)instruction.Values[Placeholders.TargetAddress]).Value);
+                        Code.Atoms.Add(address);
+
+                        current.References.Add(new GlobalReference(address)
+                        {
+                            AddressType = AddressType.ArmTargetAddress,
+                            Address = (uint)(current.Code.Count / 4)
+                        });
+                    }
+                    else
+                    {
+                        var label = (Identifier)instruction.Values[Placeholders.TargetAddress];
+                        var local = fuck.Instructions.FirstOrDefault(x => x.Label.Name == label.Name);
+
+                        if (label != null)
+                        {
+                            current.References.Add(new LocalReference()
+                            {
+                                AddressType = AddressType.ArmTargetAddress,
+                                Address = (uint)(current.Code.Count / 4),
+                                Target = local.Label.Address
+                            });
+                        }
+                        else
+                        {
+                            var global = Code.Atoms.FirstOrDefault(x => x.Name == label.Name);
+                            if (global == null)
+                                throw new EncodingException(label.Position.ToString($"The label '{label.Name}' is undefined."));
+
+                            current.References.Add(new GlobalReference(global)
+                            {
+                                AddressType = AddressType.ArmTargetAddress,
+                                Address = (uint)(current.Code.Count / 4)
+                            });
+                        }
+                    }
                 }
                 else
                     throw new NotSupportedException($"The encoding of '{chunk}' is not supported.");

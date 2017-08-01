@@ -59,8 +59,10 @@ namespace Topz.ArmV6Z
                 { "strh r0, [r1], #0",             new byte[] { 0xE0, 0xC1, 0x00, 0xB0 } },
                 { "strh r0, [r1], r2",             new byte[] { 0xE0, 0x81, 0x00, 0xB2 } },
 
-                { "b #1234",                       new byte[] { 0xEA, 0x00, 0x01, 0x34 } },
-                { "bl #1234",                      new byte[] { 0xEB, 0x00, 0x01, 0x34 } }
+                // The linker does the actual encoding of the address.
+                { "b #1234",                       new byte[] { 0xEA, 0x00, 0x00, 0x00 } },
+                { "bl #1234",                      new byte[] { 0xEB, 0x00, 0x00, 0x00 } },
+                { "lbl: bl lbl",                   new byte[] { 0xEB, 0x00, 0x00, 0x00 } }
             };
 
             foreach (var test in tests)

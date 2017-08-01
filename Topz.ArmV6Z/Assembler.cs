@@ -1,6 +1,7 @@
 ﻿using Pote;
 using Pote.Text;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Topz.FileFormats.Atom;
 
 namespace Topz.ArmV6Z
@@ -24,6 +25,7 @@ namespace Topz.ArmV6Z
         /// A problem occurred when encoding.
         /// </exception>
         /// <returns>The assembled program.</returns>
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = Justifications.InstanceAccessMayBeNeededLater)]
         public ObjectFile Assemble(string source)
         {
             if (source == null)

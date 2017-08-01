@@ -77,7 +77,6 @@
     <Compile Include="Node.cs" />
     <Compile Include="Operand.cs" />
     <Compile Include="Parser.cs" />
-    <Compile Include="Reference.cs" />
     <Compile Include="Register.cs" />
     <Compile Include="RegisterShifter.cs" />
     <Compile Include="Symbols.cs" />

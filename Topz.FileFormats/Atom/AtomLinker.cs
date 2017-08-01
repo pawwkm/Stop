@@ -143,23 +143,30 @@ namespace Topz.FileFormats.Atom
                 {
                     foreach (var reference in procedure.References)
                     {
-                        var proc = combined.OfType<Procedure>().First(p => p.Name == procedure.Name);
-                        var referenced = combined.First(a => a.Name == reference.Atom.Name);
-
-                        var r = new Reference(referenced);
-                        r.Address = reference.Address;
-                        r.AddressType = reference.AddressType;
-
-                        if (!referenced.IsGlobal)
+                        if (reference is GlobalReference)
                         {
-                            var a = GetDefiningObjectFile(referenced.Name, files);
-                            var b = GetDefiningObjectFile(proc.Name, files);
+                            var global = reference as GlobalReference;
 
-                            if (a != null && b != null && a != b)
-                                throw new InvalidObjectFileException("'" + proc.Name + "' is referencing '" + referenced.Name + "' which is local to another object file.");
+                            var proc = combined.OfType<Procedure>().First(p => p.Name == procedure.Name);
+                            var referenced = combined.First(a => a.Name == global.Atom.Name);
+
+                            var r = new GlobalReference(referenced);
+                            r.Address = global.Address;
+                            r.AddressType = global.AddressType;
+
+                            if (!referenced.IsGlobal)
+                            {
+                                var a = GetDefiningObjectFile(referenced.Name, files);
+                                var b = GetDefiningObjectFile(proc.Name, files);
+
+                                if (a != null && b != null && a != b)
+                                    throw new InvalidObjectFileException($"'{proc.Name}' is referencing '{referenced.Name}' which is local to another object file.");
+                            }
+
+                            proc.References.Add(r);
                         }
-
-                        proc.References.Add(r);
+                        else if (reference is LocalReference)
+                            throw new NotImplementedException();
                     }
                 }
             }
@@ -330,13 +337,17 @@ namespace Topz.FileFormats.Atom
             yield return procedure;
             foreach (var reference in procedure.References)
             {
-                if (reference.Atom is Procedure)
+                if (reference is LocalReference)
+                    continue;
+
+                var global = reference as GlobalReference;
+                if (global.Atom is Procedure)
                 {
-                    foreach (var atom in Walk(reference.Atom as Procedure))
+                    foreach (var atom in Walk(global.Atom as Procedure))
                         yield return atom;
                 }
                 else
-                    yield return reference.Atom;
+                    yield return global.Atom;
             }
         }
     }

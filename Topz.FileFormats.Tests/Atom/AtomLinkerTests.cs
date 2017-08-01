@@ -74,7 +74,7 @@ namespace Topz.FileFormats.Atom
             var procedure = new Procedure();
             procedure.IsDefined = true;
             procedure.Name = "Proc";
-            procedure.References.Add(new Reference(b.Atoms[0]));
+            procedure.References.Add(new GlobalReference(b.Atoms[0]));
             b.Atoms.Add(procedure);
 
             var linker = new AtomLinker();
@@ -87,7 +87,7 @@ namespace Topz.FileFormats.Atom
             Assert.True(((NullTerminatedString)c.Atoms[0]).IsDefined);
 
             Assert.AreEqual("Proc", ((Procedure)c.Atoms[1]).Name);
-            Assert.AreSame(((Procedure)c.Atoms[1]).References[0].Atom, c.Atoms[0]);
+            Assert.AreSame(((GlobalReference)((Procedure)c.Atoms[1]).References[0]).Atom, c.Atoms[0]);
             Assert.True(((Procedure)c.Atoms[1]).IsDefined);
         }
 
@@ -109,7 +109,7 @@ namespace Topz.FileFormats.Atom
             var procedure = new Procedure();
             procedure.IsDefined = true;
             procedure.Name = "Proc";
-            procedure.References.Add(new Reference(a.Atoms[0]));
+            procedure.References.Add(new GlobalReference(a.Atoms[0]));
             a.Atoms.Add(procedure);
 
             var b = new ObjectFile();
@@ -127,7 +127,7 @@ namespace Topz.FileFormats.Atom
             Assert.AreEqual(2, c.Atoms.Count);
 
             Assert.AreEqual("Proc", ((Procedure)c.Atoms[0]).Name);
-            Assert.AreSame(((Procedure)c.Atoms[0]).References[0].Atom, c.Atoms[1]);
+            Assert.AreSame(((GlobalReference)((Procedure)c.Atoms[0]).References[0]).Atom, c.Atoms[1]);
             Assert.True(((Procedure)c.Atoms[0]).IsDefined);
 
             Assert.AreEqual("A", ((NullTerminatedString)c.Atoms[1]).Name);
@@ -159,7 +159,7 @@ namespace Topz.FileFormats.Atom
             procedure.Code.Add(0x00);
             procedure.Code.Add(0x00);
 
-            procedure.References.Add(new Reference(file.Atoms[0]));
+            procedure.References.Add(new GlobalReference(file.Atoms[0]));
 
             var binary = new byte[] 
             {
@@ -202,7 +202,7 @@ namespace Topz.FileFormats.Atom
             procedure.Code.Add(0x00);
             procedure.Code.Add(0x00);
 
-            procedure.References.Add(new Reference(data));
+            procedure.References.Add(new GlobalReference(data));
 
             var binary = new byte[]
             {
@@ -236,7 +236,7 @@ namespace Topz.FileFormats.Atom
             sub.Code.Add(0xAA);
             sub.Code.Add(0x55);
 
-            var reference = new Reference(sub);
+            var reference = new GlobalReference(sub);
             reference.AddressType = AddressType.ArmTargetAddress;
 
             var main = new Procedure();
@@ -330,7 +330,7 @@ namespace Topz.FileFormats.Atom
             var procedure = new Procedure();
             procedure.IsDefined = true;
             procedure.Name = "Proc";
-            procedure.References.Add(new Reference(b.Atoms[0]));
+            procedure.References.Add(new GlobalReference(b.Atoms[0]));
             b.Atoms.Add(procedure);
 
             var linker = new AtomLinker();
@@ -359,7 +359,7 @@ namespace Topz.FileFormats.Atom
             var procedure = new Procedure();
             procedure.IsDefined = true;
             procedure.Name = "Proc";
-            procedure.References.Add(new Reference(a.Atoms[0]));
+            procedure.References.Add(new GlobalReference(a.Atoms[0]));
             a.Atoms.Add(procedure);
 
             var b = new ObjectFile();
@@ -505,7 +505,7 @@ namespace Topz.FileFormats.Atom
             var procedure = new Procedure();
             procedure.IsDefined = true;
             procedure.Name = "Proc";
-            procedure.References.Add(new Reference(b.Atoms[0]));
+            procedure.References.Add(new GlobalReference(b.Atoms[0]));
             b.Atoms.Add(procedure);
 
             var linker = new AtomLinker();

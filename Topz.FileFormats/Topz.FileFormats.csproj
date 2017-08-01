@@ -50,13 +50,16 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Atom\AbsoluteAddress.cs" />
     <Compile Include="Atom\AddressType.cs" />
     <Compile Include="Atom\Atom.cs" />
     <Compile Include="Atom\AtomLinker.cs" />
     <Compile Include="Atom\AtomReader.cs" />
     <Compile Include="Atom\AtomWriter.cs" />
     <Compile Include="Atom\Data.cs" />
+    <Compile Include="Atom\GlobalReference.cs" />
     <Compile Include="Atom\InvalidObjectFileException.cs" />
+    <Compile Include="Atom\LocalReference.cs" />
     <Compile Include="Atom\NullTerminatedString.cs" />
     <Compile Include="Atom\ObjectFile.cs" />
     <Compile Include="Atom\Procedure.cs" />

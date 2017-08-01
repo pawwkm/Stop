@@ -8,7 +8,7 @@ namespace Topz.FileFormats.Atom
     /// <summary>
     /// Writes Atom object files.
     /// </summary>
-    public class AtomWriter
+    public sealed class AtomWriter
     {
         private BinaryWriter writer;
 
@@ -62,11 +62,37 @@ namespace Topz.FileFormats.Atom
             writer.Write((ushort)procedure.References.Count);
 
             foreach (var reference in procedure.References)
-            {
-                writer.Write((uint)of.Atoms.IndexOf(reference.Atom));
-                writer.Write((byte)reference.AddressType);
-                writer.Write(reference.Address);
-            }
+                Write(reference);
+        }
+
+        /// <summary>
+        /// Writes a reference.
+        /// </summary>
+        /// <param name="reference">The reference to write.</param>
+        private void Write(Reference reference)
+        {
+            writer.Write((byte)reference.AddressType);
+            writer.Write(reference.Address);
+
+            Write((dynamic)reference);
+        }
+
+        /// <summary>
+        /// Writes a reference.
+        /// </summary>
+        /// <param name="reference">The reference to write.</param>
+        private void Write(GlobalReference reference)
+        {
+            writer.Write((uint)of.Atoms.IndexOf(reference.Atom));
+        }
+
+        /// <summary>
+        /// Writes a reference.
+        /// </summary>
+        /// <param name="reference">The reference to write.</param>
+        private void Write(LocalReference reference)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>

@@ -338,7 +338,7 @@ namespace Topz.ArmV6Z
                 immediate = ((immediate << 2) | (immediate >> 30)) & 0xFFFFFFFFu;
             }
 
-            throw new Exception($"The immediate {value} could not be encoded.");
+            throw new EncodingException($"The immediate {value} could not be encoded.");
         }
     }
 }

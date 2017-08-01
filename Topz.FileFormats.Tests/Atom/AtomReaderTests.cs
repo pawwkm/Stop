@@ -147,7 +147,7 @@ namespace Topz.FileFormats.Atom
 
                 Assert.AreEqual(1, procedure.References.Count);
                 Assert.AreEqual(0, procedure.References[0].Address);
-                Assert.AreSame(s, procedure.References[0].Atom);
+                Assert.AreSame(s, ((GlobalReference)procedure.References[0]).Atom);
 
                 Assert.True(s.IsDefined);
                 Assert.False(s.IsGlobal);

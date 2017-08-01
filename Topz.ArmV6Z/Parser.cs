@@ -298,10 +298,7 @@ namespace Topz.ArmV6Z
             var token = analyzer.Next();
             Symbol(Symbols.EndOfLabel);
 
-            var label = new Label(token.Position, token.Text);
-            token = analyzer.Next();
-
-            return label;
+            return new Label(token.Position, token.Text);
         }
 
         /// <summary>
@@ -335,6 +332,12 @@ namespace Topz.ArmV6Z
                         match.Chunks.Add(m.Value);
                 }
 
+                if (postfix == null && !match.Chunks[1].IsBit() || postfix != null && match.Chunks[1].ToLower() == postfix.Text.ToLower() || postfix != null && match.Chunks[1].StartsWith("{") && match.Chunks[1].ToLower()[1] == postfix.Text.ToLower()[0])
+                {
+                    postfixIsOptional = match.Chunks[1].StartsWith("{");
+                    wasSet = true;
+                    break;
+                }
                 if (postfix == null && !match.Chunks[2].IsBit() || postfix != null && match.Chunks[2].ToLower() == postfix.Text.ToLower() || postfix != null && match.Chunks[2].StartsWith("{") && match.Chunks[2].ToLower()[1] == postfix.Text.ToLower()[0])
                 {
                     postfixIsOptional = match.Chunks[2].StartsWith("{");

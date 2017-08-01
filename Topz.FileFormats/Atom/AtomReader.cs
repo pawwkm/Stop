@@ -424,22 +424,18 @@ namespace Topz.FileFormats.Atom
             foreach (var tuple in references)
             {
                 if (file.Atoms.Count < tuple.Item2)
-                {
-                    var message = string.Format("The atom called '{0}' has a reference to atom number {1} which doesn't exist.", tuple.Item1.Name, tuple.Item2);
+                    throw new InvalidObjectFileException($"The atom called '{tuple.Item1.Name}' has a reference to atom number {tuple.Item2} which doesn't exist.");
 
-                    throw new InvalidObjectFileException(message);
-                }
-
-                var reference = new Reference(file.Atoms[(int)tuple.Item2]);
+                var reference = new GlobalReference(file.Atoms[(int)tuple.Item2]);
                 reference.Address = tuple.Item3;
 
                 foreach (var r in tuple.Item1.References)
                 {
-                    if (r.IsOverlapping(reference))
+                    if (r is GlobalReference)
                     {
-                        var message = string.Format("{0}'s reference to '{1}' has an overlapping address with the reference to '{2}' at {3}.", tuple.Item1.Name, r.Atom.Name, reference.Atom.Name, ToHex(r.Address));
-
-                        throw new InvalidObjectFileException(message);
+                        var global = r as GlobalReference;
+                        if (global.IsOverlapping(reference))
+                            throw new InvalidObjectFileException($"{tuple.Item1.Name}'s reference to '{global.Atom.Name}' has an overlapping address with the reference to '{reference.Atom.Name}' at {ToHex(r.Address)}.");
                     }
                 }
 
