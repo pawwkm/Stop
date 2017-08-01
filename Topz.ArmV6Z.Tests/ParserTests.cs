@@ -1,6 +1,6 @@
 ﻿using NSubstitute;
 using NUnit.Framework;
-using Pote.Text;
+using Topz.Text;
 using System.Collections.Generic;
 
 namespace Topz.ArmV6Z
@@ -18,11 +18,9 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_EmptyProcedure_ParsesProcedure()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main");
-
+            var code = new LexicalAnalyzer("procedure main");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -40,11 +38,9 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_ExternalProcedure_ParsesProcedure()
         {
-            var builder = new TokenBuilder();
-            builder.External().Procedure().Identifier("main");
-
+            var code = new LexicalAnalyzer("external procedure main");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -64,12 +60,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_ImmediateDataProcessingOperand_Success()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic("ADD").R0().Comma().R1().Comma().Integer(21);
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 add r0, r1, #21");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -96,12 +90,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_RegisterDataProcessingOperand_Success()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2();
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                add r0, r1, r2");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -129,12 +121,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_LogicalLeftShiftByImmediateDataProcessingOperand_Success()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2().Comma().Lsl().Integer(2);
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                add r0, r1, r2, lsl #2");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -163,12 +153,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_LogicalLeftShiftByRegisterDataProcessingOperand_Success()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2().Comma().Lsl().R3();
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 add r0, r1, r2, lsl r3");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -197,12 +185,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_LogicalRightShiftByImmediateDataProcessingOperand_Success()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2().Comma().Lsr().Integer(2);
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 add r0, r1, r2, lsr #2");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -231,12 +217,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_LogicalRightShiftByRegisterDataProcessingOperand_Success()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2().Comma().Lsr().R3();
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 add r0, r1, r2, lsr r3");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -265,12 +249,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_ArithmeticRightShiftByImmediateDataProcessingOperand_Success()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2().Comma().Asr().Integer(2);
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 add r0, r1, r2, asr #2");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -299,12 +281,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_ArithmeticRightShiftByRegisterDataProcessingOperand_Success()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2().Comma().Asr().R3();
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 add r0, r1, r2, asr r3");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -333,12 +313,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_RotateRightShiftByImmediateDataProcessingOperand_Success()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2().Comma().Ror().Integer(2);
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 add r0, r1, r2, ror #2");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -367,12 +345,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_RotateRightShiftByRegisterDataProcessingOperand_Success()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2().Comma().Ror().R3();
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 add r0, r1, r2, ror r3");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -400,12 +376,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_RotateRightWithExtendDataProcessingOperand_Success()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic("ADD").R0().Comma().R1().Comma().R2().Comma().Rrx();
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 add r0, r1, r2, rrx");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -433,12 +407,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_TargetAddressOperand_ParsesProcedure()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic(Mnemonic.B).Integer(10);
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 b #10");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -463,12 +435,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_TargetLabelOperand_ParsesProcedure()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic(Mnemonic.B).Identifier("Abc");
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 b Abc");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -493,12 +463,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_ImmediateOffset12Operand_ParsesProcedure()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().Comma().Integer(-1).RightSquareBracket();
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 ldr r0, [r1, #-1]");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -525,12 +493,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_RegisterOffsetOperand_ParsesProcedure()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().Comma().Plus().R2().RightSquareBracket();
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 ldr r0, [r1, +r2]");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -557,12 +523,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_ScaledRegisterOffsetOperand_ParsesProcedure()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().Comma().Plus().R2().Comma().Lsl().Integer(4).RightSquareBracket();
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 ldr r0, [r1, +r2, lsl #4]");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -591,12 +555,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_ImmediatePreIndexedOffset12Operand_ParsesProcedure()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().Comma().Integer(-1).RightSquareBracket().ExclamationMark();
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 ldr r0, [r1, #-1]!");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -624,12 +586,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_ScaledRegisterPreIndexedOperand_ParsesProcedure()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().Comma().Plus().R2().Comma().Lsl().Integer(4).RightSquareBracket().ExclamationMark();
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 ldr r0, [r1, +r2, lsl #4]!");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -659,12 +619,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_Immediate12PostIndexedOperand_ParsesProcedure()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().RightSquareBracket().Comma().Integer(14);
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 ldr r0, [r1], #14");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -693,12 +651,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_RegisterPostIndexedOperand_ParsesProcedure()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().RightSquareBracket().Comma().Plus().R2();
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 ldr r0, [r1], +r2");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -727,12 +683,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_ScaledRegisterPostIndexedOperand_ParsesProcedure()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().RightSquareBracket().Comma().Plus().R2().Comma().Lsl().Integer(4);
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 ldr r0, [r1], +r2, lsl #4");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -762,12 +716,10 @@ namespace Topz.ArmV6Z
         [Test]
         public void Parse_OverloadedInstruction_ParsesProcedure()
         {
-            var builder = new TokenBuilder();
-            builder.Procedure().Identifier("main")
-                   .Mnemonic(Mnemonic.Ldr).Bit(Bit.B).R0().Comma().LeftSquareBracket().R1().Comma().Plus().R2().Comma().Lsl().Integer(4).RightSquareBracket();
-
+            var code = new LexicalAnalyzer(@"procedure main
+                                                 ldrb r0, [r1, +r2, lsl #4]");
             var parser = new Parser();
-            var program = parser.Parse(LexicalAnalyzer(builder.Build()));
+            var program = parser.Parse(code);
 
             Assert.AreEqual(1, program.Procedures.Count);
             Assert.AreEqual(0, program.Data.Count);
@@ -787,37 +739,6 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(instruction.Values[Placeholders.Shift], RegisterShifter.Lsl);
             Assert.AreEqual(instruction.Values[Placeholders.ShiftImmediate], 4);
             Assert.AreEqual(instruction.Mnemonic.Bit, Bit.B);
-        }
-
-        /// <summary>
-        /// Creates a substitute for an <see cref="LexicalAnalyzer{TokenType}"/>.
-        /// </summary>
-        /// <param name="tokens">The tokens the analyzer will consume.</param>
-        /// <returns>The substitute analyzer.</returns>
-        private static LexicalAnalyzer<TokenType> LexicalAnalyzer(IList<Token<TokenType>> tokens)
-        {
-            var analyzer = Substitute.For<LexicalAnalyzer<TokenType>>();
-
-            var current = 0;
-            analyzer.Next().Returns(x =>
-            {
-                if (analyzer.EndOfInput)
-                    return new Token<TokenType>("", TokenType.EndOfInput, new InputPosition());
-
-                return tokens[current++];
-            });
-
-            analyzer.LookAhead(Arg.Any<int>()).Returns(x =>
-            {
-                if (current + x.Arg<int>() - 1 == tokens.Count)
-                    return new Token<TokenType>("", TokenType.EndOfInput, new InputPosition());
-
-                return tokens[current + x.Arg<int>() - 1];
-            });
-
-            analyzer.EndOfInput.Returns(x => current == tokens.Count);
-
-            return analyzer;
         }
     }
 }

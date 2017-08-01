@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using Pote.Text;
+using Topz.Text;
 
 namespace Topz.ArmV6Z
 {
@@ -66,7 +66,7 @@ namespace Topz.ArmV6Z
         [TestCase(Register.ProgramCounter, 15u)]
         public void Encode_Register_CorectlyEncoded(string register, uint expected)
         {
-            var r = new Register(register, new InputPosition());
+            var r = new Register(register, new Position());
             var instruction = 0u;
             var index = 3;
 
@@ -139,8 +139,8 @@ namespace Topz.ArmV6Z
             var binary = 0u;
             var index = 11;
 
-            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new InputPosition()));
-            instruction.Values.Add(Placeholders.Rm, new Register(register, new InputPosition()));
+            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new Position()));
+            instruction.Values.Add(Placeholders.Rm, new Register(register, new Position()));
 
             index = Encoder.EncodeShifterOperand(ref binary, index, instruction);
 
@@ -162,8 +162,8 @@ namespace Topz.ArmV6Z
             var binary = 0u;
             var index = 11;
 
-            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new InputPosition()));
-            instruction.Values.Add(Placeholders.Immediate, new Integer(immediate, new InputPosition()));
+            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new Position()));
+            instruction.Values.Add(Placeholders.Immediate, new Integer(immediate, new Position()));
 
             index = Encoder.EncodeShifterOperand(ref binary, index, instruction);
 
@@ -185,9 +185,9 @@ namespace Topz.ArmV6Z
             var binary = 0u;
             var index = 11;
 
-            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new InputPosition()));
-            instruction.Values.Add(Placeholders.Rm, new Register(register, new InputPosition()));
-            instruction.Values.Add(RegisterShifter.Lsl, new Integer(shift, new InputPosition()));
+            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new Position()));
+            instruction.Values.Add(Placeholders.Rm, new Register(register, new Position()));
+            instruction.Values.Add(RegisterShifter.Lsl, new Integer(shift, new Position()));
 
             index = Encoder.EncodeShifterOperand(ref binary, index, instruction);
 
@@ -208,9 +208,9 @@ namespace Topz.ArmV6Z
             var binary = 0u;
             var index = 11;
 
-            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new InputPosition()));
-            instruction.Values.Add(Placeholders.Rm, new Register(Register.R2, new InputPosition()));
-            instruction.Values.Add(RegisterShifter.Lsl, new Register(register, new InputPosition()));
+            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new Position()));
+            instruction.Values.Add(Placeholders.Rm, new Register(Register.R2, new Position()));
+            instruction.Values.Add(RegisterShifter.Lsl, new Register(register, new Position()));
 
             index = Encoder.EncodeShifterOperand(ref binary, index, instruction);
 
@@ -232,9 +232,9 @@ namespace Topz.ArmV6Z
             var binary = 0u;
             var index = 11;
 
-            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new InputPosition()));
-            instruction.Values.Add(Placeholders.Rm, new Register(register, new InputPosition()));
-            instruction.Values.Add(RegisterShifter.Lsr, new Integer(shift, new InputPosition()));
+            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new Position()));
+            instruction.Values.Add(Placeholders.Rm, new Register(register, new Position()));
+            instruction.Values.Add(RegisterShifter.Lsr, new Integer(shift, new Position()));
 
             index = Encoder.EncodeShifterOperand(ref binary, index, instruction);
 
@@ -255,9 +255,9 @@ namespace Topz.ArmV6Z
             var binary = 0u;
             var index = 11;
 
-            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new InputPosition()));
-            instruction.Values.Add(Placeholders.Rm, new Register(Register.R2, new InputPosition()));
-            instruction.Values.Add(RegisterShifter.Lsr, new Register(register, new InputPosition()));
+            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new Position()));
+            instruction.Values.Add(Placeholders.Rm, new Register(Register.R2, new Position()));
+            instruction.Values.Add(RegisterShifter.Lsr, new Register(register, new Position()));
 
             index = Encoder.EncodeShifterOperand(ref binary, index, instruction);
 
@@ -279,9 +279,9 @@ namespace Topz.ArmV6Z
             var binary = 0u;
             var index = 11;
 
-            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new InputPosition()));
-            instruction.Values.Add(Placeholders.Rm, new Register(register, new InputPosition()));
-            instruction.Values.Add(RegisterShifter.Asr, new Integer(shift, new InputPosition()));
+            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new Position()));
+            instruction.Values.Add(Placeholders.Rm, new Register(register, new Position()));
+            instruction.Values.Add(RegisterShifter.Asr, new Integer(shift, new Position()));
 
             index = Encoder.EncodeShifterOperand(ref binary, index, instruction);
 
@@ -302,9 +302,9 @@ namespace Topz.ArmV6Z
             var binary = 0u;
             var index = 11;
 
-            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new InputPosition()));
-            instruction.Values.Add(Placeholders.Rm, new Register(Register.R2, new InputPosition()));
-            instruction.Values.Add(RegisterShifter.Asr, new Register(register, new InputPosition()));
+            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new Position()));
+            instruction.Values.Add(Placeholders.Rm, new Register(Register.R2, new Position()));
+            instruction.Values.Add(RegisterShifter.Asr, new Register(register, new Position()));
 
             index = Encoder.EncodeShifterOperand(ref binary, index, instruction);
 
@@ -326,9 +326,9 @@ namespace Topz.ArmV6Z
             var binary = 0u;
             var index = 11;
 
-            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new InputPosition()));
-            instruction.Values.Add(Placeholders.Rm, new Register(register, new InputPosition()));
-            instruction.Values.Add(RegisterShifter.Ror, new Integer(shift, new InputPosition()));
+            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new Position()));
+            instruction.Values.Add(Placeholders.Rm, new Register(register, new Position()));
+            instruction.Values.Add(RegisterShifter.Ror, new Integer(shift, new Position()));
 
             index = Encoder.EncodeShifterOperand(ref binary, index, instruction);
 
@@ -349,9 +349,9 @@ namespace Topz.ArmV6Z
             var binary = 0u;
             var index = 11;
 
-            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new InputPosition()));
-            instruction.Values.Add(Placeholders.Rm, new Register(Register.R2, new InputPosition()));
-            instruction.Values.Add(RegisterShifter.Ror, new Register(register, new InputPosition()));
+            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new Position()));
+            instruction.Values.Add(Placeholders.Rm, new Register(Register.R2, new Position()));
+            instruction.Values.Add(RegisterShifter.Ror, new Register(register, new Position()));
 
             index = Encoder.EncodeShifterOperand(ref binary, index, instruction);
 
@@ -390,8 +390,8 @@ namespace Topz.ArmV6Z
             var binary = 0u;
             var index = 11;
 
-            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new InputPosition()));
-            instruction.Values.Add(Placeholders.Rm, new Register(register, new InputPosition()));
+            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new Position()));
+            instruction.Values.Add(Placeholders.Rm, new Register(register, new Position()));
             instruction.Values.Add(RegisterShifter.Rrx, null);
 
             index = Encoder.EncodeShifterOperand(ref binary, index, instruction);
@@ -414,8 +414,8 @@ namespace Topz.ArmV6Z
             var binary = 0u;
             var index = 11;
 
-            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new InputPosition()));
-            instruction.Values.Add(Placeholders.Offset12, new Integer(offset, new InputPosition()));
+            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new Position()));
+            instruction.Values.Add(Placeholders.Offset12, new Integer(offset, new Position()));
 
             index = Encoder.EncodeLoadStoreOperand(ref binary, index, instruction);
 
@@ -447,11 +447,11 @@ namespace Topz.ArmV6Z
             var binary = 0u;
             var index = 11;
 
-            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new InputPosition()));
-            instruction.Values.Add(Placeholders.ShiftImmediate, new Integer(offset, new InputPosition()));
-            instruction.Values.Add(Placeholders.Shift, new RegisterShifter(shifter, new InputPosition()));
-            instruction.Values.Add(Placeholders.Rn, new Register(Register.R6, new InputPosition()));
-            instruction.Values.Add(Symbols.Plus + Placeholders.Rm, new Register(Register.R7, new InputPosition()));
+            var instruction = new Instruction(new Mnemonic(Mnemonic.Add, new Position()));
+            instruction.Values.Add(Placeholders.ShiftImmediate, new Integer(offset, new Position()));
+            instruction.Values.Add(Placeholders.Shift, new RegisterShifter(shifter, new Position()));
+            instruction.Values.Add(Placeholders.Rn, new Register(Register.R6, new Position()));
+            instruction.Values.Add(Symbols.Plus + Placeholders.Rm, new Register(Register.R7, new Position()));
 
             index = Encoder.EncodeLoadStoreOperand(ref binary, index, instruction);
 

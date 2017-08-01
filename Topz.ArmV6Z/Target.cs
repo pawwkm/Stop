@@ -1,4 +1,4 @@
-﻿using Pote.Text;
+﻿using Topz.Text;
 using System;
 
 namespace Topz.ArmV6Z
@@ -16,7 +16,7 @@ namespace Topz.ArmV6Z
         /// <exception cref="ArgumentNullException">
         /// <paramref name="position"/> is null.
         /// </exception>
-        public Target(string name, InputPosition position) : base(position)
+        public Target(string name, Position position) : base(position)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));

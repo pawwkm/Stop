@@ -1,5 +1,5 @@
 ﻿using Pote;
-using Pote.Text;
+using Topz.Text;
 using System;
 using System.Collections.Generic;
 
@@ -63,7 +63,7 @@ namespace Topz.ArmV6Z
         /// <exception cref="ArgumentException">
         /// <paramref name="shifter"/> is not one of <see cref="All"/>.
         /// </exception>
-        public RegisterShifter(string shifter, InputPosition position) : base(position)
+        public RegisterShifter(string shifter, Position position) : base(position)
         {
             if (shifter == null)
                 throw new ArgumentNullException(nameof(shifter));

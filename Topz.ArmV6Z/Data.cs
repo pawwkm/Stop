@@ -1,4 +1,4 @@
-﻿using Pote.Text;
+﻿using Topz.Text;
 using System;
 using System.Collections.Generic;
 
@@ -18,7 +18,7 @@ namespace Topz.ArmV6Z
         /// <exception cref="ArgumentNullException">
         /// <paramref name="position"/>, <paramref name="name"/> or <paramref name="content"/> is null.
         /// </exception>
-        public Data(InputPosition position, string name, IEnumerable<byte> content) : base(position)
+        public Data(Position position, string name, IEnumerable<byte> content) : base(position)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));

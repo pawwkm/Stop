@@ -1,4 +1,4 @@
-﻿using Pote.Text;
+﻿using Topz.Text;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -21,7 +21,7 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// Initializes a new instance of the <see cref="Program"/> class.
         /// </summary>
-        public Program() : base(new InputPosition())
+        public Program() : base(new Position())
         {
             procedures.CollectionChanged += CheckNameUniqueness;
             procedures.CollectionChanged += CheckMainProcedure;

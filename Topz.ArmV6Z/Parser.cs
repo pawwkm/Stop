@@ -1,4 +1,4 @@
-﻿using Pote.Text;
+﻿using Topz.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,7 +57,7 @@ namespace Topz.ArmV6Z
             analyzer = source;
 
             program = new Program();
-            while (!analyzer.EndOfInput)
+            while (!analyzer.EndOfSourceCode)
             {
                 isExternal = External();
                 if (analyzer.NextIs(Keywords.Procedure))
@@ -84,7 +84,7 @@ namespace Topz.ArmV6Z
 
             if (!isExternal)
             {
-                while (!analyzer.EndOfInput)
+                while (!analyzer.EndOfSourceCode)
                 {
                     if (analyzer.NextIs(TokenType.Keyword))
                         break;

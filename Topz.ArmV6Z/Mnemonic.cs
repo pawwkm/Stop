@@ -1,4 +1,4 @@
-﻿using Pote.Text;
+﻿using Topz.Text;
 using System;
 using System.Collections.Generic;
 
@@ -70,7 +70,7 @@ namespace Topz.ArmV6Z
         /// <exception cref="ArgumentException">
         /// <paramref name="name"/> is not a mnemonic. Casing is not important.
         /// </exception>
-        public Mnemonic(string name, InputPosition position)
+        public Mnemonic(string name, Position position)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -135,7 +135,7 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// The position of the mnemonic in the program.
         /// </summary>
-        public InputPosition Position
+        public Position Position
         {
             get;
             private set;

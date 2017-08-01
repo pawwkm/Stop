@@ -1,5 +1,5 @@
 ﻿using Pote;
-using Pote.Text;
+using Topz.Text;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -134,7 +134,7 @@ namespace Topz.ArmV6Z
         /// <exception cref="ArgumentException">
         /// <paramref name="register"/> is not one of <see cref="All"/>.
         /// </exception>
-        public Register(string register, InputPosition position) : base(position)
+        public Register(string register, Position position) : base(position)
         {
             if (register == null)
                 throw new ArgumentNullException(nameof(register));
