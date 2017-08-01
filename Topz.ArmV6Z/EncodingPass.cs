@@ -1,5 +1,6 @@
 ﻿using Pote;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Topz.FileFormats.Atom;
@@ -76,6 +77,8 @@ namespace Topz.ArmV6Z
         /// <exception cref="ArgumentNullException">
         /// <paramref name="instruction"/> is null.
         /// </exception>
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = Justifications.RefactoringWouldResultInMessyCode)]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = Justifications.RefactoringWouldResultInMessyCode)]
         protected override void Visit(Instruction instruction)
         {
             if (instruction == null)

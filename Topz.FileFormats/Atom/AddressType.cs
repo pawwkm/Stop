@@ -1,8 +1,12 @@
-﻿namespace Topz.FileFormats.Atom
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Topz.FileFormats.Atom
 {
     /// <summary>
     /// Defines the address types available.
     /// </summary>
+
+    [SuppressMessage("Microsoft.Design", "CA1028:EnumStorageShouldBeInt32", Justification = Justifications.UnderlyingTypeIsRequired)]
     public enum AddressType : byte
     {
         /// <summary>

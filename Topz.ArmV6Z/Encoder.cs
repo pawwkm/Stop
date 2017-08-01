@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Topz.ArmV6Z
 {
@@ -187,79 +188,9 @@ namespace Topz.ArmV6Z
         public static int EncodeLoadStoreOperand(ref uint binary, int index, Instruction instruction)
         {
             if (instruction.Values.ContainsKey(Placeholders.Offset12))
-            {
-                // Set the 26th and 24th bit.
-                binary |= 1 << 26;
-                binary |= 1 << 24;
-
-                var offset = instruction.Values[Placeholders.Offset12] as Integer;
-                if (Math.Abs(offset.Value) > 4095)
-                    throw new EncodingException(offset.Position.ToString("The offset exceeds 12 bits."));
-
-                binary |= ((uint)Math.Abs(offset.Value) << index - 11);
-                if (instruction.Values.ContainsKey(Symbols.ExclamationMark))
-                    binary |= 1 << 21;
-            }
+                binary = EncodeLoadOrStoreImmediateOffset(binary, index, instruction);
             else if (instruction.Values.ContainsKey(Symbols.Plus + Placeholders.Rm) || instruction.Values.ContainsKey(Symbols.Minus + Placeholders.Rm))
-            {
-                // Set the 26th, 25th and 24th bit.
-                binary |= 1 << 26;
-                binary |= 1 << 25;
-                binary |= 1 << 24;
-
-                if (instruction.Values.ContainsKey(Symbols.ExclamationMark))
-                    binary |= 1 << 21;
-
-                var rm = 0u;
-                if (instruction.Values.ContainsKey(Symbols.Plus + Placeholders.Rm))
-                {
-                    rm = (uint)((Register)instruction.Values[Symbols.Plus + Placeholders.Rm]);
-                    binary |= 1 << 23;
-                }
-                else
-                    rm = (uint)((Register)instruction.Values[Symbols.Minus + Placeholders.Rm]);
-
-                binary |= rm << index - 11;
-                if (instruction.Values.ContainsKey(Placeholders.Shift))
-                {
-                    var shift = 0u;
-
-                    Integer immediate = null;
-                    if (instruction.Values.ContainsKey(Placeholders.ShiftImmediate))
-                        immediate = (Integer)instruction.Values[Placeholders.ShiftImmediate];
-
-                    var register = instruction.Values[Placeholders.Shift] as RegisterShifter;
-                    if (register == RegisterShifter.Lsl)
-                    {
-                        if (immediate.Value < 0 || immediate.Value > 31)
-                            throw new EncodingException(immediate.Position.ToString("Immediate must be from 0 to 31."));
-                    }
-                    else if (register == RegisterShifter.Lsr)
-                    {
-                        shift = 1;
-                        if (immediate.Value < 0 || immediate.Value > 32)
-                            throw new EncodingException(immediate.Position.ToString("Immediate must be from 1 to 32."));
-                    }
-                    else if (register == RegisterShifter.Asr)
-                    {
-                        shift = 2;
-                        if (immediate.Value < 0 || immediate.Value > 32)
-                            throw new EncodingException(immediate.Position.ToString("Immediate must be from 1 to 32."));
-                    }
-                    else if (register == RegisterShifter.Ror)
-                    {
-                        shift = 3;
-                        if (immediate.Value < 0 || immediate.Value > 31)
-                            throw new EncodingException(immediate.Position.ToString("Immediate must be from 1 to 31."));
-                    }
-                    else if (register == RegisterShifter.Rrx)
-                        shift = 3;
-
-                    binary |= shift << 5;
-                    if (immediate != null && immediate.Value != 32)
-                        binary |= (uint)immediate.Value << 7;
-                }
-            }
+                binary = EncodeLoadOrStoreRegisterOffset(binary, index, instruction);
 
             if (instruction.Values.ContainsKey(Placeholders.PostIndexed))
                 binary &= ~(1u << 24);
@@ -339,6 +270,100 @@ namespace Topz.ArmV6Z
             }
 
             throw new EncodingException($"The immediate {value} could not be encoded.");
+        }
+
+        /// <summary>
+        /// Encodes a load/store immediate operand.
+        /// </summary>
+        /// <param name="binary">The instruction to apply the operand to.</param>
+        /// <param name="index">The index where the operand is applied to.</param>
+        /// <param name="instruction">The instruction that carries the shifter operand.</param>
+        /// <returns>The encoded operand.</returns>
+        private static uint EncodeLoadOrStoreImmediateOffset(uint binary, int index, Instruction instruction)
+        {
+            // Set the 26th and 24th bit.
+            binary |= 1 << 26;
+            binary |= 1 << 24;
+
+            var offset = instruction.Values[Placeholders.Offset12] as Integer;
+            if (Math.Abs(offset.Value) > 4095)
+                throw new EncodingException(offset.Position.ToString("The offset exceeds 12 bits."));
+
+            binary |= ((uint)Math.Abs(offset.Value) << index - 11);
+            if (instruction.Values.ContainsKey(Symbols.ExclamationMark))
+                binary |= 1 << 21;
+
+            return binary;
+        }
+
+        /// <summary>
+        /// Encodes a load/store register operand.
+        /// </summary>
+        /// <param name="binary">The instruction to apply the operand to.</param>
+        /// <param name="index">The index where the operand is applied to.</param>
+        /// <param name="instruction">The instruction that carries the shifter operand.</param>
+        /// <returns>The encoded operand.</returns>
+        private static uint EncodeLoadOrStoreRegisterOffset(uint binary, int index, Instruction instruction)
+        {
+            // Set the 26th, 25th and 24th bit.
+            binary |= 1 << 26;
+            binary |= 1 << 25;
+            binary |= 1 << 24;
+
+            if (instruction.Values.ContainsKey(Symbols.ExclamationMark))
+                binary |= 1 << 21;
+
+            var rm = 0u;
+            if (instruction.Values.ContainsKey(Symbols.Plus + Placeholders.Rm))
+            {
+                rm = (uint)((Register)instruction.Values[Symbols.Plus + Placeholders.Rm]);
+                binary |= 1 << 23;
+            }
+            else
+                rm = (uint)((Register)instruction.Values[Symbols.Minus + Placeholders.Rm]);
+
+            binary |= rm << index - 11;
+            if (instruction.Values.ContainsKey(Placeholders.Shift))
+            {
+                var shift = 0u;
+
+                Integer immediate = null;
+                if (instruction.Values.ContainsKey(Placeholders.ShiftImmediate))
+                    immediate = (Integer)instruction.Values[Placeholders.ShiftImmediate];
+
+                var register = instruction.Values[Placeholders.Shift] as RegisterShifter;
+                if (register == RegisterShifter.Lsl)
+                {
+                    if (immediate.Value < 0 || immediate.Value > 31)
+                        throw new EncodingException(immediate.Position.ToString("Immediate must be from 0 to 31."));
+                }
+                else if (register == RegisterShifter.Lsr)
+                {
+                    shift = 1;
+                    if (immediate.Value < 0 || immediate.Value > 32)
+                        throw new EncodingException(immediate.Position.ToString("Immediate must be from 1 to 32."));
+                }
+                else if (register == RegisterShifter.Asr)
+                {
+                    shift = 2;
+                    if (immediate.Value < 0 || immediate.Value > 32)
+                        throw new EncodingException(immediate.Position.ToString("Immediate must be from 1 to 32."));
+                }
+                else if (register == RegisterShifter.Ror)
+                {
+                    shift = 3;
+                    if (immediate.Value < 0 || immediate.Value > 31)
+                        throw new EncodingException(immediate.Position.ToString("Immediate must be from 1 to 31."));
+                }
+                else if (register == RegisterShifter.Rrx)
+                    shift = 3;
+
+                binary |= shift << 5;
+                if (immediate != null && immediate.Value != 32)
+                    binary |= (uint)immediate.Value << 7;
+            }
+
+            return binary;
         }
     }
 }

@@ -244,9 +244,10 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
-        /// 
+        /// Converts a register to its numeric equivalent.
         /// </summary>
-        /// <param name="register"></param>
+        /// <param name="register">The register to convert.</param>
+        /// <returns>The numberic equivalent of the <paramref name="register"/>.</returns>
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = Justifications.SimpleSwitch)]
         public static explicit operator int (Register register)
         {
@@ -291,10 +292,15 @@ namespace Topz.ArmV6Z
                 case ProgramCounter:
                     return 15;
                 default:
-                    throw new ArgumentException(nameof(register));
+                    throw new ArgumentException("This is not a register.", nameof(register));
             }
         }
 
+        /// <summary>
+        /// Converts a register to its numeric equivalent.
+        /// </summary>
+        /// <param name="register">The register to convert.</param>
+        /// <returns>The numberic equivalent of the <paramref name="register"/>.</returns>
         public static explicit operator uint(Register register)
         {
             return (uint)((int)register);
