@@ -559,7 +559,7 @@ namespace Topz.ArmV6Z
         {
             var builder = new TokenBuilder();
             builder.Procedure().Identifier("main")
-                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().Comma().Plus().R2().Comma().Lsl().Lsr().RightSquareBracket();
+                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().Comma().Plus().R2().Comma().Lsl().Integer(4).RightSquareBracket();
 
             var parser = new Parser();
             var program = parser.Parse(LexicalAnalyzer(builder.Build()));
@@ -580,7 +580,7 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
             Assert.AreEqual(instruction.Values[Symbols.Plus + Placeholders.Rm], Register.R2);
             Assert.AreEqual(instruction.Values[Placeholders.Shift], RegisterShifter.Lsl);
-            Assert.AreEqual(instruction.Values[Placeholders.ShiftImmediate], RegisterShifter.Lsr);
+            Assert.AreEqual(instruction.Values[Placeholders.ShiftImmediate], 4);
         }
 
         /// <summary>
@@ -626,7 +626,7 @@ namespace Topz.ArmV6Z
         {
             var builder = new TokenBuilder();
             builder.Procedure().Identifier("main")
-                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().Comma().Plus().R2().Comma().Lsl().Lsr().RightSquareBracket().ExclamationMark();
+                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().Comma().Plus().R2().Comma().Lsl().Integer(4).RightSquareBracket().ExclamationMark();
 
             var parser = new Parser();
             var program = parser.Parse(LexicalAnalyzer(builder.Build()));
@@ -647,7 +647,7 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
             Assert.AreEqual(instruction.Values[Symbols.Plus + Placeholders.Rm], Register.R2);
             Assert.AreEqual(instruction.Values[Placeholders.Shift], RegisterShifter.Lsl);
-            Assert.AreEqual(instruction.Values[Placeholders.ShiftImmediate], RegisterShifter.Lsr);
+            Assert.AreEqual(instruction.Values[Placeholders.ShiftImmediate], 4);
             Assert.Null(instruction.Values[Symbols.ExclamationMark]);
         }
 
@@ -675,7 +675,7 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(1, main.Instructions.Count);
 
             var instruction = main.Instructions[0];
-            Assert.AreEqual(instruction.Values.Count, 3);
+            Assert.AreEqual(instruction.Values.Count, 4);
             Assert.Null(instruction.Label);
 
             Assert.AreEqual(instruction.Encoding, "cond 01 I P U 0 W 1 Rn Rd addr_mode");
@@ -709,7 +709,7 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(1, main.Instructions.Count);
 
             var instruction = main.Instructions[0];
-            Assert.AreEqual(instruction.Values.Count, 3);
+            Assert.AreEqual(instruction.Values.Count, 4);
             Assert.Null(instruction.Label);
 
             Assert.AreEqual(instruction.Encoding, "cond 01 I P U 0 W 1 Rn Rd addr_mode");
@@ -729,7 +729,7 @@ namespace Topz.ArmV6Z
         {
             var builder = new TokenBuilder();
             builder.Procedure().Identifier("main")
-                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().RightSquareBracket().Comma().Plus().R2().Comma().Lsl().Lsr();
+                   .Mnemonic(Mnemonic.Ldr).R0().Comma().LeftSquareBracket().R1().RightSquareBracket().Comma().Plus().R2().Comma().Lsl().Integer(4);
 
             var parser = new Parser();
             var program = parser.Parse(LexicalAnalyzer(builder.Build()));
@@ -743,7 +743,7 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(1, main.Instructions.Count);
 
             var instruction = main.Instructions[0];
-            Assert.AreEqual(instruction.Values.Count, 5);
+            Assert.AreEqual(instruction.Values.Count, 6);
             Assert.Null(instruction.Label);
 
             Assert.AreEqual(instruction.Encoding, "cond 01 I P U 0 W 1 Rn Rd addr_mode");
@@ -751,7 +751,7 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
             Assert.AreEqual(instruction.Values[Symbols.Plus + Placeholders.Rm], Register.R2);
             Assert.AreEqual(instruction.Values[Placeholders.Shift], RegisterShifter.Lsl);
-            Assert.AreEqual(instruction.Values[Placeholders.ShiftImmediate], RegisterShifter.Lsr);
+            Assert.AreEqual(instruction.Values[Placeholders.ShiftImmediate], 4);
             Assert.Null(instruction.Values[Placeholders.PostIndexed]);
         }
 
@@ -764,7 +764,7 @@ namespace Topz.ArmV6Z
         {
             var builder = new TokenBuilder();
             builder.Procedure().Identifier("main")
-                   .Mnemonic(Mnemonic.Ldr).Bit(Bit.B).R0().Comma().LeftSquareBracket().R1().Comma().Plus().R2().Comma().Lsl().Lsr().RightSquareBracket();
+                   .Mnemonic(Mnemonic.Ldr).Bit(Bit.B).R0().Comma().LeftSquareBracket().R1().Comma().Plus().R2().Comma().Lsl().Integer(4).RightSquareBracket();
 
             var parser = new Parser();
             var program = parser.Parse(LexicalAnalyzer(builder.Build()));
@@ -785,7 +785,7 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(instruction.Values[Placeholders.Rn], Register.R1);
             Assert.AreEqual(instruction.Values[Symbols.Plus + Placeholders.Rm], Register.R2);
             Assert.AreEqual(instruction.Values[Placeholders.Shift], RegisterShifter.Lsl);
-            Assert.AreEqual(instruction.Values[Placeholders.ShiftImmediate], RegisterShifter.Lsr);
+            Assert.AreEqual(instruction.Values[Placeholders.ShiftImmediate], 4);
             Assert.AreEqual(instruction.Mnemonic.Bit, Bit.B);
         }
 
