@@ -361,7 +361,7 @@ namespace Topz.FileFormats.Atom
             procedure.Code.Add(0x00);
             procedure.Code.Add(0x00);
 
-            // bl #0
+            // bl #??????
             procedure.Code.Add(0xEB);
             procedure.Code.Add(0x00);
             procedure.Code.Add(0x00);
@@ -407,7 +407,7 @@ namespace Topz.FileFormats.Atom
             procedure.IsDefined = true;
             procedure.Name = "Proc";
 
-            // bl #0
+            // bl #??????
             procedure.Code.Add(0xEB);
             procedure.Code.Add(0x00);
             procedure.Code.Add(0x00);
@@ -436,6 +436,49 @@ namespace Topz.FileFormats.Atom
 
                 // The random instruction that was referenced.
                 0x00, 0x00, 0x00, 0x00
+            };
+
+            using (var stream = new MemoryStream())
+            {
+                var linker = new AtomLinker();
+                linker.Link(new[] { file }, stream);
+
+                CollectionAssert.AreEqual(binary, stream.ToArray());
+            }
+        }
+
+        /// <summary>
+        /// Tests that <see cref="AtomLinker.Link(IEnumerable{ObjectFile}, Stream)"/>
+        /// can resolve a local <see cref="AddressType.ArmTargetAddress"/> to itself.
+        /// </summary>
+        [Test]
+        public void Link_ProcedureJumpToSelf_ResolvesReference()
+        {
+            var procedure = new Procedure();
+            procedure.IsMain = true;
+            procedure.IsDefined = true;
+            procedure.Name = "Proc";
+
+            // bl #??????
+            procedure.Code.Add(0xEB);
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+
+            procedure.References.Add(new LocalReference()
+            {
+                Address = 0,
+                AddressType = AddressType.ArmTargetAddress,
+                Target = 0
+            });
+
+            var file = new ObjectFile();
+            file.Atoms.Add(procedure);
+
+            var binary = new byte[]
+            {
+                // bl #0
+                0xEB, 0xFF, 0xFF, 0xFE,
             };
 
             using (var stream = new MemoryStream())

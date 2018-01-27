@@ -390,19 +390,5 @@ namespace Topz.FileFormats.Atom
                     yield return global.Atom;
             }
         }
-
-        private static uint Test(uint value, byte bits)
-        {
-            uint mask = 1u << bits - 1;
-
-            return (uint)(-(value & mask) + (value & ~mask));
-        }
-
-        private static int Test(int value, byte bits)
-        {
-            uint mask = 1u << bits - 1;
-
-            return (int)(-(value & mask) + (value & ~mask));
-        }
     }
 }
