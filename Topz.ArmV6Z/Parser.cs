@@ -81,6 +81,7 @@ namespace Topz.ArmV6Z
 
             var procedure = new Procedure(identifier.Name, identifier.Position);
             procedure.IsExternal = isExternal;
+            procedure.IsMain = identifier.Name == "Main";
 
             if (!isExternal)
             {

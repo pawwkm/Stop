@@ -39,8 +39,12 @@ namespace Topz.FileFormats.Atom
                 // Write header.
                 writer.Write(0x6D6F7461);   // Ascii for "atom" backwards.
                 writer.Write((ushort)1);
-                writer.Write(file.IsOriginSet);
-                writer.Write(file.Origin);
+                writer.Write(file.Origin.HasValue);
+                
+                if (file.Origin.HasValue)
+                    writer.Write(file.Origin.Value);
+                else
+                    writer.Write(0UL);
 
                 of = file;
                 foreach (dynamic atom in file)

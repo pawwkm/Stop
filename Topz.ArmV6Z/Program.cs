@@ -120,14 +120,8 @@ namespace Topz.ArmV6Z
         /// <param name="e">The parameters for the event.</param>
         private void CheckMainProcedure(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (!Procedures.Any(x => x.IsMain))
-                return;
-
-            foreach (Procedure procedure in e.NewItems)
-            {
-                if (procedure.IsMain)
-                    throw new ArgumentException("Cannot have multiple main procedures.");
-            }
+            if (Procedures.Count(x => x.IsMain) > 1)
+                throw new ArgumentException("Cannot have multiple main procedures.");
         }
     }
 }

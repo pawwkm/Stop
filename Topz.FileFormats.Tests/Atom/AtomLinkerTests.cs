@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace Topz.FileFormats.Atom
@@ -136,11 +137,115 @@ namespace Topz.FileFormats.Atom
         }
 
         /// <summary>
-        /// Tests that <see cref="AtomLinker.Link(IEnumerable{ObjectFile})"/>
-        /// can link a main procedure that references a null terminated string.
+        /// Tests that <see cref="AtomLinker.Link(IEnumerable{ObjectFile}, Stream)"/>
+        /// can resolve a local reference to a future instruction.
         /// </summary>
         [Test]
-        public void Link_ProcedureReferencingNullTerminatedString_LinksToBinary()
+        public void Link_ProcedureReferencingLocalFutureInstruction_ResolvesReference()
+        {
+            var procedure = new Procedure();
+            procedure.IsMain = true;
+            procedure.IsDefined = true;
+            procedure.Name = "Proc";
+
+            // ldr r0, [r1, #0]
+            procedure.Code.Add(0xE5);
+            procedure.Code.Add(0x91);
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+
+            // Some random instruction to be referenced.
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+
+            procedure.References.Add(new LocalReference()
+            {
+                Address = 0,
+                AddressType = AddressType.ArmOffset12,
+                Target = 4
+            });
+
+            var file = new ObjectFile();
+            file.Atoms.Add(procedure);
+
+            var binary = new byte[]
+            {
+                // ldr r0, [r1, #4]
+                0xE5, 0x91, 0x00, 0x04,
+
+                // The random instruction that was referenced.
+                0x00, 0x00, 0x00, 0x00
+            };
+
+            using (var stream = new MemoryStream())
+            {
+                var linker = new AtomLinker();
+                linker.Link(new[] { file }, stream);
+
+                CollectionAssert.AreEqual(binary, stream.ToArray());
+            }
+        }
+
+        /// <summary>
+        /// Tests that <see cref="AtomLinker.Link(IEnumerable{ObjectFile}, Stream)"/>
+        /// can resolve an instruction referencing itself.
+        /// </summary>
+        [Test]
+        public void Link_InstructionReferencingItself_ResolvesReference()
+        {
+            var procedure = new Procedure();
+            procedure.IsMain = true;
+            procedure.IsDefined = true;
+            procedure.Name = "Proc";
+
+            // Some random instruction.
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+
+            // ldr r0, [r1, #4]
+            procedure.Code.Add(0xE5);
+            procedure.Code.Add(0x91);
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x04);
+
+            procedure.References.Add(new LocalReference()
+            {
+                Address = 4,
+                AddressType = AddressType.ArmOffset12,
+                Target = 4
+            });
+
+            var file = new ObjectFile();
+            file.Atoms.Add(procedure);
+
+            var binary = new byte[]
+            {
+                // The random instruction that was referenced.
+                0x00, 0x00, 0x00, 0x00,
+
+                // ldr r0, [r1, #0]
+                0xE5, 0x91, 0x00, 0x00
+            };
+
+            using (var stream = new MemoryStream())
+            {
+                var linker = new AtomLinker();
+                linker.Link(new[] { file }, stream);
+
+                CollectionAssert.AreEqual(binary, stream.ToArray());
+            }
+        }
+
+        /// <summary>
+        /// Tests that <see cref="AtomLinker.Link(IEnumerable{ObjectFile}, Stream)"/>
+        /// can resolve a global <see cref="AddressType.ArmOffset12"/> reference.
+        /// </summary>
+        [Test]
+        public void Link_GlobalOffset12Reference_ResolvesReference()
         {
             var file = new ObjectFile();
             file.Atoms.Add(new NullTerminatedString()
@@ -151,20 +256,30 @@ namespace Topz.FileFormats.Atom
             });
 
             var procedure = new Procedure();
-            file.Atoms.Add(procedure);
-
             procedure.IsMain = true;
             procedure.IsDefined = true;
             procedure.Name = "Proc";
+            file.Atoms.Add(procedure);
+
+            // ldr r0, [r1, #0]
+            procedure.Code.Add(0xE5);
+            procedure.Code.Add(0x91);
             procedure.Code.Add(0x00);
             procedure.Code.Add(0x00);
 
-            procedure.References.Add(new GlobalReference(file.Atoms[0]));
-
-            var binary = new byte[] 
+            procedure.References.Add(new GlobalReference(file.Atoms.First())
             {
-                0x02, 0x00,             // Procedure code.
-                0x41, 0x62, 0x63, 0x00  // The string 'Abc'.
+                Address = 0,
+                AddressType = AddressType.ArmOffset12
+            });
+
+            var binary = new byte[]
+            {
+                // ldr r0, [r1, #4]
+                0xE5, 0x91, 0x00, 0x04,
+
+                // The "Abc" string.
+                0x41, 0x62, 0x63, 0x00
             };
 
             using (var stream = new MemoryStream())
@@ -175,39 +290,48 @@ namespace Topz.FileFormats.Atom
                 CollectionAssert.AreEqual(binary, stream.ToArray());
             }
         }
-
+        
         /// <summary>
-        /// Tests that <see cref="AtomLinker.Link(IEnumerable{ObjectFile})"/>
-        /// can link a main procedure that references a chunk of data.
+        /// Tests that <see cref="AtomLinker.Link(IEnumerable{ObjectFile}, Stream)"/>
+        /// can resolve a local reference to a past instruction.
         /// </summary>
         [Test]
-        public void Link_ProcedureReferencingData_LinksToBinary()
+        public void Link_ProcedureReferencingLocalPastInstruction_ResolvesReference()
         {
-            var file = new ObjectFile();
-
-            var data = new Data();
-            file.Atoms.Add(data);
-
-            data.IsDefined = true;
-            data.Name = "Data";
-            data.Content.Add(0xAA);
-            data.Content.Add(0x55);
-
             var procedure = new Procedure();
-            file.Atoms.Add(procedure);
-
             procedure.IsMain = true;
             procedure.IsDefined = true;
             procedure.Name = "Proc";
+
+            // Some random instruction to be referenced.
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
             procedure.Code.Add(0x00);
             procedure.Code.Add(0x00);
 
-            procedure.References.Add(new GlobalReference(data));
+            // ldr r0, [r1, #0]
+            procedure.Code.Add(0xE5);
+            procedure.Code.Add(0x91);
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+
+            procedure.References.Add(new LocalReference()
+            {
+                Address = 4,
+                AddressType = AddressType.ArmOffset12,
+                Target = 0
+            });
+
+            var file = new ObjectFile();
+            file.Atoms.Add(procedure);
 
             var binary = new byte[]
             {
-                0x02, 0x00, // Procedure code.
-                0xAA, 0x55, // The data chunk.
+                // The random instruction that was referenced.
+                0x00, 0x00, 0x00, 0x00,
+
+                // ldr r0, [r1, #-4]
+                0xE5, 0x11, 0x00, 0x04
             };
 
             using (var stream = new MemoryStream())
@@ -220,39 +344,98 @@ namespace Topz.FileFormats.Atom
         }
 
         /// <summary>
-        /// Tests that <see cref="AtomLinker.Link(IEnumerable{ObjectFile})"/>
-        /// can link a main procedure that references another procedure.
+        /// Tests that <see cref="AtomLinker.Link(IEnumerable{ObjectFile}, Stream)"/>
+        /// can resolve a local <see cref="AddressType.ArmTargetAddress"/> to a past instruction.
         /// </summary>
         [Test]
-        public void Link_ProcedureReferencingProcedure_LinksToBinary()
+        public void Link_ProcedureJumpToPast_ResolvesReference()
         {
+            var procedure = new Procedure();
+            procedure.IsMain = true;
+            procedure.IsDefined = true;
+            procedure.Name = "Proc";
+
+            // Some random instruction to be referenced.
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+
+            // bl #0
+            procedure.Code.Add(0xEB);
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+
+            procedure.References.Add(new LocalReference()
+            {
+                Address = 4,
+                AddressType = AddressType.ArmTargetAddress,
+                Target = 0
+            });
+
             var file = new ObjectFile();
-
-            var sub = new Procedure();
-            file.Atoms.Add(sub);
-
-            sub.IsDefined = true;
-            sub.Name = "Sub";
-            sub.Code.Add(0xAA);
-            sub.Code.Add(0x55);
-
-            var reference = new GlobalReference(sub);
-            reference.AddressType = AddressType.ArmTargetAddress;
-
-            var main = new Procedure();
-            file.Atoms.Add(main);
-
-            main.IsMain = true;
-            main.IsDefined = true;
-            main.Name = "Proc";
-            main.Code.Add(0x00);
-            main.Code.Add(0x00);
-            main.References.Add(reference);
+            file.Atoms.Add(procedure);
 
             var binary = new byte[]
             {
-                0x02, 0x00, // Main procedure.
-                0xAA, 0x55, // Sub procedure.
+                // The random instruction that was referenced.
+                0x00, 0x00, 0x00, 0x00,
+
+                // bl #-4
+                0xEB, 0xFF, 0xFF, 0xFD
+            };
+
+            using (var stream = new MemoryStream())
+            {
+                var linker = new AtomLinker();
+                linker.Link(new[] { file }, stream);
+
+                CollectionAssert.AreEqual(binary, stream.ToArray());
+            }
+        }
+
+        /// <summary>
+        /// Tests that <see cref="AtomLinker.Link(IEnumerable{ObjectFile}, Stream)"/>
+        /// can resolve a local <see cref="AddressType.ArmTargetAddress"/> to a future instruction.
+        /// </summary>
+        [Test]
+        public void Link_ProcedureJumpToFuture_ResolvesReference()
+        {
+            var procedure = new Procedure();
+            procedure.IsMain = true;
+            procedure.IsDefined = true;
+            procedure.Name = "Proc";
+
+            // bl #0
+            procedure.Code.Add(0xEB);
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+
+            // Some random instruction to be referenced.
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+            procedure.Code.Add(0x00);
+
+            procedure.References.Add(new LocalReference()
+            {
+                Address = 0,
+                AddressType = AddressType.ArmTargetAddress,
+                Target = 4
+            });
+
+            var file = new ObjectFile();
+            file.Atoms.Add(procedure);
+
+            var binary = new byte[]
+            {
+                // bl #4
+                0xEB, 0xFF, 0xFF, 0xFF,
+
+                // The random instruction that was referenced.
+                0x00, 0x00, 0x00, 0x00
             };
 
             using (var stream = new MemoryStream())
@@ -387,11 +570,10 @@ namespace Topz.FileFormats.Atom
         public void Link_InconsistentOrigin_ThrowsException()
         {
             var a = new ObjectFile();
-            a.IsOriginSet = true;
             a.Origin = 0x10;
 
             var b = new ObjectFile();
-            b.IsOriginSet = true;
+            b.Origin = 0;
 
             var linker = new AtomLinker();
 

@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using Topz.Text;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Topz.ArmV6Z
 {
@@ -739,6 +740,24 @@ namespace Topz.ArmV6Z
             Assert.AreEqual(instruction.Values[Placeholders.Shift], RegisterShifter.Lsl);
             Assert.AreEqual(instruction.Values[Placeholders.ShiftImmediate], 4);
             Assert.AreEqual(instruction.Mnemonic.Bit, Bit.B);
+        }
+
+        /// <summary>
+        /// ssafasdf as df asdf 
+        /// </summary>
+        [Test]
+        public void LOL()
+        {
+            var path = @"C:\Users\Paw\Desktop\Act LED\main.s";
+            var assembler = new Assembler();
+            var obj = assembler.Assemble(File.ReadAllText(path));
+            var linker = new FileFormats.Atom.AtomLinker();
+
+            using (var stream = File.Create(@"C:\Users\Paw\Desktop\Act LED\kernel.img"))
+            {
+                linker.Link(new[] { obj }, stream);
+                stream.Flush();
+            }
         }
     }
 }

@@ -29,7 +29,6 @@ namespace Topz.FileFormats.Atom
                 var writer = new AtomWriter();
 
                 var file = new ObjectFile();
-                file.IsOriginSet = true;
                 file.Origin = 0x20;
 
                 writer.Write(file, stream);
@@ -80,7 +79,6 @@ namespace Topz.FileFormats.Atom
                 var writer = new AtomWriter();
 
                 var file = new ObjectFile();
-                file.IsOriginSet = true;
                 file.Origin = 0x20;
                 file.Atoms.Add(procedure);
 
@@ -160,7 +158,6 @@ namespace Topz.FileFormats.Atom
                 var writer = new AtomWriter();
 
                 var file = new ObjectFile();
-                file.IsOriginSet = true;
                 file.Origin = 0x20;
 
                 file.Atoms.Add(procedure);
@@ -210,7 +207,6 @@ namespace Topz.FileFormats.Atom
                 var writer = new AtomWriter();
 
                 var file = new ObjectFile();
-                file.IsOriginSet = true;
                 file.Origin = 0x20;
                 file.Atoms.Add(s);
 
@@ -259,7 +255,6 @@ namespace Topz.FileFormats.Atom
                 var writer = new AtomWriter();
 
                 var file = new ObjectFile();
-                file.IsOriginSet = true;
                 file.Origin = 0x20;
                 file.Atoms.Add(data);
 

@@ -24,7 +24,7 @@ namespace Topz
 
             if (value)
                 return number | (1u << index);
-
+            
             return number & ~(1u << index);
         }
 
@@ -34,6 +34,22 @@ namespace Topz
         /// <param name="value">The integer to convert.</param>
         /// <returns>The binary value.</returns>
         public static string ToBinary(this uint value)
+        {
+            var text = Convert.ToString(value, 2);
+            text = text.PadLeft(32, '0');
+
+            for (int i = 4; i <= text.Length; i += 4)
+                text = text.Insert(i++, " ");
+
+            return text.Substring(0, text.Length - 1);
+        }
+
+        /// <summary>
+        /// Converts an integer to binary.
+        /// </summary>
+        /// <param name="value">The integer to convert.</param>
+        /// <returns>The binary value.</returns>
+        public static string ToBinary(this int value)
         {
             var text = Convert.ToString(value, 2);
             text = text.PadLeft(32, '0');

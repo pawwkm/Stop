@@ -31,8 +31,8 @@ namespace Topz.FileFormats.Atom
                 var file = reader.Read(stream);
 
                 Assert.AreEqual(0, file.Atoms.Count);
-                Assert.True(file.IsOriginSet);
-                Assert.AreEqual(0x20, file.Origin);
+                Assert.True(file.Origin.HasValue);
+                Assert.AreEqual(0x20, file.Origin.Value);
             }
         }
 
@@ -69,7 +69,7 @@ namespace Topz.FileFormats.Atom
                 var reader = new AtomReader();
                 var file = reader.Read(stream);
 
-                Assert.True(file.IsOriginSet);
+                Assert.True(file.Origin.HasValue);
                 Assert.AreEqual(0x20, file.Origin);
 
                 var procedure = (Procedure)file.Atoms[0];
@@ -132,7 +132,7 @@ namespace Topz.FileFormats.Atom
                 var reader = new AtomReader();
                 var file = reader.Read(stream);
 
-                Assert.True(file.IsOriginSet);
+                Assert.True(file.Origin.HasValue);
                 Assert.AreEqual(0x20, file.Origin);
 
                 var procedure = (Procedure)file.Atoms[0];
@@ -187,8 +187,7 @@ namespace Topz.FileFormats.Atom
                 var reader = new AtomReader();
                 var file = reader.Read(stream);
 
-                Assert.True(file.IsOriginSet);
-                Assert.AreEqual(0x20, file.Origin);
+                Assert.AreEqual(0x20, file.Origin.Value);
 
                 var data = (Data)file.Atoms[0];
 
@@ -230,7 +229,6 @@ namespace Topz.FileFormats.Atom
                 var reader = new AtomReader();
                 var file = reader.Read(stream);
 
-                Assert.True(file.IsOriginSet);
                 Assert.AreEqual(0x20, file.Origin);
 
                 var s = (NullTerminatedString)file.Atoms[0];

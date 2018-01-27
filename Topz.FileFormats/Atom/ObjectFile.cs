@@ -26,16 +26,7 @@ namespace Topz.FileFormats.Atom
         /// <summary>
         /// The offset from zero which the <see cref="Atoms"/> have been assembled.
         /// </summary>
-        public ulong Origin
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// True if the <see cref="Origin"/> must be respected.
-        /// </summary>
-        public bool IsOriginSet
+        public long? Origin
         {
             get;
             set;

@@ -78,8 +78,10 @@ namespace Topz.FileFormats.Atom
                 if (reader.ReadUInt16() != 1)
                     throw new InvalidObjectFileException("This object file is not using version one.");
 
-                file.IsOriginSet = reader.ReadBoolean();
-                file.Origin = reader.ReadUInt64();
+                if (reader.ReadBoolean())
+                    file.Origin = (long)reader.ReadUInt64();
+                else
+                    reader.ReadUInt64();
 
                 while (!EndOfFile)
                 {

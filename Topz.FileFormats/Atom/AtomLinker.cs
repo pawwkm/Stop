@@ -14,9 +14,9 @@ namespace Topz.FileFormats.Atom
     {
         private Stream stream;
 
-        private Dictionary<Atom, ulong> addresses = new Dictionary<Atom, ulong>();
+        private Dictionary<Atom, long> addresses = new Dictionary<Atom, long>();
 
-        private ulong address;
+        private long address;
 
         /// <summary>
         /// Combines object files into a single one.
@@ -40,10 +40,9 @@ namespace Topz.FileFormats.Atom
             {
                 if (combined.Origin != file.Origin)
                 {
-                    if (combined.IsOriginSet)
+                    if (combined.Origin.HasValue)
                         throw new InvalidObjectFileException("Inconsistent origin.");
 
-                    combined.IsOriginSet = true;
                     combined.Origin = file.Origin;
                 }
 
@@ -121,7 +120,7 @@ namespace Topz.FileFormats.Atom
                 throw new InvalidObjectFileException("There is no main procedure.");
 
             addresses.Clear();
-            address = file.IsOriginSet ? file.Origin : 0;
+            address = file.Origin.HasValue ? file.Origin.Value : 0L;
 
             var main = file.OfType<Procedure>().First(p => p.IsMain);
             foreach (dynamic atom in Walk(main))
@@ -143,11 +142,10 @@ namespace Topz.FileFormats.Atom
                 {
                     foreach (var reference in procedure.References)
                     {
+                        var proc = combined.OfType<Procedure>().First(p => p.Name == procedure.Name);
                         if (reference is GlobalReference)
                         {
                             var global = reference as GlobalReference;
-
-                            var proc = combined.OfType<Procedure>().First(p => p.Name == procedure.Name);
                             var referenced = combined.First(a => a.Name == global.Atom.Name);
 
                             var r = new GlobalReference(referenced);
@@ -165,8 +163,16 @@ namespace Topz.FileFormats.Atom
 
                             proc.References.Add(r);
                         }
-                        else if (reference is LocalReference)
-                            throw new NotImplementedException();
+                        else
+                        {
+                            var local = reference as LocalReference;
+                            proc.References.Add(new LocalReference()
+                            {
+                                Address = local.Address,
+                                AddressType = local.AddressType,
+                                Target = local.Target
+                            });
+                        }
                     }
                 }
             }
@@ -265,22 +271,56 @@ namespace Topz.FileFormats.Atom
             {
                 foreach (var reference in procedure.References)
                 {
-                    if (reference.AddressType == AddressType.ArmTargetAddress)
-                        throw new NotSupportedException();
+                    var target = 0L;
+                    if (reference is GlobalReference)
+                        target = addresses[((GlobalReference)reference).Atom];
+                    else
+                        target = addresses[procedure] + ((LocalReference)reference).Target;
 
-                    //var offset = (long)(addresses[procedure] + reference.Address);
-                    //stream.Seek(offset, SeekOrigin.Begin);
+                    var start = addresses[procedure] + reference.Address;
+                    stream.Seek(start, SeekOrigin.Begin);
 
-                    //byte[] bytes = null;
-                    //if (reference.SizeOfAddress == 2)
-                    //    bytes = BitConverter.GetBytes((ushort)addresses[reference.Atom]);
-                    //else
-                    //    bytes = BitConverter.GetBytes(addresses[reference.Atom]);
+                    var buffer = new byte[4];
+                    stream.Read(buffer, 0, buffer.Length);
 
-                    //if (!reference.IsAddressInLittleEndian)
-                    //    bytes.Reverse();
+                    var instruction = BitConverter.ToUInt32(buffer.Reverse().ToArray(), 0);
 
-                    //stream.Write(bytes, 0, bytes.Length);
+                    var offset = 0u;
+                    switch (reference.AddressType)
+                    {
+                        case AddressType.ArmOffset12:
+                            offset = (uint)Math.Abs(start - target);
+                            if (offset > 4095)
+                                throw new Exception($"Out of the ±4kB range.");
+
+                            // Set the U bit.
+                            instruction = instruction.SetBit(23, start <= target);
+
+                            // Clear offset.
+                            instruction &= ~0xFFFu;
+
+                            break;
+                        case AddressType.ArmTargetAddress:
+                            if (Math.Abs(start - target) > 3.2e+7)
+                                throw new Exception($"Out of the ±32MB range.");
+
+                            offset = (uint)((((start <= target ? start + target : target - start) - 8) >> 2) | 0x80000000) & 0x00FFFFFF;
+
+                            // Clear offset.
+                            instruction &= 0xFF000000u;
+
+                            break;
+                        default:
+                            throw new NotSupportedException($"The {reference.Address} address mode is not supported.");
+                    }
+
+                    // Use the resolved offset.
+                    instruction |= offset;
+
+                    stream.Seek(start, SeekOrigin.Begin);
+                    buffer = BitConverter.GetBytes(instruction);
+
+                    stream.Write(buffer.Reverse().ToArray(), 0, buffer.Length);
                 }
             }
         }
@@ -349,6 +389,20 @@ namespace Topz.FileFormats.Atom
                 else
                     yield return global.Atom;
             }
+        }
+
+        private static uint Test(uint value, byte bits)
+        {
+            uint mask = 1u << bits - 1;
+
+            return (uint)(-(value & mask) + (value & ~mask));
+        }
+
+        private static int Test(int value, byte bits)
+        {
+            uint mask = 1u << bits - 1;
+
+            return (int)(-(value & mask) + (value & ~mask));
         }
     }
 }

@@ -11,8 +11,14 @@ namespace Topz.FileFormats.Atom
     {
         /// <summary>
         /// The address is encoded as defined in the Arm 
-        /// reference manual section A4.1.5.
+        /// Architecture Reference Manual section A4.1.5.
         /// </summary>
-        ArmTargetAddress = 0
+        ArmTargetAddress = 0,
+
+        /// <summary>
+        /// The address is encoded as defined in the Arm 
+        /// Architecture Reference Manual section A5.2.
+        /// </summary>
+        ArmOffset12 = 1
     }
 }
