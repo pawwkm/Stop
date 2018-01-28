@@ -22,10 +22,7 @@ namespace Topz.FileFormats.Atom
         /// </exception>
         public GlobalReference(Atom referenced)
         {
-            if (referenced == null)
-                throw new ArgumentNullException(nameof(referenced));
-
-            Atom = referenced;
+            Atom = referenced ?? throw new ArgumentNullException(nameof(referenced));
         }
 
         /// <summary>
@@ -42,28 +39,8 @@ namespace Topz.FileFormats.Atom
             }
             set
             {
-                if (value == null)
-                    throw new ArgumentNullException(nameof(value));
-
-                atom = value;
+                atom = value ?? throw new ArgumentNullException(nameof(value));
             }
-        }
-
-        /// <summary>
-        /// Checks if the <paramref name="reference"/>'s address overlaps with 
-        /// the address with this reference.
-        /// </summary>
-        /// <param name="reference">The reference the check.</param>
-        /// <returns>True if the two references have overlapping addresses; otherwise false.</returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="reference"/> is null.
-        /// </exception>
-        public bool IsOverlapping(Reference reference)
-        {
-            if (reference == null)
-                throw new ArgumentNullException(nameof(reference));
-
-            return false;
         }
     }
 }

@@ -14,9 +14,9 @@ namespace Topz.FileFormats.Atom
     {
         private Stream stream;
 
-        private Dictionary<Atom, long> addresses = new Dictionary<Atom, long>();
+        private Dictionary<Atom, ulong> addresses = new Dictionary<Atom, ulong>();
 
-        private long address;
+        private ulong address;
 
         /// <summary>
         /// Combines object files into a single one.
@@ -120,7 +120,7 @@ namespace Topz.FileFormats.Atom
                 throw new InvalidObjectFileException("There is no main procedure.");
 
             addresses.Clear();
-            address = file.Origin.HasValue ? file.Origin.Value : 0L;
+            address = file.Origin ?? 0UL;
 
             var main = file.OfType<Procedure>().First(p => p.IsMain);
             foreach (dynamic atom in Walk(main))
@@ -163,14 +163,12 @@ namespace Topz.FileFormats.Atom
 
                             proc.References.Add(r);
                         }
-                        else
+                        else if (reference is LocalReference local)
                         {
-                            var local = reference as LocalReference;
-                            proc.References.Add(new LocalReference()
+                            proc.References.Add(new LocalReference(local.Target)
                             {
                                 Address = local.Address,
                                 AddressType = local.AddressType,
-                                Target = local.Target
                             });
                         }
                     }
@@ -271,14 +269,14 @@ namespace Topz.FileFormats.Atom
             {
                 foreach (var reference in procedure.References)
                 {
-                    var target = 0L;
+                    var target = 0UL;
                     if (reference is GlobalReference)
                         target = addresses[((GlobalReference)reference).Atom];
                     else
                         target = addresses[procedure] + ((LocalReference)reference).Target;
 
                     var start = addresses[procedure] + reference.Address;
-                    stream.Seek(start, SeekOrigin.Begin);
+                    stream.Seek((long)start, SeekOrigin.Begin);
 
                     var buffer = new byte[4];
                     stream.Read(buffer, 0, buffer.Length);
@@ -289,7 +287,7 @@ namespace Topz.FileFormats.Atom
                     switch (reference.AddressType)
                     {
                         case AddressType.ArmOffset12:
-                            offset = (uint)Math.Abs(start - target);
+                            offset = (uint)Math.Abs((long)start - (long)target);
                             if (offset > 4095)
                                 throw new Exception($"Out of the ±4kB range.");
 
@@ -301,7 +299,7 @@ namespace Topz.FileFormats.Atom
 
                             break;
                         case AddressType.ArmTargetAddress:
-                            if (Math.Abs(start - target) > 3.2e+7)
+                            if (Math.Abs((long)start - (long)target) > 3.2e+7)
                                 throw new Exception($"Out of the ±32MB range.");
 
                             offset = (uint)((((start <= target ? start + target : target - start) - 8) >> 2) | 0x80000000) & 0x00FFFFFF;
@@ -317,7 +315,7 @@ namespace Topz.FileFormats.Atom
                     // Use the resolved offset.
                     instruction |= offset;
 
-                    stream.Seek(start, SeekOrigin.Begin);
+                    stream.Seek((long)start, SeekOrigin.Begin);
                     buffer = BitConverter.GetBytes(instruction);
 
                     stream.Write(buffer.Reverse().ToArray(), 0, buffer.Length);

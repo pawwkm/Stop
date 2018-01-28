@@ -116,10 +116,10 @@ namespace Topz.FileFormats.Atom
                 0x01, 0x00,                     // Number of references.
 
                 // Reference.
-                0x01, 0x00, 0x00, 0x00,         // It is atom number 1 that is being referenced (index based).
-                0x01,                           // The address is in little endian.
-                0x04,                           // The size of the address is 4 bytes.
+                0x01,                           // This is a global reference.
+                0x00,                           // The type of reference.
                 0x00, 0x00, 0x00, 0x00,         // The address to relocate.
+                0x01, 0x00, 0x00, 0x00,         // It is atom number 1 that is being referenced (index based).
 
                 // Null terminated string.
                 0x01,                           // Null terminated string type.
@@ -162,7 +162,7 @@ namespace Topz.FileFormats.Atom
 
                 file.Atoms.Add(procedure);
                 file.Atoms.Add(s);
-
+                
                 writer.Write(file, stream);
 
                 CollectionAssert.AreEqual(bytes, stream.ToArray());

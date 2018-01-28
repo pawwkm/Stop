@@ -17,6 +17,9 @@ namespace Topz.FileFormats.Atom
         /// <exception cref="ArgumentNullException">
         /// <paramref name="value"/> is null.
         /// </exception>
+        /// <exception cref="ArgumentException">
+        /// The value ends with null.
+        /// </exception>
         public string Name
         {
             get
@@ -27,6 +30,8 @@ namespace Topz.FileFormats.Atom
             {
                 if (name == null)
                     throw new ArgumentNullException(nameof(value));
+                if (name.EndsWith("\0"))
+                    throw new ArgumentException("Ends with null.", nameof(value));
 
                 name = value;
             }

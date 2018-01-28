@@ -40,14 +40,9 @@ namespace Topz.FileFormats.Atom
                 writer.Write(0x6D6F7461);   // Ascii for "atom" backwards.
                 writer.Write((ushort)1);
                 writer.Write(file.Origin.HasValue);
-                
-                if (file.Origin.HasValue)
-                    writer.Write(file.Origin.Value);
-                else
-                    writer.Write(0UL);
+                writer.Write(file.Origin ?? 0UL);
 
-                of = file;
-                foreach (dynamic atom in file)
+                foreach (dynamic atom in of = file)
                     Write(atom);
             }
         }
@@ -75,6 +70,7 @@ namespace Topz.FileFormats.Atom
         /// <param name="reference">The reference to write.</param>
         private void Write(Reference reference)
         {
+            writer.Write(reference is GlobalReference);
             writer.Write((byte)reference.AddressType);
             writer.Write(reference.Address);
 
@@ -96,7 +92,7 @@ namespace Topz.FileFormats.Atom
         /// <param name="reference">The reference to write.</param>
         private void Write(LocalReference reference)
         {
-            throw new NotImplementedException();
+            writer.Write(reference.Target);
         }
 
         /// <summary>

@@ -6,7 +6,7 @@ namespace Topz.FileFormats
     /// <summary>
     /// Provides extension methods for the <see cref="BinaryReader"/> class.
     /// </summary>
-    internal static class BinaryReaderExtensions
+    public static class BinaryReaderExtensions
     {
         /// <summary>
         /// Reads a 2 byte unsigned integer from the current stream using big endian encoding and advances 

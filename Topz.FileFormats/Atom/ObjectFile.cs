@@ -26,7 +26,7 @@ namespace Topz.FileFormats.Atom
         /// <summary>
         /// The offset from zero which the <see cref="Atoms"/> have been assembled.
         /// </summary>
-        public long? Origin
+        public ulong? Origin
         {
             get;
             set;

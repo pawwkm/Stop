@@ -159,11 +159,10 @@ namespace Topz.ArmV6Z
 
                         if (label != null)
                         {
-                            current.References.Add(new LocalReference()
+                            current.References.Add(new LocalReference(local.Label.Address)
                             {
                                 AddressType = AddressType.ArmTargetAddress,
-                                Address = (uint)(current.Code.Count / 4),
-                                Target = local.Label.Address
+                                Address = (uint)(current.Code.Count / 4)
                             });
                         }
                         else

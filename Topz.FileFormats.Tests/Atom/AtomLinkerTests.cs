@@ -160,11 +160,10 @@ namespace Topz.FileFormats.Atom
             procedure.Code.Add(0x00);
             procedure.Code.Add(0x00);
 
-            procedure.References.Add(new LocalReference()
+            procedure.References.Add(new LocalReference(4)
             {
                 Address = 0,
-                AddressType = AddressType.ArmOffset12,
-                Target = 4
+                AddressType = AddressType.ArmOffset12
             });
 
             var file = new ObjectFile();
@@ -212,11 +211,10 @@ namespace Topz.FileFormats.Atom
             procedure.Code.Add(0x00);
             procedure.Code.Add(0x04);
 
-            procedure.References.Add(new LocalReference()
+            procedure.References.Add(new LocalReference(4)
             {
                 Address = 4,
-                AddressType = AddressType.ArmOffset12,
-                Target = 4
+                AddressType = AddressType.ArmOffset12
             });
 
             var file = new ObjectFile();
@@ -315,11 +313,10 @@ namespace Topz.FileFormats.Atom
             procedure.Code.Add(0x00);
             procedure.Code.Add(0x00);
 
-            procedure.References.Add(new LocalReference()
+            procedure.References.Add(new LocalReference(0)
             {
                 Address = 4,
-                AddressType = AddressType.ArmOffset12,
-                Target = 0
+                AddressType = AddressType.ArmOffset12
             });
 
             var file = new ObjectFile();
@@ -367,11 +364,10 @@ namespace Topz.FileFormats.Atom
             procedure.Code.Add(0x00);
             procedure.Code.Add(0x00);
 
-            procedure.References.Add(new LocalReference()
+            procedure.References.Add(new LocalReference(0)
             {
                 Address = 4,
-                AddressType = AddressType.ArmTargetAddress,
-                Target = 0
+                AddressType = AddressType.ArmTargetAddress
             });
 
             var file = new ObjectFile();
@@ -419,11 +415,10 @@ namespace Topz.FileFormats.Atom
             procedure.Code.Add(0x00);
             procedure.Code.Add(0x00);
 
-            procedure.References.Add(new LocalReference()
+            procedure.References.Add(new LocalReference(4)
             {
                 Address = 0,
-                AddressType = AddressType.ArmTargetAddress,
-                Target = 4
+                AddressType = AddressType.ArmTargetAddress
             });
 
             var file = new ObjectFile();
@@ -465,11 +460,10 @@ namespace Topz.FileFormats.Atom
             procedure.Code.Add(0x00);
             procedure.Code.Add(0x00);
 
-            procedure.References.Add(new LocalReference()
+            procedure.References.Add(new LocalReference(0)
             {
                 Address = 0,
-                AddressType = AddressType.ArmTargetAddress,
-                Target = 0
+                AddressType = AddressType.ArmTargetAddress
             });
 
             var file = new ObjectFile();
