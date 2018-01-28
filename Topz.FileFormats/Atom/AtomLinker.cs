@@ -40,10 +40,9 @@ namespace Topz.FileFormats.Atom
             {
                 if (combined.Origin != file.Origin)
                 {
-                    if (combined.IsOriginSet)
+                    if (combined.Origin.HasValue)
                         throw new InvalidObjectFileException("Inconsistent origin.");
 
-                    combined.IsOriginSet = true;
                     combined.Origin = file.Origin;
                 }
 
@@ -121,7 +120,7 @@ namespace Topz.FileFormats.Atom
                 throw new InvalidObjectFileException("There is no main procedure.");
 
             addresses.Clear();
-            address = file.IsOriginSet ? file.Origin : 0;
+            address = file.Origin ?? 0UL;
 
             var main = file.OfType<Procedure>().First(p => p.IsMain);
             foreach (dynamic atom in Walk(main))
@@ -144,23 +143,34 @@ namespace Topz.FileFormats.Atom
                     foreach (var reference in procedure.References)
                     {
                         var proc = combined.OfType<Procedure>().First(p => p.Name == procedure.Name);
-                        var referenced = combined.First(a => a.Name == reference.Atom.Name);
-
-                        var r = new Reference(referenced);
-                        r.Address = reference.Address;
-                        r.IsAddressInLittleEndian = reference.IsAddressInLittleEndian;
-                        r.SizeOfAddress = reference.SizeOfAddress;
-
-                        if (!referenced.IsGlobal)
+                        if (reference is GlobalReference)
                         {
-                            var a = GetDefiningObjectFile(referenced.Name, files);
-                            var b = GetDefiningObjectFile(proc.Name, files);
+                            var global = reference as GlobalReference;
+                            var referenced = combined.First(a => a.Name == global.Atom.Name);
 
-                            if (a != null && b != null && a != b)
-                                throw new InvalidObjectFileException("'" + proc.Name + "' is referencing '" + referenced.Name + "' which is local to another object file.");
+                            var r = new GlobalReference(referenced);
+                            r.Address = global.Address;
+                            r.AddressType = global.AddressType;
+
+                            if (!referenced.IsGlobal)
+                            {
+                                var a = GetDefiningObjectFile(referenced.Name, files);
+                                var b = GetDefiningObjectFile(proc.Name, files);
+
+                                if (a != null && b != null && a != b)
+                                    throw new InvalidObjectFileException($"'{proc.Name}' is referencing '{referenced.Name}' which is local to another object file.");
+                            }
+
+                            proc.References.Add(r);
                         }
-
-                        proc.References.Add(r);
+                        else if (reference is LocalReference local)
+                        {
+                            proc.References.Add(new LocalReference(local.Target)
+                            {
+                                Address = local.Address,
+                                AddressType = local.AddressType,
+                            });
+                        }
                     }
                 }
             }
@@ -259,19 +269,56 @@ namespace Topz.FileFormats.Atom
             {
                 foreach (var reference in procedure.References)
                 {
-                    var offset = (long)(addresses[procedure] + reference.Address);
-                    stream.Seek(offset, SeekOrigin.Begin);
-
-                    byte[] bytes = null;
-                    if (reference.SizeOfAddress == 2)
-                        bytes = BitConverter.GetBytes((ushort)addresses[reference.Atom]);
+                    var target = 0UL;
+                    if (reference is GlobalReference)
+                        target = addresses[((GlobalReference)reference).Atom];
                     else
-                        bytes = BitConverter.GetBytes(addresses[reference.Atom]);
+                        target = addresses[procedure] + ((LocalReference)reference).Target;
 
-                    if (!reference.IsAddressInLittleEndian)
-                        bytes.Reverse();
+                    var start = addresses[procedure] + reference.Address;
+                    stream.Seek((long)start, SeekOrigin.Begin);
 
-                    stream.Write(bytes, 0, bytes.Length);
+                    var buffer = new byte[4];
+                    stream.Read(buffer, 0, buffer.Length);
+
+                    var instruction = BitConverter.ToUInt32(buffer.Reverse().ToArray(), 0);
+
+                    var offset = 0u;
+                    switch (reference.AddressType)
+                    {
+                        case AddressType.ArmOffset12:
+                            offset = (uint)Math.Abs((long)start - (long)target);
+                            if (offset > 4095)
+                                throw new Exception($"Out of the ±4kB range.");
+
+                            // Set the U bit.
+                            instruction = instruction.SetBit(23, start <= target);
+
+                            // Clear offset.
+                            instruction &= ~0xFFFu;
+
+                            break;
+                        case AddressType.ArmTargetAddress:
+                            if (Math.Abs((long)start - (long)target) > 3.2e+7)
+                                throw new Exception($"Out of the ±32MB range.");
+
+                            offset = (uint)((((start <= target ? start + target : target - start) - 8) >> 2) | 0x80000000) & 0x00FFFFFF;
+
+                            // Clear offset.
+                            instruction &= 0xFF000000u;
+
+                            break;
+                        default:
+                            throw new NotSupportedException($"The {reference.Address} address mode is not supported.");
+                    }
+
+                    // Use the resolved offset.
+                    instruction |= offset;
+
+                    stream.Seek((long)start, SeekOrigin.Begin);
+                    buffer = BitConverter.GetBytes(instruction);
+
+                    stream.Write(buffer.Reverse().ToArray(), 0, buffer.Length);
                 }
             }
         }
@@ -328,13 +375,17 @@ namespace Topz.FileFormats.Atom
             yield return procedure;
             foreach (var reference in procedure.References)
             {
-                if (reference.Atom is Procedure)
+                if (reference is LocalReference)
+                    continue;
+
+                var global = reference as GlobalReference;
+                if (global.Atom is Procedure)
                 {
-                    foreach (var atom in Walk(reference.Atom as Procedure))
+                    foreach (var atom in Walk(global.Atom as Procedure))
                         yield return atom;
                 }
                 else
-                    yield return reference.Atom;
+                    yield return global.Atom;
             }
         }
     }

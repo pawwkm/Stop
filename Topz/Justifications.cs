@@ -38,12 +38,17 @@
         /// <summary>
         /// This works do NOT touch it!
         /// </summary>
-        /// <remarks>Do not use this one just for silencing a warning!</remarks>
+        /// <remarks>Do not use this one just to silence a warning!</remarks>
         public const string ItWorksNoTouchy = "This works do NOT touch it!";
 
         /// <summary>
         /// Though there are many cases they are simple.
         /// </summary>
         public const string SimpleSwitch = "Though there are many cases they are simple.";
+
+        /// <summary>
+        /// Refactoring would result in the code being more messy than it is.
+        /// </summary>
+        public const string RefactoringWouldResultInMessyCode = "Refactoring would result in the code being more messy than it is.";
     }
 }

@@ -5,22 +5,23 @@ A procedure is an executable chunk of code.
     \label{tbl:procedure}
     \begin{tabular}{|l|l|l|}
         \hline
-        \textbf{Offset} & \textbf{Size in Bytes} & \textbf{Description}                                                    \\ \hline
-        0               & 1                      & Boolean telling if this procedure is the starting point of the program. \\ \hline
-        1               & 4                      & The size of the code in the procedure.                                  \\ \hline
-        5               & x                      & The executable code of the procedure.                                   \\ \hline
-        x               & 2                      & Number of references to other atoms.                                    \\ \hline
-        x               & x                      & The references to other atoms.                                          \\ \hline
+        \textbf{Offset} & \textbf{Size in Bytes} & \textbf{Description}                              \\ \hline
+        0               & 1                      & Boolean telling if this procedure the entry point \\ \hline
+        1               & 4                      & The size of the code in the procedure.            \\ \hline
+        5               & x                      & The executable code of the procedure.             \\ \hline
+        x               & 2                      & Number of references to other atoms.              \\ \hline
+        x               & x                      & The references to other atoms.                    \\ \hline
     \end{tabular}
 \end{table}
 
 \subsection{Is Main}
-If true the procedure is the starting point of the program. It is not required 
-that an object file has a main procedure, but there cannot be more than one.
+If true the procedure is the entry point of the program; otherwise false. It is 
+not required that an object file has a main procedure, but there cannot be more 
+than one.
 
 \subsection{Size of the Procedure}
 This is the size of the code block following this number, in bytes. This is an
-usinged 32 bit integer.
+unsigned 32 bit integer.
 
 \subsection{Code}
 The actual code of the procedure.
@@ -38,11 +39,41 @@ address and if it the address is in little endian.
     \label{tbl:reference}
     \begin{tabular}{|l|l|l|}
         \hline
+        \textbf{Offset} & \textbf{Size in Bytes} & \textbf{Description}     \\ \hline
+        0               & 1                      & Is Global Reference.     \\ \hline
+        1               & 1                      & Type of address.         \\ \hline
+        2               & 4                      & The address to relocate. \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsubsection{Is Global Reference}
+If true the reference refer to another atom; otherwise it refers to an address 
+within the procedure.
+
+\subsubsection{Address Type}
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Name}    & \textbf{Value} & \textbf{Description}                                          \\ \hline
+        ArmTargetAddress & 0              & Encoded as defined in the Arm reference manual section A4.1.5 \\ \hline
+        ArmOffset12      & 1              & Encoded as defined in the Arm reference manual section A5.2   \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsubsection{Address}
+This is the address within the code block of the procedure to relocate to match
+the address of the referenced atom.
+\clearpage
+
+\paragraph{Global Reference}
+\begin{table}[h]
+    \centering
+    \label{tbl:global_reference}
+    \begin{tabular}{|l|l|l|}
+        \hline
         \textbf{Offset} & \textbf{Size in Bytes} & \textbf{Description}                             \\ \hline
-        0               & 4                      & The number of the atom that is being referenced. \\ \hline
-        4               & 1                      & Boolean telling if the address is little endian  \\ \hline
-        5               & 1                      & Address size in bytes.                           \\ \hline
-        6               & 4                      & The address to relocate.                         \\ \hline
+        6               & 4                      & The number of the atom that is being referenced. \\ \hline
     \end{tabular}
 \end{table}
 
@@ -51,12 +82,17 @@ The number of an atom is the number of atoms declared before the referenced one.
 This number is used instead of the name to save space and improve performance. 
 This number is an unsigned 32 bit integer.
 
-\subsubsection{Is it in Little Endian}
-If true the address is in little endian.
+\paragraph{Global Reference}
+\begin{table}[h]
+    \centering
+    \label{tbl:local_reference}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Offset} & \textbf{Size in Bytes} & \textbf{Description}  \\ \hline
+        6               & 4                      & Local target address. \\ \hline
+    \end{tabular}
+\end{table}
 
-\subsubsection{Address Size}
-The size of an address can be 2, 4 or 8 bytes long.
-
-\subsubsection{Address}
-This is the address within the code block of the procedure to relocate to match
-the address of the referenced atom.
+\subsubsection{Target}
+This is the address within the procedure that is referred to.
+This number is an unsigned 32 bit integer.

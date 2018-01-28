@@ -8,7 +8,7 @@ namespace Topz.FileFormats.Atom
     /// <summary>
     /// Writes Atom object files.
     /// </summary>
-    public class AtomWriter
+    public sealed class AtomWriter
     {
         private BinaryWriter writer;
 
@@ -39,11 +39,10 @@ namespace Topz.FileFormats.Atom
                 // Write header.
                 writer.Write(0x6D6F7461);   // Ascii for "atom" backwards.
                 writer.Write((ushort)1);
-                writer.Write(file.IsOriginSet);
-                writer.Write(file.Origin);
+                writer.Write(file.Origin.HasValue);
+                writer.Write(file.Origin ?? 0UL);
 
-                of = file;
-                foreach (dynamic atom in file)
+                foreach (dynamic atom in of = file)
                     Write(atom);
             }
         }
@@ -62,33 +61,38 @@ namespace Topz.FileFormats.Atom
             writer.Write((ushort)procedure.References.Count);
 
             foreach (var reference in procedure.References)
-            {
-                writer.Write((uint)of.Atoms.IndexOf(reference.Atom));
-                writer.Write(reference.IsAddressInLittleEndian);
-                writer.Write(reference.SizeOfAddress);
+                Write(reference);
+        }
 
-                if (reference.SizeOfAddress == 2)
-                {
-                    if (reference.IsAddressInLittleEndian)
-                        writer.Write((ushort)reference.Address);
-                    else
-                        writer.WriteBigEndian((ushort)reference.Address);
-                }
-                else if (reference.SizeOfAddress == 4)
-                {
-                    if (reference.IsAddressInLittleEndian)
-                        writer.Write(reference.Address);
-                    else
-                        writer.WriteBigEndian(reference.Address);
-                }
-                else
-                {
-                    if (reference.IsAddressInLittleEndian)
-                        writer.Write((ulong)reference.Address);
-                    else
-                        writer.WriteBigEndian((ulong)reference.Address);
-                }
-            }
+        /// <summary>
+        /// Writes a reference.
+        /// </summary>
+        /// <param name="reference">The reference to write.</param>
+        private void Write(Reference reference)
+        {
+            writer.Write(reference is GlobalReference);
+            writer.Write((byte)reference.AddressType);
+            writer.Write(reference.Address);
+
+            Write((dynamic)reference);
+        }
+
+        /// <summary>
+        /// Writes a reference.
+        /// </summary>
+        /// <param name="reference">The reference to write.</param>
+        private void Write(GlobalReference reference)
+        {
+            writer.Write((uint)of.Atoms.IndexOf(reference.Atom));
+        }
+
+        /// <summary>
+        /// Writes a reference.
+        /// </summary>
+        /// <param name="reference">The reference to write.</param>
+        private void Write(LocalReference reference)
+        {
+            writer.Write(reference.Target);
         }
 
         /// <summary>

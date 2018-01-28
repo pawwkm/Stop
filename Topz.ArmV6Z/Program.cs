@@ -1,4 +1,4 @@
-﻿using Pote.Text;
+﻿using Topz.Text;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -21,7 +21,7 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// Initializes a new instance of the <see cref="Program"/> class.
         /// </summary>
-        public Program() : base(new InputPosition())
+        public Program() : base(new Position())
         {
             procedures.CollectionChanged += CheckNameUniqueness;
             procedures.CollectionChanged += CheckMainProcedure;
@@ -120,14 +120,8 @@ namespace Topz.ArmV6Z
         /// <param name="e">The parameters for the event.</param>
         private void CheckMainProcedure(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (!Procedures.Any(x => x.IsMain))
-                return;
-
-            foreach (Procedure procedure in e.NewItems)
-            {
-                if (procedure.IsMain)
-                    throw new ArgumentException("Cannot have multiple main procedures.");
-            }
+            if (Procedures.Count(x => x.IsMain) > 1)
+                throw new ArgumentException("Cannot have multiple main procedures.");
         }
     }
 }

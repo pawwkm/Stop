@@ -1,4 +1,4 @@
-﻿using Pote.Text;
+﻿using Topz.Text;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,12 +17,12 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// Initializes a new instance of the <see cref="Procedure"/> class.
         /// </summary>
-        /// <param name="position">The position of the node in the program's source code.</param>
         /// <param name="name">Name of the procedure.</param>
+        /// <param name="position">The position of the node in the program's source code.</param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="position"/> is null.
         /// </exception>
-        public Procedure(InputPosition position, string name) : base(position)
+        public Procedure(string name, Position position) : base(position)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -87,7 +87,7 @@ namespace Topz.ArmV6Z
 
             foreach (Instruction instruction in e.NewItems)
             {
-                if (labeldInstructions.Any(x => x.Label.Name == instruction.Label.Name))
+                if (labeldInstructions.Any(x => x != instruction && x.Label.Name == instruction.Label.Name))
                     throw new ArgumentException(instruction.Position.ToString($"Redefining the label '{instruction.Label.Name}'."));
             }
         }

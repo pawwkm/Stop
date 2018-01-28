@@ -1,4 +1,4 @@
-﻿using Pote.Text;
+﻿using Topz.Text;
 using System;
 
 namespace Topz.ArmV6Z
@@ -15,7 +15,7 @@ namespace Topz.ArmV6Z
         /// <exception cref="ArgumentNullException">
         /// <paramref name="position"/> is null.
         /// </exception>
-        protected Node(InputPosition position)
+        protected Node(Position position)
         {
             if (position == null)
                 throw new ArgumentNullException(nameof(position));
@@ -26,25 +26,10 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// The position of the node in the program's source code.
         /// </summary>
-        public InputPosition Position
+        public Position Position
         {
             get;
             private set;
-        }
-
-        /// <summary>
-        /// Accepts a given <paramref name="pass"/>.
-        /// </summary>
-        /// <param name="pass">The pass to accept.</param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="pass"/> is null.
-        /// </exception>
-        public void Accept(IPass pass)
-        {
-            if (pass == null)
-                throw new ArgumentNullException(nameof(pass));
-
-            pass.Visit((dynamic)this);
         }
     }
 }

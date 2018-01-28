@@ -71,8 +71,23 @@
         public const string AddressingMode = "<addressing_mode>";
 
         /// <summary>
+        /// The misc addressing mode place holder.
+        /// </summary>
+        public const string MiscAddressingMode = "<misc_addressing_mode>";
+
+        /// <summary>
         /// The offset 12 place holder.
         /// </summary>
         public const string Offset12 = "#+/-<offset_12>";
+
+        /// <summary>
+        /// The offset 8 place holder.
+        /// </summary>
+        public const string Offset8 = "#+/-<offset_8>";
+
+        /// <summary>
+        /// The post index place holder.
+        /// </summary>
+        public const string PostIndexed = "PostIndexed";
     }
 }

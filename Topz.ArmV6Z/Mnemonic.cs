@@ -1,4 +1,4 @@
-﻿using Pote.Text;
+﻿using Topz.Text;
 using System;
 using System.Collections.Generic;
 
@@ -35,11 +35,6 @@ namespace Topz.ArmV6Z
         public const string Ldr = "ldr";
 
         /// <summary>
-        /// The 'ldrb' mnemonic.
-        /// </summary>
-        public const string Ldrb = "ldrb";
-
-        /// <summary>
         /// The 'mov' mnemonic.
         /// </summary>
         public const string Mov = "mov";
@@ -48,11 +43,6 @@ namespace Topz.ArmV6Z
         /// The 'str' mnemonic.
         /// </summary>
         public const string Str = "str";
-
-        /// <summary>
-        /// The 'strh' mnemonic.
-        /// </summary>
-        public const string Strh = "strh";
 
         /// <summary>
         /// The 'sub' mnemonic.
@@ -80,7 +70,7 @@ namespace Topz.ArmV6Z
         /// <exception cref="ArgumentException">
         /// <paramref name="name"/> is not a mnemonic. Casing is not important.
         /// </exception>
-        public Mnemonic(string name, InputPosition position)
+        public Mnemonic(string name, Position position)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -105,7 +95,6 @@ namespace Topz.ArmV6Z
                 yield return Cmp;
                 yield return Ldr;
                 yield return Mov;
-                yield return Strh;
                 yield return Str;
                 yield return Sub;
                 yield return Teq;
@@ -132,7 +121,7 @@ namespace Topz.ArmV6Z
         {
             get;
             set;
-        }
+        } = Condition.Always;
 
         /// <summary>
         /// Specifies if a special bit has been flipped.
@@ -146,7 +135,7 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// The position of the mnemonic in the program.
         /// </summary>
-        public InputPosition Position
+        public Position Position
         {
             get;
             private set;

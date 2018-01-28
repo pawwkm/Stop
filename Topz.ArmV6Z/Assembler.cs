@@ -1,7 +1,7 @@
-﻿using Pote.Text;
-using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using Topz.FileFormats.Atom;
+using Topz.Text;
 
 namespace Topz.ArmV6Z
 {
@@ -13,45 +13,53 @@ namespace Topz.ArmV6Z
         /// <summary>
         /// Assembles a program.
         /// </summary>
-        /// <param name="source">The path to the source file.</param>
-        /// <param name="destination">The path to the file to store the result.</param>
+        /// <param name="code">The program to assemble.</param>
+        /// <param name="path">The path to the <paramref name="code"/>.</param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="source"/> or <paramref name="destination"/> is null.
+        /// <paramref name="code"/> or <paramref name="path"/> is null.
         /// </exception>
         /// <exception cref="ParsingException">
         /// A problem occurred when parsing.
         /// </exception>
-        /// <exception cref="FileNotFoundException">
-        /// <paramref name="source"/> could not be found.
+        /// <exception cref="EncodingException">
+        /// A problem occurred when encoding.
         /// </exception>
-        /// <exception cref="DirectoryNotFoundException">
-        /// <paramref name="source"/> is invalid, such as being on an unmapped drive.
-        /// </exception>
-        public void Assemble(string source, string destination)
+        /// <returns>The assembled program.</returns>
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = Justifications.InstanceAccessMayBeNeededLater)]
+        public ObjectFile Assemble(string code, string path)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-            if (destination == null)
-                throw new ArgumentNullException(nameof(destination));
+            if (code == null)
+                throw new ArgumentNullException(nameof(code));
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
 
-            using (var reader = new StreamReader(source))
-            {
-                var analyzer = new LexicalAnalyzer(reader, source);
-                var parser = new Parser();
+            var analyzer = new LexicalAnalyzer(code, path);
+            var parser = new Parser();
 
-                var program = parser.Parse(analyzer);
-                foreach (var pass in GetPasses())
-                    pass.Visit(program);
-            }
+            var encoder = new EncodingPass();
+            encoder.Visit(parser.Parse(analyzer));
+
+            return encoder.Code;
         }
 
         /// <summary>
-        /// Gets the passes that fits the users selected options.
+        /// Assembles a program.
         /// </summary>
-        /// <returns>The passes that fits the users selected options.</returns>
-        private IEnumerable<IPass> GetPasses()
+        /// <param name="code">The program to assemble.</param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="code"/> is null.
+        /// </exception>
+        /// <exception cref="ParsingException">
+        /// A problem occurred when parsing.
+        /// </exception>
+        /// <exception cref="EncodingException">
+        /// A problem occurred when encoding.
+        /// </exception>
+        /// <returns>The assembled program.</returns>
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = Justifications.InstanceAccessMayBeNeededLater)]
+        public ObjectFile Assemble(string code)
         {
-            yield break;
+            return Assemble(code, "");
         }
     }
 }

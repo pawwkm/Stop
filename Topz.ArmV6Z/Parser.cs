@@ -1,4 +1,4 @@
-﻿using Pote.Text;
+﻿using Topz.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,16 +18,16 @@ namespace Topz.ArmV6Z
             { "ADD{<cond>}{S} <Rd>, <Rn>, <shifter_operand>",   "cond 00 I 0100 S Rn Rd shifter_operand" },
             { "AND{<cond>}{S} <Rd>, <Rn>, <shifter_operand>",   "cond 00 I 0000 S Rn Rd shifter_operand" },
             { "B{L}{<cond>} <target_address>",                  "cond 101 L signed_immed_24" },
-            { "CMP{<cond>} <Rn>, <shifter_operand>",            "cond 00 I 10101 Rn SBZ shifter_operand" },
+            { "CMP{<cond>} <Rn>, <shifter_operand>",            "cond 00 I 10101 Rn 0000 shifter_operand" },
             { "LDR{<cond>} <Rd>, <addressing_mode>",            "cond 01 I P U 0 W 1 Rn Rd addr_mode" },
             { "LDR{<cond>}B <Rd>, <addressing_mode>",           "cond 01 I P U 1 W 1 Rn Rd addr_mode" },
-            { "LDR{<cond>}D <Rd>, <addressing_mode>",           "cond 000 P U I W 0 Rn Rd addr_mode 1101 addr_mode" },
-            { "MOV{<cond>}{S} <Rd>, <shifter_operand>",         "cond 00 I 1101 S SBZ Rd shifter_operand" },
+            { "LDR{<cond>}D <Rd>, <misc_addressing_mode>",      "cond 000 P U I W 0 Rn Rd addr_mode 1101 addr_mode" },
+            { "MOV{<cond>}{S} <Rd>, <shifter_operand>",         "cond 00 I 1101 S 0000 Rd shifter_operand" },
             { "STR{<cond>} <Rd>, <addressing_mode>",            "cond 01 I P U 0 W 0 Rn Rd addr_mode" },
-            { "STR{<cond>}H <Rd>, <addressing_mode>",           "cond 000 P U I W 0 Rn Rd addr_mode 1011 addr_mode" },
+            { "STR{<cond>}H <Rd>, <misc_addressing_mode>",      "cond 000 P U I W 0 Rn Rd addr_mode 1011 addr_mode" },
             { "SUB{<cond>}{S} <Rd>, <Rn>, <shifter_operand>",   "cond 00 I 0010 S Rn Rd shifter_operand" },
-            { "TEQ{<cond>} <Rn>, <shifter_operand>",            "cond 00 I 1001 1 Rn SBZ shifter_operand" },
-            { "TST{<cond>} <Rn>, <shifter_operand>",            "cond 00 I 1000 1 Rn SBZ shifter_operand" }
+            { "TEQ{<cond>} <Rn>, <shifter_operand>",            "cond 00 I 1001 1 Rn 0000 shifter_operand" },
+            { "TST{<cond>} <Rn>, <shifter_operand>",            "cond 00 I 1000 1 Rn 0000 shifter_operand" }
         };
 
         private FormatMatch match;
@@ -57,7 +57,7 @@ namespace Topz.ArmV6Z
             analyzer = source;
 
             program = new Program();
-            while (!analyzer.EndOfInput)
+            while (!analyzer.EndOfSourceCode)
             {
                 isExternal = External();
                 if (analyzer.NextIs(Keywords.Procedure))
@@ -79,12 +79,13 @@ namespace Topz.ArmV6Z
             Keyword(Keywords.Procedure);
             var identifier = Identifier();
 
-            var procedure = new Procedure(identifier.Position, identifier.Name);
+            var procedure = new Procedure(identifier.Name, identifier.Position);
             procedure.IsExternal = isExternal;
+            procedure.IsMain = identifier.Name == "Main";
 
             if (!isExternal)
             {
-                while (!analyzer.EndOfInput)
+                while (!analyzer.EndOfSourceCode)
                 {
                     if (analyzer.NextIs(TokenType.Keyword))
                         break;
@@ -140,7 +141,10 @@ namespace Topz.ArmV6Z
                         TargetAddress(instruction);
                         break;
                     case Placeholders.AddressingMode:
-                        AddressingMode(instruction);
+                        LoadAndStoreAddressingMode(instruction);
+                        break;
+                    case Placeholders.MiscAddressingMode:
+                        MiscLoadAndStoreAddressingMode(instruction);
                         break;
                     case Placeholders.Immediate16:
                         instruction.Values[Placeholders.Immediate16] = Integer(16, false);
@@ -295,10 +299,7 @@ namespace Topz.ArmV6Z
             var token = analyzer.Next();
             Symbol(Symbols.EndOfLabel);
 
-            var label = new Label(token.Position, token.Text);
-            token = analyzer.Next();
-
-            return label;
+            return new Label(token.Position, token.Text);
         }
 
         /// <summary>
@@ -313,6 +314,7 @@ namespace Topz.ArmV6Z
 
             var mnemonic = new Mnemonic(token.Text, token.Position);
             var postfix = analyzer.LookAhead().Text.IsBit() ? analyzer.Next() : null ;
+            var postfixIsOptional = false;
 
             var entries = from row in Table
                           where row.Key.StartsWith(token.Text, StringComparison.InvariantCultureIgnoreCase)
@@ -331,15 +333,22 @@ namespace Topz.ArmV6Z
                         match.Chunks.Add(m.Value);
                 }
 
-                if (postfix == null && !match.Chunks[2].IsBit() || postfix != null && match.Chunks[2].ToLower() == postfix.Text.ToLower())
+                if (postfix == null && !match.Chunks[1].IsBit() || postfix != null && match.Chunks[1].ToLower() == postfix.Text.ToLower() || postfix != null && match.Chunks[1].StartsWith("{") && match.Chunks[1].ToLower()[1] == postfix.Text.ToLower()[0])
                 {
+                    postfixIsOptional = match.Chunks[1].StartsWith("{");
+                    wasSet = true;
+                    break;
+                }
+                if (postfix == null && !match.Chunks[2].IsBit() || postfix != null && match.Chunks[2].ToLower() == postfix.Text.ToLower() || postfix != null && match.Chunks[2].StartsWith("{") && match.Chunks[2].ToLower()[1] == postfix.Text.ToLower()[0])
+                {
+                    postfixIsOptional = match.Chunks[2].StartsWith("{");
                     wasSet = true;
                     break;
                 }
             }
 
             if (!wasSet)
-                throw new ParsingException(token.Position.ToString("Fuck is this?"));
+                throw new ParsingException(token.Position.ToString("Invalid mnemonic."));
 
             while (match.Next.StartsWith("{"))
                 Optional(mnemonic);
@@ -347,7 +356,8 @@ namespace Topz.ArmV6Z
             if (postfix != null)
             {
                 mnemonic.Bit = postfix.Text.ToBit();
-                match.Current++;
+                if (!postfixIsOptional)
+                    match.Current++;
             }
 
             return mnemonic;
@@ -410,10 +420,10 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
-        /// Parses the next target addressing mode.
+        /// Parses the next load/store addressing mode.
         /// </summary>
         /// <param name="instruction">The instruction to store the operand in.</param>
-        private void AddressingMode(Instruction instruction)
+        private void LoadAndStoreAddressingMode(Instruction instruction)
         {
             Symbol(Symbols.LeftSquareBracket);
             instruction.Values.Add(Placeholders.Rn, Register());
@@ -432,11 +442,13 @@ namespace Topz.ArmV6Z
                         instruction.Values.Add(Symbols.ExclamationMark, null);
                     }
                 }
-                else if (analyzer.NextIs(Symbols.Plus).Then(TokenType.Register) || analyzer.NextIs(Symbols.Minus).Then(TokenType.Register))
+                else if (analyzer.NextIs(TokenType.Register) || analyzer.NextIs(Symbols.Plus).Then(TokenType.Register) || analyzer.NextIs(Symbols.Minus).Then(TokenType.Register))
                 {
-                    var sign = analyzer.Next();
+                    if (analyzer.NextIs(Symbols.Plus) || analyzer.NextIs(Symbols.Minus))
+                        instruction.Values.Add($"{analyzer.Next().Text}{Placeholders.Rm}", Register());
+                    else
+                        instruction.Values.Add($"{Symbols.Plus}{Placeholders.Rm}", Register());
 
-                    instruction.Values.Add($"{sign.Text}{Placeholders.Rm}", Register());
                     if (analyzer.NextIs(Symbols.Comma))
                     {
                         analyzer.Next();
@@ -470,12 +482,15 @@ namespace Topz.ArmV6Z
                 analyzer.Next();
                 Symbol(Symbols.Comma);
 
+                instruction.Values.Add(Placeholders.PostIndexed, null);
                 if (analyzer.NextIs(TokenType.Integer))
                     instruction.Values.Add(Placeholders.Offset12, Integer(12, false));
-                else if (analyzer.NextIs(Symbols.Plus).Then(TokenType.Register) || analyzer.NextIs(Symbols.Minus).Then(TokenType.Register))
+                else if (analyzer.NextIs(TokenType.Register) || analyzer.NextIs(Symbols.Plus).Then(TokenType.Register) || analyzer.NextIs(Symbols.Minus).Then(TokenType.Register))
                 {
-                    var sign = analyzer.Next();
-                    instruction.Values.Add($"{sign.Text}{Placeholders.Rm}", Register());
+                    if (analyzer.NextIs(Symbols.Plus) || analyzer.NextIs(Symbols.Minus))
+                        instruction.Values.Add($"{analyzer.Next().Text}{Placeholders.Rm}", Register());
+                    else
+                        instruction.Values.Add($"{Symbols.Plus}{Placeholders.Rm}", Register());
 
                     if (analyzer.NextIs(Symbols.Comma))
                     {
@@ -486,6 +501,71 @@ namespace Topz.ArmV6Z
                 else
                     throw new ParsingException(analyzer.LookAhead().Position.ToString("Expected an integer or register."));
             }
+            else
+                throw new ParsingException(analyzer.LookAhead().Position.ToString("Expected , or ]"));
+        }
+
+        /// <summary>
+        /// Parses the next misc load/store addressing mode.
+        /// </summary>
+        /// <param name="instruction">The instruction to store the operand in.</param>
+        private void MiscLoadAndStoreAddressingMode(Instruction instruction)
+        {
+            Symbol(Symbols.LeftSquareBracket);
+            instruction.Values.Add(Placeholders.Rn, Register());
+
+            if (analyzer.NextIs(Symbols.Comma))
+            {
+                analyzer.Next();
+                if (analyzer.NextIs(TokenType.Integer))
+                {
+                    instruction.Values.Add(Placeholders.Offset8, Integer(8, true));
+                    Symbol(Symbols.RightSquareBracket);
+                }
+                else if (analyzer.NextIs(TokenType.Register) || analyzer.NextIs(Symbols.Plus).Then(TokenType.Register) || analyzer.NextIs(Symbols.Minus).Then(TokenType.Register))
+                {
+                    if (analyzer.NextIs(Symbols.Plus) || analyzer.NextIs(Symbols.Minus))
+                        instruction.Values.Add($"{analyzer.Next().Text}{Placeholders.Rm}", Register());
+                    else
+                        instruction.Values.Add($"{Symbols.Plus}{Placeholders.Rm}", Register());
+
+                    Symbol(Symbols.RightSquareBracket);
+                }
+                else
+                    throw new ParsingException(analyzer.LookAhead().Position.ToString("Expected an integer or register."));
+
+                if (analyzer.NextIs(Symbols.ExclamationMark))
+                {
+                    analyzer.Next();
+                    instruction.Values.Add(Symbols.ExclamationMark, null);
+                }
+            }
+            else if (analyzer.NextIs(Symbols.RightSquareBracket))
+            {
+                analyzer.Next();
+                Symbol(Symbols.Comma);
+
+                instruction.Values.Add(Placeholders.PostIndexed, null);
+                if (analyzer.NextIs(TokenType.Integer))
+                    instruction.Values.Add(Placeholders.Offset8, Integer(8, false));
+                else if (analyzer.NextIs(TokenType.Register) || analyzer.NextIs(Symbols.Plus).Then(TokenType.Register) || analyzer.NextIs(Symbols.Minus).Then(TokenType.Register))
+                {
+                    if (analyzer.NextIs(Symbols.Plus) || analyzer.NextIs(Symbols.Minus))
+                        instruction.Values.Add($"{analyzer.Next().Text}{Placeholders.Rm}", Register());
+                    else
+                        instruction.Values.Add($"{Symbols.Plus}{Placeholders.Rm}", Register());
+
+                    if (analyzer.NextIs(Symbols.Comma))
+                    {
+                        analyzer.Next();
+                        Shift(instruction);
+                    }
+                }
+                else
+                    throw new ParsingException(analyzer.LookAhead().Position.ToString("Expected an integer or register."));
+            }
+            else
+                throw new ParsingException(analyzer.LookAhead().Position.ToString("Expected , or ]"));
         }
 
         /// <summary>
@@ -505,7 +585,7 @@ namespace Topz.ArmV6Z
                     if (analyzer.NextIs(ArmV6Z.RegisterShifter.Rrx))
                         throw new ParsingException(analyzer.LookAhead().Position.ToString($"{ArmV6Z.RegisterShifter.Rrx} not allowed."));
 
-                    instruction.Values.Add(Placeholders.ShiftImmediate, RegisterShifter());
+                    instruction.Values.Add(Placeholders.ShiftImmediate, Integer(4, false));
                 }
             }
             else

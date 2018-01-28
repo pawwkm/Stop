@@ -43,14 +43,13 @@
       <HintPath>..\packages\Pote.1.0.4\lib\net45\Pote.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Pote.Text, Version=0.7.0.2, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Pote.Text.0.7.4\lib\net45\Pote.Text.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Assembler.cs" />
     <Compile Include="Bit.cs" />
     <Compile Include="BitExtensions.cs" />
@@ -58,12 +57,15 @@
     <Compile Include="ConditionExtensions.cs" />
     <Compile Include="Data.cs" />
     <Compile Include="Directive.cs" />
+    <Compile Include="Encoder.cs" />
+    <Compile Include="EncodingException.cs" />
+    <Compile Include="EncodingPass.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Identifier.cs" />
+    <Compile Include="IEnumerable`1Extensions.cs" />
     <Compile Include="INamedNode.cs" />
     <Compile Include="Instruction.cs" />
     <Compile Include="Integer.cs" />
-    <Compile Include="IPass.cs" />
     <Compile Include="Keywords.cs" />
     <Compile Include="Label.cs" />
     <Compile Include="LexicalAnalyzer.cs" />
@@ -71,7 +73,6 @@
     <Compile Include="Node.cs" />
     <Compile Include="Operand.cs" />
     <Compile Include="Parser.cs" />
-    <Compile Include="Reference.cs" />
     <Compile Include="Register.cs" />
     <Compile Include="RegisterShifter.cs" />
     <Compile Include="Symbols.cs" />

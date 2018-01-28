@@ -5,7 +5,7 @@ namespace Topz.ArmV6Z
     /// <summary>
     /// Defines a pass in the assembler.
     /// </summary>
-    internal abstract class Pass : IPass
+    internal abstract class Pass
     {
         /// <summary>
         /// Visits a program node then visits all the procedures, strings and data nodes.
@@ -36,7 +36,7 @@ namespace Topz.ArmV6Z
         /// <exception cref="ArgumentNullException">
         /// <paramref name="procedure"/> is null.
         /// </exception>
-        public virtual void Visit(Procedure procedure)
+        protected virtual void Visit(Procedure procedure)
         {
             if (procedure == null)
                 throw new ArgumentNullException(nameof(procedure));
@@ -52,7 +52,7 @@ namespace Topz.ArmV6Z
         /// <exception cref="ArgumentNullException">
         /// <paramref name="instruction"/> is null.
         /// </exception>
-        public virtual void Visit(Instruction instruction)
+        protected virtual void Visit(Instruction instruction)
         {
             if (instruction == null)
                 throw new ArgumentNullException(nameof(instruction));
@@ -65,7 +65,7 @@ namespace Topz.ArmV6Z
         /// <exception cref="ArgumentNullException">
         /// <paramref name="data"/> is null.
         /// </exception>
-        public virtual void Visit(Data data)
+        protected virtual void Visit(Data data)
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
@@ -78,7 +78,7 @@ namespace Topz.ArmV6Z
         /// <exception cref="ArgumentNullException">
         /// <paramref name="s"/> is null.
         /// </exception>
-        public virtual void Visit(String s)
+        protected virtual void Visit(String s)
         {
             if (s == null)
                 throw new ArgumentNullException(nameof(s));

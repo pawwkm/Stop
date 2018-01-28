@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Topz.FileFormats", "Topz.FileFormats\Topz.FileFormats.csproj", "{60231FA6-15C6-4FA3-9DCE-A4BE20D7C36A}"
 EndProject
@@ -20,6 +20,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Topz.ArmV6Z.Tests", "Topz.ArmV6Z.Tests\Topz.ArmV6Z.Tests.csproj", "{BF3B0818-8B0F-4F25-98DF-3EBE6EB745C1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Topz", "Topz\Topz.csproj", "{B641D7C5-EEA8-4E77-9A9D-64A0DF475159}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4E52B9F1-A04D-4B61-AF53-EFD14A4470C9}"
+	ProjectSection(SolutionItems) = preProject
+		GlobalAssemblyInfo.cs = GlobalAssemblyInfo.cs
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

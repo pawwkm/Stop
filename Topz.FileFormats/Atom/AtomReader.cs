@@ -1,5 +1,4 @@
-﻿using Pote;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -11,7 +10,65 @@ namespace Topz.FileFormats.Atom
     /// </summary>
     public class AtomReader
     {
-        private List<Tuple<Procedure, uint, bool, byte, uint>> references = new List<Tuple<Procedure, uint, bool, byte, uint>>();
+        private sealed class RawReference
+        {
+            /// <summary>
+            /// True if the <see cref="Owner"/> refers to another atom;
+            /// otherwise it refers to a local address.
+            /// </summary>
+            public bool IsGlobal
+            {
+                get;
+                set;
+            }
+
+            /// <summary>
+            /// The procedure that owns the reference.
+            /// </summary>
+            public Procedure Owner
+            {
+                get;
+                set;
+            }
+
+            /// <summary>
+            /// The index of the Atom that the <see cref="Owner"/> refers to.
+            /// </summary>
+            public uint Index
+            {
+                get;
+                set;
+            }
+
+            /// <summary>
+            /// The address within the <see cref="Owner"/> to relocate.
+            /// </summary>
+            public uint Address
+            {
+                get;
+                set;
+            }
+
+            /// <summary>
+            /// The local target address.
+            /// </summary>
+            public uint Target
+            {
+                get;
+                set;
+            }
+
+            /// <summary>
+            /// The type of reference.
+            /// </summary>
+            public AddressType Type
+            {
+                get;
+                set;
+            }
+        }
+
+        private List<RawReference> references = new List<RawReference>();
 
         private BinaryReader reader;
 
@@ -78,8 +135,10 @@ namespace Topz.FileFormats.Atom
                 if (reader.ReadUInt16() != 1)
                     throw new InvalidObjectFileException("This object file is not using version one.");
 
-                file.IsOriginSet = reader.ReadBoolean();
-                file.Origin = reader.ReadUInt64();
+                if (reader.ReadBoolean())
+                    file.Origin = reader.ReadUInt64();
+                else
+                    reader.ReadUInt64();
 
                 while (!EndOfFile)
                 {
@@ -255,21 +314,10 @@ namespace Topz.FileFormats.Atom
                 throw new InvalidObjectFileException("Unexpected end of object file. Expected the name of an atom.");
 
             var bytes = new List<byte>();
-            while (!EndOfFile)
-            {
-                var b = reader.ReadByte();
-                switch (b)
-                {
-                    case 0:
-                        break;
-                    default:
-                        bytes.Add(b);
-                        break;
-                }
+            byte b = 0;
 
-                if (b == 0)
-                    break;
-            }
+            while (!EndOfFile && (b = reader.ReadByte()) != 0)
+                bytes.Add(b);
 
             return Encoding.UTF8.GetString(bytes.ToArray());
         }
@@ -328,21 +376,10 @@ namespace Topz.FileFormats.Atom
                 throw new InvalidObjectFileException("Unexpected end of object file. Expected null terminated string.");
 
             var bytes = new List<byte>();
-            while (!EndOfFile)
-            {
-                var b = reader.ReadByte();
-                switch (b)
-                {
-                    case 0:
-                        break;
-                    default:
-                        bytes.Add(b);
-                        break;
-                }
+            byte b = 0;
 
-                if (b == 0)
-                    break;
-            }
+            while (!EndOfFile && (b = reader.ReadByte()) != 0)
+                bytes.Add(b);
 
             s.Content = Encoding.UTF8.GetString(bytes.ToArray());
 
@@ -390,25 +427,23 @@ namespace Topz.FileFormats.Atom
             if (BytesLeft < 2)
                 throw new InvalidObjectFileException("Unexpected end of object file. Expected the 16 bit number for amount of references.");
 
-            var amount = reader.ReadUInt16();
-            for (int i = 0; i < amount; i++)
+            for (var i = reader.ReadUInt16(); i > 0; i--)
             {
-                if (BytesLeft < 4)
-                    throw new InvalidObjectFileException("Unexpected end of object file. Expected the number of an atom.");
+                if (BytesLeft == 0)
+                    throw new InvalidObjectFileException("Unexpected end of object file. Expected a reference.");
 
-                var number = reader.ReadUInt32();
-                var isLittleEndian = IsAddressInLittleEndian();
+                var reference = new RawReference();
+                reference.Owner = owner;
+                reference.IsGlobal = reader.ReadBoolean();
+                reference.Type = (AddressType)reader.ReadByte();
+                reference.Address = reader.ReadUInt32();
 
-                if (EndOfFile)
-                    throw new InvalidObjectFileException("Unexpected end of object file. Expected 'address size' byte.");
+                if (reference.IsGlobal)
+                    reference.Index = reader.ReadUInt32();
+                else
+                    reference.Target = reader.ReadUInt32();
 
-                var size = reader.ReadByte();
-                if (!size.IsOneOf(2, 4))
-                    throw new InvalidObjectFileException("The address size at " + ToHex(Position - 1) + " is invalid. It must be 2 or 4.");
-
-                var address = (uint)Address(size, isLittleEndian);
-
-                references.Add(new Tuple<Procedure, uint, bool, byte, uint>(owner, number, isLittleEndian, size, address));
+                references.Add(reference);
             }
         }
 
@@ -421,31 +456,19 @@ namespace Topz.FileFormats.Atom
         /// </exception>
         private void ResolveReferences(ObjectFile file)
         {
-            foreach (var tuple in references)
+            foreach (var raw in references)
             {
-                if (file.Atoms.Count < tuple.Item2)
-                {
-                    var message = string.Format("The atom called '{0}' has a reference to atom number {1} which doesn't exist.", tuple.Item1.Name, tuple.Item2);
+                if (file.Atoms.Count < raw.Index)
+                    throw new InvalidObjectFileException($"The atom called '{raw.Owner.Name}' has a reference to atom number {raw.Index} which doesn't exist.");
 
-                    throw new InvalidObjectFileException(message);
-                }
+                var reference = (Reference)null;
+                if (raw.IsGlobal)
+                    reference = new GlobalReference(file.Atoms[(int)raw.Index]);
+                else
+                    reference = new LocalReference(raw.Target);
 
-                var reference = new Reference(file.Atoms[(int)tuple.Item2]);
-                reference.IsAddressInLittleEndian = tuple.Item3;
-                reference.SizeOfAddress = tuple.Item4;
-                reference.Address = tuple.Item5;
-
-                foreach (var r in tuple.Item1.References)
-                {
-                    if (r.IsOverlapping(reference))
-                    {
-                        var message = string.Format("{0}'s reference to '{1}' has an overlapping address with the reference to '{2}' at {3}.", tuple.Item1.Name, r.Atom.Name, reference.Atom.Name, ToHex(r.Address));
-
-                        throw new InvalidObjectFileException(message);
-                    }
-                }
-
-                tuple.Item1.References.Add(reference);
+                reference.Address = raw.Address;
+                raw.Owner.References.Add(reference);
             }
         }
     }

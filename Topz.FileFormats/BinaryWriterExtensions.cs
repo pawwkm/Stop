@@ -6,7 +6,7 @@ namespace Topz.FileFormats
     /// <summary>
     /// Provides extension methods for the <see cref="BinaryWriter"/> class.
     /// </summary>
-    internal static class BinaryWriterExtensions
+    public static class BinaryWriterExtensions
     {
         /// <summary>
         /// Writes a 2 byte unsigned integer to the current stream encoded in big 

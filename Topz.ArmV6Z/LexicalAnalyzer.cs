@@ -1,9 +1,9 @@
-﻿using Pote.Text;
-using System;
+﻿using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using Pote;
+using Topz.Text;
 
 namespace Topz.ArmV6Z
 {
@@ -12,29 +12,30 @@ namespace Topz.ArmV6Z
     /// </summary>
     internal sealed class LexicalAnalyzer : LexicalAnalyzer<TokenType>
     {
+        private static string[] conditions = (from Condition c in Enum.GetValues(typeof(Condition))
+                                              where c != ArmV6Z.Condition.Always
+                                              select c.AsText()).ToArray();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="LexicalAnalyzer"/> class.
         /// </summary>
-        /// <param name="reader">The source to analyze.</param>
+        /// <param name="code">The source code to analyze.</param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="reader"/> is null.
+        /// <paramref name="code"/> is null.
         /// </exception>
-        public LexicalAnalyzer(StreamReader reader) : base(reader)
+        public LexicalAnalyzer(string code) : this(code, "")
         {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LexicalAnalyzer"/> class.
         /// </summary>
-        /// <param name="reader">The source to analyze.</param>
-        /// <param name="origin">
-        /// The origin of the <paramref name="reader"/>.
-        /// This is used to give more detailed information if errors occur.
-        /// </param>
+        /// <param name="code">The source code to analyze.</param>
+        /// <param name="path">The path to the <paramref name="code"/>.</param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="reader"/> or <paramref name="origin"/> is null.
+        /// <paramref name="code"/> or <paramref name="path"/> is null.
         /// </exception>
-        public LexicalAnalyzer(StreamReader reader, string origin) : base(reader, origin)
+        public LexicalAnalyzer(string code, string path) : base(code, path)
         {
         }
 
@@ -54,20 +55,22 @@ namespace Topz.ArmV6Z
         protected override Token<TokenType> NextTokenFromSource()
         {
             SkipWhitespaces();
-            if (Source.EndOfStream)
+            if (NoMoreCharacters)
                 return new Token<TokenType>("", TokenType.EndOfInput, Position.DeepCopy());
 
-            char c = (char)Source.Peek();
-            if (Source.MatchesAnyOf(Keywords.All))
+            char c = NextCharacter;
+            if (Match(Keywords.All))
                 return Keyword();
-            if (Source.MatchesAnyOf(ArmV6Z.Register.All))
+            if (Match(ArmV6Z.Register.All))
                 return Register();
-            if (Source.MatchesAnyOf(RegisterShifter.All))
+            if (Match(RegisterShifter.All))
                 return Shifted();
-            if (Source.MatchesAnyOf(Symbols.All))
+            if (Match(Symbols.All))
                 return Symbol();
-            if (Source.MatchesAnyOf(false, Mnemonic.All))
+            if (Match(Mnemonic.All))
                 return LexMnemonic();
+            if (Match(conditions))
+                return Condition();
             if (char.IsLetter(c) || c == '_')
                 return Identifier();
             if (c == '#')
@@ -138,9 +141,9 @@ namespace Topz.ArmV6Z
             var start = Position.DeepCopy();
             var text = "";
 
-            while (!Source.EndOfStream)
+            while (!NoMoreCharacters)
             {
-                char c = (char)Source.Peek();
+                char c = NextCharacter;
                 if (!char.IsLetterOrDigit(c) && !char.IsDigit(c) && c != '_')
                     break;
 
@@ -218,6 +221,22 @@ namespace Topz.ArmV6Z
         }
 
         /// <summary>
+        /// Consumes the next condition from the input.
+        /// </summary>
+        /// <returns>The consumed condition from the input.</returns>
+        private Token<TokenType> Condition()
+        {
+            var start = Position.DeepCopy();
+            foreach (string condition in conditions)
+            {
+                if (Consume(condition))
+                    return new Token<TokenType>(condition, TokenType.Condition, start);
+            }
+
+            return new Token<TokenType>(Advance(), TokenType.Unknown, start);
+        }
+
+        /// <summary>
         /// Consumes the next integer from the input.
         /// </summary>
         /// <returns>The consumed integer from the input.</returns>
@@ -229,12 +248,12 @@ namespace Topz.ArmV6Z
             if (!Consume("#"))
                 return Unknown();
 
-            if (Source.Peek().IsOneOf('-', '+'))
+            if (NextCharacter.IsOneOf('-', '+'))
                 text += Advance();
 
-            while (!Source.EndOfStream)
+            while (!NoMoreCharacters)
             {
-                char c = (char)Source.Peek();
+                char c = NextCharacter;
                 if (!char.IsDigit(c))
                     break;
 
@@ -259,14 +278,13 @@ namespace Topz.ArmV6Z
             // Skip the first double qoute.
             Advance();
 
-            while (!Source.EndOfStream)
+            while (!NoMoreCharacters)
             {
                 if (Consume("\\\""))
                     text += '"';
                 else
                 {
-                    char c = (char)Source.Peek();
-                    if (c == '"')
+                    if (NextCharacter == '"')
                     {
                         // Skip the second double qoute.
                         Advance();
@@ -290,7 +308,7 @@ namespace Topz.ArmV6Z
             Advance();
 
             var line = Position.Line;
-            while (!Source.EndOfStream)
+            while (!NoMoreCharacters)
             {
                 Advance();
                 if (line != Position.Line)
@@ -303,7 +321,7 @@ namespace Topz.ArmV6Z
         /// </summary>
         private void MultilineComment()
         {
-            while (!Source.EndOfStream)
+            while (!NoMoreCharacters)
             {
                 if (Consume("*/"))
                     break;
@@ -321,10 +339,9 @@ namespace Topz.ArmV6Z
             var start = Position.DeepCopy();
             var text = "";
 
-            while (!Source.EndOfStream)
+            while (!NoMoreCharacters)
             {
-                char c = (char)Source.Peek();
-                if (IsWhitespace(c))
+                if (IsWhitespace(NextCharacter))
                     break;
 
                 text += Advance();
@@ -338,10 +355,9 @@ namespace Topz.ArmV6Z
         /// </summary>
         private void SkipWhitespaces()
         {
-            while (!Source.EndOfStream)
+            while (!NoMoreCharacters)
             {
-                char c = (char)Source.Peek();
-                if (!IsWhitespace(c))
+                if (!IsWhitespace(NextCharacter))
                     break;
 
                 Advance();
